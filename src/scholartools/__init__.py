@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from scholartools.adapters.local import make_filestore, make_storage
 from scholartools.apis.anthropic_extract import make_llm_extractor
@@ -31,17 +32,20 @@ _ctx: LibraryCtx | None = None
 
 def _build_ctx() -> LibraryCtx:
     s = load_settings()
-    read_all, write_all = make_storage(s.local.library_path)
+    read_all, write_all = make_storage(str(s.local.library_file))
     copy_file, delete_file, rename_file, list_file_paths = make_filestore(
-        s.local.files_dir
+        str(s.local.files_dir)
     )
+
+    gbooks_api_key = os.environ.get("GBOOKS_API_KEY")
+    anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
 
     source_map = {
         "crossref": lambda cfg: make_crossref(email=cfg.email),
-        "semantic_scholar": lambda cfg: make_semantic_scholar(api_key=cfg.api_key),
+        "semantic_scholar": lambda cfg: make_semantic_scholar(api_key=None),
         "arxiv": lambda cfg: make_arxiv(),
-        "latindex": lambda cfg: make_latindex(api_key=cfg.api_key),
-        "google_books": lambda cfg: make_google_books(api_key=cfg.api_key),
+        "latindex": lambda cfg: make_latindex(api_key=None),
+        "google_books": lambda cfg: make_google_books(api_key=gbooks_api_key),
     }
 
     api_sources = []
@@ -52,8 +56,8 @@ def _build_ctx() -> LibraryCtx:
         api_sources.append({"name": cfg.name, "search": search_fn, "fetch": fetch_fn})
 
     llm_extract = (
-        make_llm_extractor(s.llm.anthropic_api_key, s.llm.model)
-        if s.llm.anthropic_api_key
+        make_llm_extractor(anthropic_api_key, s.llm.model)
+        if anthropic_api_key
         else None
     )
 
@@ -64,7 +68,7 @@ def _build_ctx() -> LibraryCtx:
         delete_file=delete_file,
         rename_file=rename_file,
         list_file_paths=list_file_paths,
-        files_dir=s.local.files_dir,
+        files_dir=str(s.local.files_dir),
         api_sources=api_sources,
         llm_extract=llm_extract,
     )

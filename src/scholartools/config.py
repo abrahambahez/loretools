@@ -1,19 +1,32 @@
 import json
-import os
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
+
+CONFIG_PATH = Path.home() / ".config" / "scholartools" / "config.json"
 
 
 class LocalSettings(BaseModel):
-    library_path: str = "lib.json"
-    files_dir: str = "data/files"
+    model_config = ConfigDict(extra="forbid")
+    library_dir: Path = Field(
+        default_factory=lambda: Path.home() / ".local/share/scholartools"
+    )
+
+    @computed_field
+    @property
+    def library_file(self) -> Path:
+        return self.library_dir / "library.json"
+
+    @computed_field
+    @property
+    def files_dir(self) -> Path:
+        return self.library_dir / "files"
 
 
 class SourceConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     name: str
     enabled: bool = True
-    api_key: str | None = None
     email: str | None = None
 
 
@@ -32,8 +45,8 @@ class ApiSettings(BaseModel):
 
 
 class LlmSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     model: str = "claude-sonnet-4-6"
-    anthropic_api_key: str | None = None
 
 
 class Settings(BaseModel):
@@ -46,40 +59,18 @@ class Settings(BaseModel):
 _settings: Settings | None = None
 
 
-def _find_config() -> Path | None:
-    if env := os.environ.get("SCHOLARTOOLS_CONFIG"):
-        return Path(env)
-    local = Path(".scholartools/config.json")
-    if local.exists():
-        return local
-    global_ = Path.home() / ".config" / "scholartools" / "config.json"
-    if global_.exists():
-        return global_
-    return None
-
-
 def load_settings() -> Settings:
     global _settings
     if _settings is not None:
         return _settings
-
-    config_path = _find_config()
-    if config_path and config_path.exists():
-        _settings = Settings.model_validate(json.loads(config_path.read_text()))
-    else:
-        _settings = Settings()
-
-    if not _settings.llm.anthropic_api_key:
-        _settings.llm.anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if lib_path := os.environ.get("SCHOLARTOOLS_LIBRARY_PATH"):
-        _settings.local.library_path = lib_path
-    if files_dir := os.environ.get("SCHOLARTOOLS_FILES_DIR"):
-        _settings.local.files_dir = files_dir
-    if api_key := os.environ.get("GBOOKS_API_KEY"):
-        for src in _settings.apis.sources:
-            if src.name == "google_books":
-                src.api_key = api_key
-
+    if not CONFIG_PATH.exists():
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        CONFIG_PATH.write_text(
+            Settings().model_dump_json(
+                indent=2, exclude={"local": {"library_file", "files_dir"}}
+            )
+        )
+    _settings = Settings.model_validate(json.loads(CONFIG_PATH.read_text()))
     return _settings
 
 
