@@ -45,14 +45,19 @@ def _build_ctx() -> LibraryCtx:
         "semantic_scholar": lambda cfg: make_semantic_scholar(api_key=None),
         "arxiv": lambda cfg: make_arxiv(),
         "latindex": lambda cfg: make_latindex(api_key=None),
-        "google_books": lambda cfg: make_google_books(api_key=gbooks_api_key),
+        "google_books": lambda cfg: (
+            make_google_books(api_key=gbooks_api_key) if gbooks_api_key else None
+        ),
     }
 
     api_sources = []
     for cfg in s.apis.sources:
         if not cfg.enabled or cfg.name not in source_map:
             continue
-        search_fn, fetch_fn = source_map[cfg.name](cfg)
+        result = source_map[cfg.name](cfg)
+        if result is None:
+            continue
+        search_fn, fetch_fn = result
         api_sources.append({"name": cfg.name, "search": search_fn, "fetch": fetch_fn})
 
     llm_extract = (

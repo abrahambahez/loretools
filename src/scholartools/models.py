@@ -1,6 +1,7 @@
+from pathlib import Path
 from typing import Literal, TypedDict
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from scholartools.ports import (
     CopyFile,
@@ -138,3 +139,53 @@ class MoveResult(BaseModel):
 class FilesListResult(BaseModel):
     files: list[FileRecord]
     total: int
+
+
+class LocalSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    library_dir: Path = Field(
+        default_factory=lambda: Path.home() / ".local/share/scholartools"
+    )
+
+    @computed_field
+    @property
+    def library_file(self) -> Path:
+        return self.library_dir / "library.json"
+
+    @computed_field
+    @property
+    def files_dir(self) -> Path:
+        return self.library_dir / "files"
+
+
+class SourceConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str
+    enabled: bool = True
+    email: str | None = None
+
+
+def _default_sources() -> list[SourceConfig]:
+    return [
+        SourceConfig(name="crossref"),
+        SourceConfig(name="semantic_scholar"),
+        SourceConfig(name="arxiv"),
+        SourceConfig(name="latindex"),
+        SourceConfig(name="google_books"),
+    ]
+
+
+class ApiSettings(BaseModel):
+    sources: list[SourceConfig] = Field(default_factory=_default_sources)
+
+
+class LlmSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    model: str = "claude-sonnet-4-6"
+
+
+class Settings(BaseModel):
+    backend: str = "local"
+    local: LocalSettings = Field(default_factory=LocalSettings)
+    apis: ApiSettings = Field(default_factory=ApiSettings)
+    llm: LlmSettings = Field(default_factory=LlmSettings)

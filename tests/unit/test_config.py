@@ -5,6 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from scholartools.config import load_settings, reset_settings
+from scholartools.models import LlmSettings, LocalSettings, SourceConfig
 
 
 @pytest.fixture(autouse=True)
@@ -45,8 +46,6 @@ def test_loads_from_existing_config_file(tmp_path, monkeypatch):
 
 
 def test_library_dir_derives_paths(tmp_path):
-    from scholartools.config import LocalSettings
-
     ls = LocalSettings(library_dir=tmp_path / "mylib")
     assert ls.library_file == tmp_path / "mylib" / "library.json"
     assert ls.files_dir == tmp_path / "mylib" / "files"
@@ -62,21 +61,22 @@ def test_settings_cached(tmp_path, monkeypatch):
 
 def test_source_config_forbids_api_key():
     with pytest.raises(ValidationError):
-        from scholartools.config import SourceConfig
-
         SourceConfig(name="google_books", api_key="secret")
 
 
 def test_llm_settings_forbids_anthropic_api_key():
     with pytest.raises(ValidationError):
-        from scholartools.config import LlmSettings
-
         LlmSettings(anthropic_api_key="sk-test")
 
 
 def test_config_file_with_api_key_raises(tmp_path, monkeypatch):
     config_path = tmp_path / "config.json"
-    config = {"llm": {"anthropic_api_key": "sk-from-config"}}
+    config = {
+        "backend": "local",
+        "local": {},
+        "apis": {"sources": []},
+        "llm": {"anthropic_api_key": "sk-from-config"},
+    }
     config_path.write_text(json.dumps(config))
     monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
     with pytest.raises(ValidationError):
@@ -95,3 +95,22 @@ def test_source_order_preserved(tmp_path, monkeypatch):
         "latindex",
         "google_books",
     ]
+
+
+def test_partial_config_raises_with_message(tmp_path, monkeypatch):
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps({"backend": "local"}))
+    monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
+    with pytest.raises(ValueError, match="incomplete"):
+        load_settings()
+
+
+def test_api_keys_not_in_settings(tmp_path, monkeypatch):
+    config_path = tmp_path / "config.json"
+    monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
+    monkeypatch.setenv("GBOOKS_API_KEY", "gbooks-test")
+    s = load_settings()
+    assert not hasattr(s.llm, "anthropic_api_key")
+    for src in s.apis.sources:
+        assert not hasattr(src, "api_key")

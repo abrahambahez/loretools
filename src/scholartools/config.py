@@ -1,62 +1,15 @@
 import json
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from scholartools.models import (
+    Settings,
+)
 
 CONFIG_PATH = Path.home() / ".config" / "scholartools" / "config.json"
 
-
-class LocalSettings(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    library_dir: Path = Field(
-        default_factory=lambda: Path.home() / ".local/share/scholartools"
-    )
-
-    @computed_field
-    @property
-    def library_file(self) -> Path:
-        return self.library_dir / "library.json"
-
-    @computed_field
-    @property
-    def files_dir(self) -> Path:
-        return self.library_dir / "files"
-
-
-class SourceConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    name: str
-    enabled: bool = True
-    email: str | None = None
-
-
-def _default_sources() -> list[SourceConfig]:
-    return [
-        SourceConfig(name="crossref"),
-        SourceConfig(name="semantic_scholar"),
-        SourceConfig(name="arxiv"),
-        SourceConfig(name="latindex"),
-        SourceConfig(name="google_books"),
-    ]
-
-
-class ApiSettings(BaseModel):
-    sources: list[SourceConfig] = Field(default_factory=_default_sources)
-
-
-class LlmSettings(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    model: str = "claude-sonnet-4-6"
-
-
-class Settings(BaseModel):
-    backend: str = "local"
-    local: LocalSettings = Field(default_factory=LocalSettings)
-    apis: ApiSettings = Field(default_factory=ApiSettings)
-    llm: LlmSettings = Field(default_factory=LlmSettings)
-
-
 _settings: Settings | None = None
+
+_REQUIRED_KEYS = {"backend", "local", "apis", "llm"}
 
 
 def load_settings() -> Settings:
@@ -70,7 +23,15 @@ def load_settings() -> Settings:
                 indent=2, exclude={"local": {"library_file", "files_dir"}}
             )
         )
-    _settings = Settings.model_validate(json.loads(CONFIG_PATH.read_text()))
+    data = json.loads(CONFIG_PATH.read_text())
+    missing = _REQUIRED_KEYS - data.keys()
+    if missing:
+        raise ValueError(
+            f"Config file at {CONFIG_PATH} is incomplete. "
+            f"Missing required keys: {sorted(missing)}. "
+            "Please add them or delete the file to regenerate defaults."
+        )
+    _settings = Settings.model_validate(data)
     return _settings
 
 
