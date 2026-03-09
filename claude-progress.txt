@@ -45,3 +45,13 @@ decisions:
 broken: none
 next: deduplication feature (feature_list.json id: deduplication) — write docs/feats/deduplication.md first
 
+--- [2026-03-09] session 2 ---
+completed:
+  - initialized git repository
+  - created .gitignore (venv, pycache, dist, .scholartools/)
+  - created GitHub repo abrahambahez/scholartools (public)
+  - pushed all code to origin/main
+pending: none
+decisions: none
+broken: none
+next: deduplication feature — write docs/feats/deduplication.md first
