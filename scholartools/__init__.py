@@ -150,11 +150,11 @@ def list_references(page: int = 1) -> ListResult:
     return _run(store.list_references(_get_ctx(), page))
 
 
-def search_references(
+def discover_references(
     query: str, sources: list[str] | None = None, limit: int = 10
 ) -> SearchResult:
     return _run(
-        search.search_references(query, _get_ctx(), sources=sources, limit=limit)
+        search.discover_references(query, _get_ctx(), sources=sources, limit=limit)
     )
 
 

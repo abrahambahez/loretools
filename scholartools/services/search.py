@@ -6,7 +6,7 @@ import httpx
 from scholartools.models import LibraryCtx, Reference, SearchResult
 
 
-async def search_references(
+async def discover_references(
     query: str, ctx: LibraryCtx, sources: list[str] | None = None, limit: int = 10
 ) -> SearchResult:
     active = (
