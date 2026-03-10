@@ -150,6 +150,29 @@ def list_references(page: int = 1) -> ListResult:
     return _run(store.list_references(_get_ctx(), page))
 
 
+def filter_references(
+    query: str | None = None,
+    author: str | None = None,
+    year: int | None = None,
+    ref_type: str | None = None,
+    has_file: bool | None = None,
+    staging: bool = False,
+    page: int = 1,
+) -> ListResult:
+    return _run(
+        store.filter_references(
+            _get_ctx(),
+            query=query,
+            author=author,
+            year=year,
+            ref_type=ref_type,
+            has_file=has_file,
+            staging=staging,
+            page=page,
+        )
+    )
+
+
 def discover_references(
     query: str, sources: list[str] | None = None, limit: int = 10
 ) -> SearchResult:

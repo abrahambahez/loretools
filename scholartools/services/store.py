@@ -87,6 +87,53 @@ async def delete_reference(citekey: str, ctx: LibraryCtx) -> DeleteResult:
     return DeleteResult(deleted=True)
 
 
+async def filter_references(
+    ctx: LibraryCtx,
+    query: str | None = None,
+    author: str | None = None,
+    year: int | None = None,
+    ref_type: str | None = None,
+    has_file: bool | None = None,
+    staging: bool = False,
+    page: int = 1,
+) -> ListResult:
+    read = ctx.staging_read_all if staging else ctx.read_all
+    records = await read()
+    if query:
+        q = query.lower()
+        records = [r for r in records if q in (r.get("title") or "").lower()]
+    if author:
+        a = author.lower()
+        records = [r for r in records if _author_matches(r, a)]
+    if year is not None:
+        records = [r for r in records if _get_year(r) == year]
+    if ref_type is not None:
+        records = [r for r in records if r.get("type") == ref_type]
+    if has_file is not None:
+        records = [r for r in records if ("_file" in r) == has_file]
+    sorted_records = sorted(records, key=lambda r: r.get("id", ""))
+    rows = [to_reference_row(r) for r in sorted_records]
+    items, page, pages = paginate(rows, page)
+    return ListResult(references=items, total=len(rows), page=page, pages=pages)
+
+
+def _author_matches(record: dict, query: str) -> bool:
+    for a in record.get("author") or []:
+        if query in (a.get("family") or "").lower():
+            return True
+        if query in (a.get("literal") or "").lower():
+            return True
+    return False
+
+
+def _get_year(record: dict) -> int | None:
+    issued = record.get("issued") or {}
+    parts = issued.get("date-parts") or []
+    if parts and parts[0]:
+        return parts[0][0]
+    return None
+
+
 async def list_references(ctx: LibraryCtx, page: int = 1) -> ListResult:
     records = await ctx.read_all()
     sorted_records = sorted(records, key=lambda r: r.get("id", ""))
