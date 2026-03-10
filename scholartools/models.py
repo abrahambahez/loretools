@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Literal, TypedDict
 
@@ -44,6 +45,7 @@ class Reference(BaseModel):
     issued: DateField | None = None
     DOI: str | None = None
     URL: str | None = None
+    added_at: datetime | None = None
 
     file_record: FileRecord | None = Field(None, alias="_file")
     warnings: list[str] = Field(default_factory=list, alias="_warnings")
@@ -65,6 +67,11 @@ class LibraryCtx(BaseModel):
     rename_file: RenameFile
     list_file_paths: ListFilePaths
     files_dir: str
+    staging_read_all: ReadAll | None = None
+    staging_write_all: WriteAll | None = None
+    staging_copy_file: CopyFile | None = None
+    staging_delete_file: DeleteFile | None = None
+    staging_dir: str | None = None
     api_sources: list[ApiSource]
     llm_extract: LlmExtractFn | None = None
 
@@ -157,6 +164,16 @@ class LocalSettings(BaseModel):
     def files_dir(self) -> Path:
         return self.library_dir / "files"
 
+    @computed_field
+    @property
+    def staging_file(self) -> Path:
+        return self.library_dir / "staging.json"
+
+    @computed_field
+    @property
+    def staging_dir(self) -> Path:
+        return self.library_dir / "staging"
+
 
 class SourceConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -189,3 +206,24 @@ class Settings(BaseModel):
     local: LocalSettings = Field(default_factory=LocalSettings)
     apis: ApiSettings = Field(default_factory=ApiSettings)
     llm: LlmSettings = Field(default_factory=LlmSettings)
+
+
+class StageResult(BaseModel):
+    citekey: str | None = None
+    error: str | None = None
+
+
+class ListStagedResult(BaseModel):
+    references: list[Reference]
+    total: int
+
+
+class DeleteStagedResult(BaseModel):
+    deleted: bool
+    error: str | None = None
+
+
+class MergeResult(BaseModel):
+    promoted: list[str]
+    errors: dict[str, str]
+    skipped: list[str]

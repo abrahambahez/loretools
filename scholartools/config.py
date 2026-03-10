@@ -11,6 +11,8 @@ _settings: Settings | None = None
 
 _REQUIRED_KEYS = {"backend", "local", "apis", "llm"}
 
+_LOCAL_COMPUTED = {"library_file", "files_dir", "staging_file", "staging_dir"}
+
 
 def load_settings() -> Settings:
     global _settings
@@ -19,9 +21,7 @@ def load_settings() -> Settings:
     if not CONFIG_PATH.exists():
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         CONFIG_PATH.write_text(
-            Settings().model_dump_json(
-                indent=2, exclude={"local": {"library_file", "files_dir"}}
-            )
+            Settings().model_dump_json(indent=2, exclude={"local": _LOCAL_COMPUTED})
         )
     data = json.loads(CONFIG_PATH.read_text())
     missing = _REQUIRED_KEYS - data.keys()

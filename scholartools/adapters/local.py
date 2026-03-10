@@ -31,6 +31,31 @@ def make_storage(library_path: str) -> tuple[ReadAll, WriteAll]:
     return read_all, write_all
 
 
+def make_staging_storage(
+    staging_path: str, staging_dir: str
+) -> tuple[ReadAll, WriteAll]:
+    path = Path(staging_path)
+    sdir = Path(staging_dir)
+
+    async def read_all() -> list[dict]:
+        if not path.exists():
+            return []
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    async def write_all(records: list[dict]) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        sdir.mkdir(parents=True, exist_ok=True)
+        if not path.exists():
+            path.write_text("[]", encoding="utf-8")
+        tmp = path.with_suffix(".tmp.json")
+        tmp.write_text(
+            json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        tmp.rename(path)
+
+    return read_all, write_all
+
+
 def make_filestore(
     files_dir: str,
 ) -> tuple[CopyFile, DeleteFile, RenameFile, ListFilePaths]:

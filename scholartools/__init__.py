@@ -1,7 +1,11 @@
 import asyncio
 import os
 
-from scholartools.adapters.local import make_filestore, make_storage
+from scholartools.adapters.local import (
+    make_filestore,
+    make_staging_storage,
+    make_storage,
+)
 from scholartools.apis.anthropic_extract import make_llm_extractor
 from scholartools.apis.arxiv import make_arxiv
 from scholartools.apis.crossref import make_crossref
@@ -35,6 +39,12 @@ def _build_ctx() -> LibraryCtx:
     read_all, write_all = make_storage(str(s.local.library_file))
     copy_file, delete_file, rename_file, list_file_paths = make_filestore(
         str(s.local.files_dir)
+    )
+    staging_read_all, staging_write_all = make_staging_storage(
+        str(s.local.staging_file), str(s.local.staging_dir)
+    )
+    staging_copy_file, staging_delete_file, _, _ = make_filestore(
+        str(s.local.staging_dir)
     )
 
     gbooks_api_key = os.environ.get("GBOOKS_API_KEY")
@@ -74,6 +84,11 @@ def _build_ctx() -> LibraryCtx:
         rename_file=rename_file,
         list_file_paths=list_file_paths,
         files_dir=str(s.local.files_dir),
+        staging_read_all=staging_read_all,
+        staging_write_all=staging_write_all,
+        staging_copy_file=staging_copy_file,
+        staging_delete_file=staging_delete_file,
+        staging_dir=str(s.local.staging_dir),
         api_sources=api_sources,
         llm_extract=llm_extract,
     )

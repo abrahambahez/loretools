@@ -9,7 +9,10 @@ def reset_ctx(tmp_path, monkeypatch):
     config_path = tmp_path / "config.json"
     config_path.write_text(
         Settings().model_dump_json(
-            indent=2, exclude={"local": {"library_file", "files_dir"}}
+            indent=2,
+            exclude={
+                "local": {"library_file", "files_dir", "staging_file", "staging_dir"}
+            },
         )
     )
     monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
