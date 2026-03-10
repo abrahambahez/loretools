@@ -24,6 +24,8 @@ Rename `search_references` → `discover_references` to clarify that it queries 
 - when `filter_references(ref_type="book")` is called, the system must return only rows with `type == "book"`
 - when `filter_references(has_file=True)` is called, the system must return only rows that have a linked file record
 - when `filter_references(has_file=False)` is called, the system must return only rows without a linked file record
+- when `filter_references(staging=True)` is called, the system must apply all predicates against the staging store instead of the library store
+- when `filter_references(staging=False)` (default) is called, the system must apply predicates against the library store
 - when multiple predicates are provided, the system must AND them (all must match)
 - when `filter_references` returns results, the system must paginate them with the same `_PAGE_SIZE` and return `total`, `page`, `pages`
 - when no records match all predicates, the system must return an empty `ListResult` with `total=0`
@@ -32,8 +34,8 @@ Rename `search_references` → `discover_references` to clarify that it queries 
 ## tasks
 
 - [ ] task-01: rename `search_references` → `discover_references` in `services/search.py` and `__init__.py`; update all tests referencing the old name (blocks: none)
-- [ ] task-02: add `filter_references` service function in `services/store.py` with five optional predicates; add sync wrapper in `__init__.py` (blocks: task-01)
-- [ ] task-03: write unit tests for `filter_references` covering each predicate, AND combination, empty result, and no-args full-list case (blocks: task-02)
+- [ ] task-02: add `filter_references` service function in `services/store.py` with five optional predicates + `staging: bool`; add sync wrapper in `__init__.py` (blocks: task-01)
+- [ ] task-03: write unit tests for `filter_references` covering each predicate, AND combination, `staging=True`, empty result, and no-args full-list case (blocks: task-02)
 
 ## ADR required?
 

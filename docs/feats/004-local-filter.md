@@ -5,7 +5,7 @@ status: current
 
 ## problem
 
-Agents operating on the local library have no way to search or filter it. Every use case that involves "find X in my library" today requires either iterating all paginated results or knowing the citekey in advance. There is also a naming ambiguity: `search_references` sounds like it searches the local library, but it fans out to external APIs. This confuses agents.
+Agents operating on the local library have no way to search or filter it. Every use case that involves "find X in my library" today requires either iterating all paginated results or knowing the citekey in advance. There is also a naming ambiguity: `search_references` sounds like it searches the local library, but it fans out to external APIs. This can confuses agents.
 
 ## two distinct operations
 
@@ -53,9 +53,12 @@ This is out of scope for this feature — cloud backends don't exist yet. The se
 4. `__init__.py` → add `filter_references(...)` sync wrapper
 5. `models.py` → no changes (reuse `ListResult`)
 
+## staging scope
+
+`filter_references(staging=True)` routes all predicates to `ctx.staging_read_all` instead of `ctx.read_all`. The return type is `ListResult` in both cases — `ListStagedResult` is structurally identical and there is no value in a separate type here.
+
 ## non-goals
 
 - Full-text search across abstract, keywords, or notes (→ semantic-search feature)
 - Field projection / include / exclude (→ future, or jq)
 - Publisher / ISSN / DOI filter (viable but not in confirmed use cases yet)
-- Staged library filter (trivial extension once local filter works; deferred)
