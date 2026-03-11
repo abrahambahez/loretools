@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-03-11
+
+### Added
+- OpenAlex adapter — free, no API key required, strong Global South coverage
+- DOAJ adapter — open access journals worldwide
+- Retry strategy for all search adapters: up to 3 attempts with 5s delay on 429/5xx responses
+
+### Removed
+- Latindex adapter — API is restricted and never returned results; ISSN fetch falls through to Crossref
+- SciELO adapter — blocked all programmatic access (403)
+
+### Fixed
+- Crossref `_normalize` now strips `None` values from `date-parts` to prevent validation errors on undated records
+- Semantic Scholar API key wired from `SEMANTIC_SCHOLAR_API_KEY` environment variable
+
 ## [0.3.0] - 2026-03-10
 
 ### Added

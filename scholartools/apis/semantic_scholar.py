@@ -1,5 +1,6 @@
 import httpx
 
+from scholartools.apis._http import get as _get
 from scholartools.ports import FetchFn, SearchFn
 
 _BASE = "https://api.semanticscholar.org/graph/v1"
@@ -11,11 +12,11 @@ def make_semantic_scholar(api_key: str | None = None) -> tuple[SearchFn, FetchFn
 
     async def search(query: str, limit: int) -> list[dict]:
         async with httpx.AsyncClient(headers=headers, timeout=10) as client:
-            r = await client.get(
+            r = await _get(
+                client,
                 f"{_BASE}/paper/search",
                 params={"query": query, "limit": limit, "fields": _FIELDS},
             )
-            r.raise_for_status()
             return [_normalize(p) for p in r.json().get("data", [])]
 
     async def fetch(identifier: str) -> dict | None:

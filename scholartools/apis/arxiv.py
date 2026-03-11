@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 
 import httpx
 
+from scholartools.apis._http import get as _get
 from scholartools.ports import FetchFn, SearchFn
 
 _BASE = "https://export.arxiv.org/api"
@@ -13,11 +14,11 @@ _ARXIV_ID_RE = re.compile(r"(\d{4}\.\d{4,5}(?:v\d+)?)")
 def make_arxiv() -> tuple[SearchFn, FetchFn]:
     async def search(query: str, limit: int) -> list[dict]:
         async with httpx.AsyncClient(timeout=10) as client:
-            r = await client.get(
+            r = await _get(
+                client,
                 f"{_BASE}/query",
                 params={"search_query": f"all:{query}", "max_results": limit},
             )
-            r.raise_for_status()
             return _parse_feed(r.text)
 
     async def fetch(identifier: str) -> dict | None:
@@ -25,8 +26,7 @@ def make_arxiv() -> tuple[SearchFn, FetchFn]:
         if not arxiv_id:
             return None
         async with httpx.AsyncClient(timeout=10) as client:
-            r = await client.get(f"{_BASE}/query", params={"id_list": arxiv_id})
-            r.raise_for_status()
+            r = await _get(client, f"{_BASE}/query", params={"id_list": arxiv_id})
             results = _parse_feed(r.text)
             return results[0] if results else None
 

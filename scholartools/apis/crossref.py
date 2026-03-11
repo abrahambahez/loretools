@@ -1,5 +1,6 @@
 import httpx
 
+from scholartools.apis._http import get as _get
 from scholartools.ports import FetchFn, SearchFn
 
 _BASE = "https://api.crossref.org"
@@ -10,7 +11,8 @@ def make_crossref(email: str | None = None) -> tuple[SearchFn, FetchFn]:
 
     async def search(query: str, limit: int) -> list[dict]:
         async with httpx.AsyncClient(headers=headers, timeout=10) as client:
-            r = await client.get(
+            r = await _get(
+                client,
                 f"{_BASE}/works",
                 params={
                     "query": query,
@@ -18,7 +20,6 @@ def make_crossref(email: str | None = None) -> tuple[SearchFn, FetchFn]:
                     "select": "DOI,title,author,issued,container-title,type,URL",
                 },
             )
-            r.raise_for_status()
             return [_normalize(item) for item in r.json()["message"]["items"]]
 
     async def fetch(identifier: str) -> dict | None:
