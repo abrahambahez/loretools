@@ -43,7 +43,9 @@ def _normalize(item: dict) -> dict:
             {"family": a.get("family"), "given": a.get("given")} for a in authors
         ]
     if issued := item.get("issued", {}).get("date-parts"):
-        out["issued"] = {"date-parts": issued}
+        parts = [[p for p in part if p is not None] for part in issued]
+        if any(parts):
+            out["issued"] = {"date-parts": parts}
     if journal := item.get("container-title"):
         out["container-title"] = journal[0] if journal else None
     if url := item.get("URL"):
