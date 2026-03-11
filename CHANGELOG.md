@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-03-10
+
+### Added
+- `CitekeySettings` — configurable citekey generation via `config.json`: `pattern` (token template), `separator`, `etal`, `disambiguation_suffix` (`"letters"` or `"title[1-9]"`)
+- Title-word disambiguation strategy with stop-word filtering (articles in 10 languages)
+- All fields validated at config load time with export-safe character constraints
+
 ## [0.2.1] - 2026-03-10
 
 ### Added
