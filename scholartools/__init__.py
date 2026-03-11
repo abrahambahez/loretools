@@ -226,5 +226,5 @@ def delete_staged(citekey: str) -> DeleteStagedResult:
     return _run(staging_service.delete_staged(citekey, _get_ctx()))
 
 
-def merge(omit: list[str] | None = None) -> MergeResult:
-    return _run(merge_service.merge(omit, _get_ctx()))
+def merge(omit: list[str] | None = None, allow_semantic: bool = False) -> MergeResult:
+    return _run(merge_service.merge(omit, _get_ctx(), allow_semantic=allow_semantic))

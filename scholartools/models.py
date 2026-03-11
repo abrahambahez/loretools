@@ -46,6 +46,8 @@ class Reference(BaseModel):
     DOI: str | None = None
     URL: str | None = None
     added_at: datetime | None = None
+    uid: str | None = None
+    uid_confidence: Literal["authoritative", "semantic"] | None = None
 
     file_record: FileRecord | None = Field(None, alias="_file")
     warnings: list[str] = Field(default_factory=list, alias="_warnings")

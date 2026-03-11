@@ -58,7 +58,9 @@ def _validate_schema(record: dict) -> str | None:
     return None
 
 
-async def merge(omit: list[str] | None, ctx: LibraryCtx) -> MergeResult:
+async def merge(
+    omit: list[str] | None, ctx: LibraryCtx, allow_semantic: bool = False
+) -> MergeResult:
     try:
         staged_records = await ctx.staging_read_all()
         library_records = await ctx.read_all()
@@ -84,6 +86,11 @@ async def merge(omit: list[str] | None, ctx: LibraryCtx) -> MergeResult:
         normalized = _normalize_fields(record)
 
         ref = Reference.model_validate(normalized)
+        if ref.uid_confidence == "semantic" and not allow_semantic:
+            errors[citekey] = (
+                "semantic uid confidence requires explicit confirmation (allow_semantic=True)"
+            )
+            continue
         dup_key = is_duplicate(ref, library_refs)
         if dup_key:
             errors[citekey] = f"duplicate of {dup_key}"

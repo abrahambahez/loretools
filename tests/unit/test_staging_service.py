@@ -112,6 +112,38 @@ async def test_stage_no_file_copy_when_path_none():
     assert copied == []
 
 
+async def test_stage_sets_uid_and_uid_confidence():
+    ctx, store, _, _ = make_ctx()
+    ref = Reference(
+        id="",
+        type="article-journal",
+        author=[{"family": "Jones"}],
+        issued={"date-parts": [[2021]]},
+        DOI="10.1234/test",
+    )
+    result = await stage_reference(ref, None, ctx)
+    assert result.error is None
+    record = store[0]
+    assert record.get("uid") is not None
+    assert record.get("uid_confidence") == "authoritative"
+
+
+async def test_stage_sets_semantic_uid_when_no_authoritative_id():
+    ctx, store, _, _ = make_ctx()
+    ref = Reference(
+        id="",
+        type="article-journal",
+        title="Some Title Without Identifiers",
+        author=[{"family": "Smith"}],
+        issued={"date-parts": [[2020]]},
+    )
+    result = await stage_reference(ref, None, ctx)
+    assert result.error is None
+    record = store[0]
+    assert record.get("uid") is not None
+    assert record.get("uid_confidence") == "semantic"
+
+
 async def test_stage_never_raises_on_error():
     async def failing_read():
         raise RuntimeError("storage down")

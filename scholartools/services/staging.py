@@ -43,6 +43,13 @@ async def stage_reference(
                 added_at=datetime.now(timezone.utc).isoformat(),
             ).model_dump()
 
+        if not ref_dict.get("uid"):
+            from scholartools.services.uid import compute_uid
+
+            u, conf = compute_uid(ref)
+            ref_dict["uid"] = u
+            ref_dict["uid_confidence"] = conf
+
         records.append(ref_dict)
         await ctx.staging_write_all(records)
         return StageResult(citekey=key)

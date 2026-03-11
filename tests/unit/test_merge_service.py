@@ -134,9 +134,18 @@ async def test_merge_error_does_not_block_other_records():
 
 
 async def test_merge_duplicate_goes_to_errors():
-    existing = valid_record("smith2020")
-    staged = [valid_record("smith2020b")]
-    staged[0]["title"] = "A Unique Title For Testing"  # same title as existing
+    existing = {
+        **valid_record("smith2020"),
+        "uid": "shared_uid_abcdef12",
+        "uid_confidence": "authoritative",
+    }
+    staged = [
+        {
+            **valid_record("smith2020b"),
+            "uid": "shared_uid_abcdef12",
+            "uid_confidence": "authoritative",
+        }
+    ]
 
     ctx, _, _, _, _, _, _ = make_ctx(staged=staged, library=[existing])
 
@@ -144,6 +153,29 @@ async def test_merge_duplicate_goes_to_errors():
 
     assert "smith2020b" in result.errors
     assert "smith2020" in result.errors["smith2020b"]
+
+
+async def test_merge_rejects_semantic_uid_without_flag():
+    rec = {
+        **valid_record("smith2020"),
+        "uid": "abc123def456abcd",
+        "uid_confidence": "semantic",
+    }
+    ctx, _, _, _, _, _, _ = make_ctx(staged=[rec])
+    result = await merge(None, ctx)
+    assert "smith2020" in result.errors
+    assert "allow_semantic" in result.errors["smith2020"]
+
+
+async def test_merge_allows_semantic_uid_with_flag():
+    rec = {
+        **valid_record("smith2020"),
+        "uid": "abc123def456abcd",
+        "uid_confidence": "semantic",
+    }
+    ctx, _, _, _, _, _, _ = make_ctx(staged=[rec])
+    result = await merge(None, ctx, allow_semantic=True)
+    assert "smith2020" in result.promoted
 
 
 async def test_merge_missing_required_field_goes_to_errors():
