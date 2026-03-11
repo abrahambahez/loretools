@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Literal, TypedDict
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 from scholartools.ports import (
     CopyFile,
@@ -57,6 +57,54 @@ class ApiSource(TypedDict):
     fetch: FetchFn
 
 
+class CitekeySettings(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    pattern: str = "{author[2]}{year}"
+    separator: str = "_"
+    etal: str = "_etal"
+    disambiguation_suffix: str = "letters"
+
+    @field_validator("pattern")
+    @classmethod
+    def _check_pattern(cls, v: str) -> str:
+        import re
+
+        tokens = re.findall(r"\{[^}]+\}", v)
+        if not tokens:
+            raise ValueError("pattern must contain at least one token")
+        for token in tokens:
+            if not re.fullmatch(r"\{author\[\d+\]\}|\{year\}", token):
+                raise ValueError(f"unknown pattern token: {token}")
+        return v
+
+    @field_validator("separator")
+    @classmethod
+    def _check_separator(cls, v: str) -> str:
+        import re
+
+        if not re.fullmatch(r"[a-z0-9_-]{1,3}", v):
+            raise ValueError("separator must match [a-z0-9_-]{1,3}")
+        return v
+
+    @field_validator("etal")
+    @classmethod
+    def _check_etal(cls, v: str) -> str:
+        import re
+
+        if not re.fullmatch(r"[a-z0-9_-]{1,8}", v):
+            raise ValueError("etal must match [a-z0-9_-]{1,8}")
+        return v
+
+    @field_validator("disambiguation_suffix")
+    @classmethod
+    def _check_disambiguation(cls, v: str) -> str:
+        import re
+
+        if v != "letters" and not re.fullmatch(r"title[1-9]", v):
+            raise ValueError("disambiguation_suffix must be 'letters' or 'title[1-9]'")
+        return v
+
+
 class LibraryCtx(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -74,6 +122,7 @@ class LibraryCtx(BaseModel):
     staging_dir: str | None = None
     api_sources: list[ApiSource]
     llm_extract: LlmExtractFn | None = None
+    citekey_settings: CitekeySettings = Field(default_factory=CitekeySettings)
 
 
 class AddResult(BaseModel):
@@ -227,6 +276,7 @@ class Settings(BaseModel):
     local: LocalSettings = Field(default_factory=LocalSettings)
     apis: ApiSettings = Field(default_factory=ApiSettings)
     llm: LlmSettings = Field(default_factory=LlmSettings)
+    citekey: CitekeySettings = Field(default_factory=CitekeySettings)
 
 
 class StageResult(BaseModel):

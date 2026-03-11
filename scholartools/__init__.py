@@ -100,6 +100,7 @@ def _build_ctx() -> LibraryCtx:
         staging_dir=str(s.local.staging_dir),
         api_sources=api_sources,
         llm_extract=llm_extract,
+        citekey_settings=s.citekey,
     )
 
 

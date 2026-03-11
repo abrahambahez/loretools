@@ -24,8 +24,10 @@ async def stage_reference(
         ref_dict = ref.model_dump(by_alias=True, exclude_none=True)
         ref_dict.pop("_warnings", None)
 
-        key = citekeys.generate(ref_dict)
-        key = citekeys.resolve_collision(key, existing_ids)
+        key = citekeys.generate(ref_dict, ctx.citekey_settings)
+        key = citekeys.resolve_collision(
+            key, existing_ids, ctx.citekey_settings, ref_dict
+        )
         ref_dict["id"] = key
         ref_dict["added_at"] = datetime.now(timezone.utc).isoformat()
 

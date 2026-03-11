@@ -21,8 +21,8 @@ async def add_reference(ref: dict, ctx: LibraryCtx) -> AddResult:
     existing_ids = {r["id"] for r in records if "id" in r}
 
     if "id" not in ref or not ref["id"]:
-        key = citekeys.generate(ref)
-        key = citekeys.resolve_collision(key, existing_ids)
+        key = citekeys.generate(ref, ctx.citekey_settings)
+        key = citekeys.resolve_collision(key, existing_ids, ctx.citekey_settings, ref)
         ref = {**ref, "id": key}
     elif ref["id"] in existing_ids:
         return AddResult(error=f"duplicate citekey: {ref['id']}")
