@@ -73,23 +73,45 @@ async def test_add_resolves_collision():
 
 async def test_get_found():
     ctx, _ = make_ctx([{"id": "smith2020", "type": "book", "title": "A Book"}])
-    result = await get_reference("smith2020", ctx)
+    result = await get_reference(ctx, citekey="smith2020")
     assert result.error is None
     assert result.reference.id == "smith2020"
 
 
 async def test_get_not_found():
     ctx, _ = make_ctx()
-    result = await get_reference("missing", ctx)
+    result = await get_reference(ctx, citekey="missing")
     assert result.reference is None
     assert "not found" in result.error
 
 
 async def test_get_populates_warnings_on_partial():
     ctx, _ = make_ctx([{"id": "x", "type": "book"}])
-    result = await get_reference("x", ctx)
+    result = await get_reference(ctx, citekey="x")
     assert result.reference is not None
     assert any("title" in w for w in result.reference.warnings)
+
+
+async def test_get_by_uid():
+    ctx, _ = make_ctx([{"id": "smith2020", "type": "book", "uid": "doi:10.1/test"}])
+    result = await get_reference(ctx, uid="doi:10.1/test")
+    assert result.error is None
+    assert result.reference.id == "smith2020"
+
+
+async def test_get_uid_not_found():
+    ctx, _ = make_ctx([{"id": "smith2020", "type": "book", "uid": "doi:10.1/test"}])
+    result = await get_reference(ctx, uid="doi:10.1/other")
+    assert result.reference is None
+    assert "not found" in result.error
+
+
+async def test_get_requires_exactly_one_arg():
+    ctx, _ = make_ctx()
+    both = await get_reference(ctx, citekey="x", uid="doi:10.1/test")
+    neither = await get_reference(ctx)
+    assert "exactly one" in both.error
+    assert "exactly one" in neither.error
 
 
 async def test_update_merges_fields():

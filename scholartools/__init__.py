@@ -135,8 +135,8 @@ def add_reference(ref: dict) -> AddResult:
     return _run(store.add_reference(ref, _get_ctx()))
 
 
-def get_reference(citekey: str) -> GetResult:
-    return _run(store.get_reference(citekey, _get_ctx()))
+def get_reference(citekey: str | None = None, uid: str | None = None) -> GetResult:
+    return _run(store.get_reference(_get_ctx(), citekey=citekey, uid=uid))
 
 
 def update_reference(citekey: str, fields: dict) -> UpdateResult:

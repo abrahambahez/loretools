@@ -143,6 +143,7 @@ class ReferenceRow(BaseModel):
     authors: str | None = None
     year: int | None = None
     doi: str | None = None
+    uid: str | None = None
     has_file: bool = False
     has_warnings: bool = False
 

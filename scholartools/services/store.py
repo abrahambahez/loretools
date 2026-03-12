@@ -32,12 +32,19 @@ async def add_reference(ref: dict, ctx: LibraryCtx) -> AddResult:
     return AddResult(citekey=ref["id"])
 
 
-async def get_reference(citekey: str, ctx: LibraryCtx) -> GetResult:
+async def get_reference(
+    ctx: LibraryCtx, citekey: str | None = None, uid: str | None = None
+) -> GetResult:
+    if (citekey is None) == (uid is None):
+        return GetResult(error="provide exactly one of citekey or uid")
     records = await ctx.read_all()
     for r in records:
-        if r.get("id") == citekey:
+        if citekey is not None and r.get("id") == citekey:
             return GetResult(reference=_to_reference(r))
-    return GetResult(error=f"not found: {citekey}")
+        if uid is not None and r.get("uid") == uid:
+            return GetResult(reference=_to_reference(r))
+    term = citekey or uid
+    return GetResult(error=f"not found: {term}")
 
 
 async def update_reference(citekey: str, fields: dict, ctx: LibraryCtx) -> UpdateResult:

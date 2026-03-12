@@ -51,6 +51,7 @@ def to_reference_row(record: dict) -> ReferenceRow:
         authors=format_authors(ref.author),
         year=year,
         doi=doi,
+        uid=ref.uid,
         has_file=ref.file_record is not None,
         has_warnings=has_warnings,
     )
