@@ -95,6 +95,54 @@ scholartools.merge(omit=["draft2024"]) # skip specific citekeys
 
 Every function returns a typed Result model — never raises.
 
+## peer identity & distributed sync
+
+```python
+import scholartools
+
+# initialise a local peer identity (generates Ed25519 keypair)
+scholartools.peer_init(peer_id="alice", device_id="laptop")
+
+# register another peer (requires admin keypair)
+scholartools.peer_register(peer_id="bob", pubkey_hex="<hex>")
+
+# device lifecycle
+scholartools.peer_add_device(peer_id="bob", device_id="phone", pubkey_hex="<hex>")
+scholartools.peer_revoke_device(peer_id="bob", device_id="old-tablet")
+scholartools.peer_revoke(peer_id="bob")   # revoke entire peer
+```
+
+To enable sync, add a `sync` block to `config.json`:
+
+```json
+{
+  "sync": {
+    "bucket": "my-library-sync",
+    "access_key": "AKIAIOSFODNN7EXAMPLE",
+    "secret_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "endpoint": "https://s3.example.com"
+  }
+}
+```
+
+Omitting `endpoint` targets AWS S3. Without a `sync` block the library runs local-only and the functions below are no-ops.
+
+```python
+# push local change log entries to remote backend
+scholartools.push()
+
+# pull and replay remote entries (LWW per field, HLC causality)
+scholartools.pull()
+
+# upload a snapshot for peer bootstrapping
+scholartools.create_snapshot()
+
+# conflict management (concurrent field edits within 60 s window)
+scholartools.list_conflicts()
+scholartools.resolve_conflict(uid="sha256:abc", field="title", winning_value="Corrected Title")
+scholartools.restore_reference("vaswani2017")   # undo a remote delete
+```
+
 ## search sources
 
 Crossref · Semantic Scholar · arXiv · OpenAlex · DOAJ · Google Books — queried concurrently, results normalized to CSL-JSON. All sources retry up to 3 times with a 5s delay on rate limits or server errors.

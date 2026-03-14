@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-03-14
+
+### Added
+- Peer identity and device management: `peer_init`, `peer_register`, `peer_add_device`, `peer_revoke_device`, `peer_revoke`
+- Ed25519 keypair generation via `cryptography>=42.0`; private keys stored at `~/.config/scholartools/keys/{peer_id}/{device_id}.key` (mode 0600)
+- `verify_entry` — synchronous signature verification against the peer directory
+- `make_pull_verifier` — factory returning a pull-time verifier that writes rejected entries to `rejected/`
+- Distributed sync phase 1: `push`, `pull`, `create_snapshot`, `list_conflicts`, `resolve_conflict`, `restore_reference`
+- `services/hlc.py` — HLC timestamps with per-process counter; format `{iso_utc}-{counter:04d}-{peer_id}`
+- `adapters/s3_sync.py` — S3-compatible remote backend (boto3, optional import)
+- `adapters/sync_composite.py` — `SyncCompositeAdapter` wrapping local store with append-only change log
+- `adapters/conflicts_store.py` — file-based `ConflictRecord` persistence under `{data_dir}/conflicts/`
+- New models: `DeviceIdentity`, `PeerRecord`, `PeerIdentity`, `ChangeLogEntry`, `ConflictRecord`, `PushResult`, `PullResult`, `SyncConfig`
+- Optional `sync` block in `config.json` selects `SyncCompositeAdapter`; omitting it leaves local-only behaviour unchanged
+
+### Changed
+- `LibraryCtx` extended with `peers_dir`, `data_dir`, `admin_peer_id`, `admin_device_id`, `sync_config`
+- `_field_timestamps` added to `Reference` for per-field LWW tracking
+
 ## [0.5.1] - 2026-03-11
 
 ### Added
@@ -91,6 +110,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PDF extraction via pdfplumber with Claude vision fallback
 - Local JSON backend
 
-[Unreleased]: https://github.com/abrahambahez/scholartools/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/abrahambahez/scholartools/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/abrahambahez/scholartools/compare/v0.5.2...v0.6.0
+[0.5.2]: https://github.com/abrahambahez/scholartools/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/abrahambahez/scholartools/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/abrahambahez/scholartools/compare/v0.4.1...v0.5.0
+[0.4.1]: https://github.com/abrahambahez/scholartools/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/abrahambahez/scholartools/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/abrahambahez/scholartools/compare/v0.2.1...v0.3.0
+[0.2.1]: https://github.com/abrahambahez/scholartools/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/abrahambahez/scholartools/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/abrahambahez/scholartools/releases/tag/v0.1.0

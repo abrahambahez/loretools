@@ -11,7 +11,13 @@ def reset_ctx(tmp_path, monkeypatch):
         Settings().model_dump_json(
             indent=2,
             exclude={
-                "local": {"library_file", "files_dir", "staging_file", "staging_dir"}
+                "local": {
+                    "library_file",
+                    "files_dir",
+                    "staging_file",
+                    "staging_dir",
+                    "peers_dir",
+                }
             },
         )
     )
