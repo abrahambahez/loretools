@@ -50,13 +50,15 @@
     "id": "peer-management",
     "title": "Peer management — Ed25519 identity, peer registration, device lifecycle, pull-time verification",
     "spec": "specs/008-peer-management.md",
-    "passes": false
+    "passes": true,
+    "notes": "264 unit tests + 1 integration test passing. Ed25519 keypair generation, peer registration, device add/revoke, signature verification, pull verifier with rejection log. cryptography>=42.0 dep added."
   },
   {
     "id": "distributed-sync-phase1",
-    "title": "Distributed sync phase 1 — append-only change log, push/pull, conflict resolution, rsync+S3 adapters",
-    "spec": null,
-    "passes": false
+    "title": "Distributed sync phase 1 — append-only change log, push/pull, conflict resolution, S3-compatible backend",
+    "spec": "specs/008-distributed-sync-phase1.md",
+    "passes": true,
+    "notes": "328 unit tests + 5 integration tests passing. HLC timestamps (services/hlc.py), ChangeLogEntry/ConflictRecord/PushResult/PullResult/SyncConfig models, S3 adapter (boto3 optional import), conflicts_store adapter, sync service (push/pull/create_snapshot), SyncCompositeAdapter (change log on every write), Settings.sync wiring, 6 public API functions (push/pull/create_snapshot/list_conflicts/resolve_conflict/restore_reference). _field_timestamps on Reference for per-field LWW tracking."
   },
   {
     "id": "audit",

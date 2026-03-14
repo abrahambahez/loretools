@@ -139,3 +139,59 @@ decisions:
   - arXiv ID looked up from model_extra under "arXiv-ID" and "arxiv" keys
 broken: none
 next: MCP server (feat 003) or audit feature — check feature_list.json for next priority
+
+--- [2026-03-14] session 6 ---
+completed:
+  - feat 008 peer-management fully implemented and verified
+  - task-01: DeviceIdentity, PeerRecord, PeerIdentity, 6 result models added to models.py
+  - task-02: cryptography>=42.0 added to pyproject.toml (user-approved)
+  - task-03: services/peers.py — _canonical, _sign, _verify (Ed25519 via PyCA)
+  - task-04: peer_init — keypair gen, key file at CONFIG_PATH.parent/keys/{peer_id}/{device_id}.key (mode 0600)
+  - task-05: adapters/peer_directory.py — load_peer_directory, skips revoked devices
+  - task-06: peer_register — admin keypair load+verify, self-signed admin bootstrap, signed peer records
+  - task-07: peer_add_device — appends device, re-signs
+  - task-08: peer_revoke_device, peer_revoke — set revoked_at, re-sign
+  - task-09: verify_entry (sync) — presence check then signature check
+  - task-10: rejection log in make_pull_verifier — writes to data_dir/rejected/{ts}-{peer_id}-{device_id}.json
+  - task-11: make_pull_verifier(peers_dir, data_dir) — forward-compat stub combining load+verify+reject
+  - task-12: __init__.py wired — peer_init, peer_register, peer_add_device, peer_revoke_device, peer_revoke; model exports
+  - task-13: 20 unit tests in tests/unit/test_peers.py
+  - task-14: 1 integration test in tests/integration/test_peer_lifecycle.py
+  - task-15: 264 unit tests passing (no regressions); 21 peer tests passing
+  - LibraryCtx: peers_dir, data_dir, admin_peer_id, admin_device_id added
+  - LocalSettings: peers_dir computed field added; config.py _LOCAL_COMPUTED updated
+  - feature_list.json: peer-management passes: true
+pending: none
+decisions:
+  - verify_entry made sync (pure computation, no I/O) — avoids asyncio.run() in nested event loop
+  - admin_peer_id/admin_device_id default to "_admin"/"_admin" — configurable via LibraryCtx
+  - HLC timestamp simplified to UTC ISO strftime for rejection log filenames (sync infra not yet built)
+broken: none
+next: distributed-sync-phase1 or audit feature — check feature_list.json
+
+--- [2026-03-14] session 7 ---
+completed:
+  - feat distributed-sync-phase1 fully implemented and verified
+  - task-01: services/hlc.py — HLC timestamp (iso_utc-counter:04d-peer_id), per-process state
+  - task-02: sync models in models.py — ChangeLogEntry, ConflictRecord, PushResult, PullResult, SyncConfig, Result; _field_timestamps on Reference
+  - task-03: adapters/s3_sync.py — upload/download/list_keys/exists via boto3 (optional import)
+  - task-04: adapters/conflicts_store.py — write/read/delete ConflictRecord files
+  - task-05: services/sync.py push — collect change_log entries > fence, sign, upload, update sync_state.json
+  - task-06: services/sync.py pull — list_keys, download, verify sig, replay HLC order LWW per-field, 60s conflict window, soft-delete conflict path, rejected dir
+  - task-07: services/sync.py create_snapshot — serialize library + fence_hlc, upload snapshots/{iso}.json
+  - task-08: adapters/sync_composite.py — make_sync_storage: read delegates to local, write delegates to local + appends ChangeLogEntry to change_log/
+  - task-09: Settings.sync: SyncConfig | None field; _build_ctx() uses make_sync_storage if sync present; sync_config on LibraryCtx
+  - task-10: public API: push, pull, create_snapshot, list_conflicts, resolve_conflict, restore_reference; exports PushResult, PullResult, ConflictRecord, SyncConfig, Result
+  - task-11: tests/integration/test_distributed_sync.py — 5 scenarios with MockS3 backend
+  - 328 unit tests + 5 new integration tests passing (pre-existing staging_workflow integration failures noted below)
+  - feature_list.json: distributed-sync-phase1 passes: true
+pending: none
+decisions:
+  - SyncConfig moved before Settings in models.py to avoid forward reference issues
+  - sync_config added to LibraryCtx model field
+  - make_sync_storage returns (read_all, write_all) same as make_storage — drop-in replacement
+  - _field_timestamps stored as alias "_field_timestamps" on Reference model for per-field LWW
+  - S3 adapter uses bare Exception catch on head_object for exists() — boto3 raises botocore.exceptions.ClientError (no dep on botocore in tests)
+broken:
+  - tests/integration/test_staging_workflow.py — 4 pre-existing failures (semantic uid confidence gating); NOT caused by this session
+next: audit feature (feature_list.json id: audit)

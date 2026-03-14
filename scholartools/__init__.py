@@ -6,6 +6,7 @@ from scholartools.adapters.local import (
     make_staging_storage,
     make_storage,
 )
+from scholartools.adapters.sync_composite import make_sync_storage
 from scholartools.apis.anthropic_extract import make_llm_extractor
 from scholartools.apis.arxiv import make_arxiv
 from scholartools.apis.crossref import make_crossref
@@ -16,8 +17,11 @@ from scholartools.apis.semantic_scholar import make_semantic_scholar
 from scholartools.config import load_settings
 from scholartools.models import (
     AddResult,
+    ChangeLogEntry,
+    ConflictRecord,
     DeleteResult,
     DeleteStagedResult,
+    DeviceIdentity,
     ExtractResult,
     FetchResult,
     FileRow,
@@ -29,24 +33,46 @@ from scholartools.models import (
     ListStagedResult,
     MergeResult,
     MoveResult,
+    PeerAddDeviceResult,
+    PeerIdentity,
+    PeerInitResult,
+    PeerRecord,
+    PeerRegisterResult,
+    PeerRevokeDeviceResult,
+    PeerRevokeResult,
+    PullResult,
+    PushResult,
     Reference,
     ReferenceRow,
     RenameResult,
+    Result,
     SearchResult,
     StageResult,
+    SyncConfig,
     UnlinkResult,
     UpdateResult,
+    VerifyEntryResult,
 )
 from scholartools.services import extract, fetch, files, search, store
 from scholartools.services import merge as merge_service
+from scholartools.services import peers as peers_service
 from scholartools.services import staging as staging_service
+from scholartools.services import sync as sync_service
 
 _ctx: LibraryCtx | None = None
 
 
 def _build_ctx() -> LibraryCtx:
     s = load_settings()
-    read_all, write_all = make_storage(str(s.local.library_file))
+    if s.sync:
+        read_all, write_all = make_sync_storage(
+            str(s.local.library_file),
+            str(s.local.library_dir),
+            "_admin",
+            "_admin",
+        )
+    else:
+        read_all, write_all = make_storage(str(s.local.library_file))
     copy_file, delete_file, rename_file, list_file_paths = make_filestore(
         str(s.local.files_dir)
     )
@@ -105,6 +131,9 @@ def _build_ctx() -> LibraryCtx:
         api_sources=api_sources,
         llm_extract=llm_extract,
         citekey_settings=s.citekey,
+        peers_dir=str(s.local.peers_dir),
+        data_dir=str(s.local.library_dir),
+        sync_config=s.sync,
     )
 
 
@@ -228,3 +257,128 @@ def delete_staged(citekey: str) -> DeleteStagedResult:
 
 def merge(omit: list[str] | None = None, allow_semantic: bool = False) -> MergeResult:
     return _run(merge_service.merge(omit, _get_ctx(), allow_semantic=allow_semantic))
+
+
+def peer_init(peer_id: str, device_id: str) -> PeerInitResult:
+    return _run(peers_service.peer_init(peer_id, device_id, _get_ctx()))
+
+
+def peer_register(identity: PeerIdentity) -> PeerRegisterResult:
+    return _run(peers_service.peer_register(identity, _get_ctx()))
+
+
+def peer_add_device(peer_id: str, device_identity: PeerIdentity) -> PeerAddDeviceResult:
+    return _run(peers_service.peer_add_device(peer_id, device_identity, _get_ctx()))
+
+
+def peer_revoke_device(peer_id: str, device_id: str) -> PeerRevokeDeviceResult:
+    return _run(peers_service.peer_revoke_device(peer_id, device_id, _get_ctx()))
+
+
+def peer_revoke(peer_id: str) -> PeerRevokeResult:
+    return _run(peers_service.peer_revoke(peer_id, _get_ctx()))
+
+
+def push() -> PushResult:
+    return _run(sync_service.push(_get_ctx()))
+
+
+def pull() -> PullResult:
+    return _run(sync_service.pull(_get_ctx()))
+
+
+def create_snapshot() -> None:
+    return _run(sync_service.create_snapshot(_get_ctx()))
+
+
+def list_conflicts() -> list[ConflictRecord]:
+    from pathlib import Path
+
+    from scholartools.adapters.conflicts_store import read_conflicts
+
+    ctx = _get_ctx()
+    if not ctx.data_dir:
+        return []
+    return read_conflicts(Path(ctx.data_dir))
+
+
+def resolve_conflict(uid: str, field: str, winning_value) -> Result:
+    import json
+    import tempfile
+    from pathlib import Path
+
+    from scholartools.adapters import conflicts_store, s3_sync
+    from scholartools.config import CONFIG_PATH
+    from scholartools.services import peers as _peers
+
+    ctx = _get_ctx()
+    if not ctx.data_dir:
+        return Result(ok=False, error="data_dir not configured")
+    if not ctx.sync_config:
+        return Result(ok=False, error="sync not configured")
+
+    from scholartools.services.hlc import now as hlc_now
+
+    ts = hlc_now(ctx.admin_peer_id)
+
+    key_path = (
+        CONFIG_PATH.parent / "keys" / ctx.admin_peer_id / f"{ctx.admin_device_id}.key"
+    )
+    if not key_path.exists():
+        return Result(ok=False, error="local device keypair not found")
+    privkey = key_path.read_bytes()
+
+    entry_dict = {
+        "op": "update_reference",
+        "uid": uid,
+        "uid_confidence": "",
+        "citekey": uid,
+        "data": {field: winning_value},
+        "peer_id": ctx.admin_peer_id,
+        "device_id": ctx.admin_device_id,
+        "timestamp_hlc": ts,
+    }
+    payload = _peers._canonical(entry_dict)
+    entry_dict["signature"] = _peers._sign(payload, privkey)
+
+    remote_key = f"changes/{ctx.admin_peer_id}/{ts}.json"
+    try:
+        with tempfile.NamedTemporaryFile(
+            suffix=".json", delete=False, mode="w", encoding="utf-8"
+        ) as tmp:
+            json.dump(entry_dict, tmp, ensure_ascii=False)
+            tmp_path = Path(tmp.name)
+        s3_sync.upload(ctx.sync_config, tmp_path, remote_key)
+        tmp_path.unlink(missing_ok=True)
+    except Exception as exc:
+        return Result(ok=False, error=str(exc))
+
+    conflicts_store.delete_conflict(Path(ctx.data_dir), uid, field)
+    return Result(ok=True)
+
+
+def restore_reference(citekey: str) -> Result:
+    from pathlib import Path
+
+    from scholartools.services.hlc import now as hlc_now
+
+    ctx = _get_ctx()
+    if not ctx.data_dir:
+        return Result(ok=False, error="data_dir not configured")
+
+    ts = hlc_now(ctx.admin_peer_id)
+    entry = ChangeLogEntry(
+        op="restore_reference",
+        uid="",
+        uid_confidence="",
+        citekey=citekey,
+        data={},
+        peer_id=ctx.admin_peer_id,
+        device_id=ctx.admin_device_id,
+        timestamp_hlc=ts,
+        signature="",
+    )
+    log_dir = Path(ctx.data_dir) / "change_log"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    (log_dir / f"{ts}.json").write_text(entry.model_dump_json(), encoding="utf-8")
+    return Result(ok=True)

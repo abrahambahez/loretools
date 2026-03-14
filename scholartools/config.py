@@ -11,7 +11,13 @@ _settings: Settings | None = None
 
 _REQUIRED_KEYS = {"backend", "local", "apis", "llm"}
 
-_LOCAL_COMPUTED = {"library_file", "files_dir", "staging_file", "staging_dir"}
+_LOCAL_COMPUTED = {
+    "library_file",
+    "files_dir",
+    "staging_file",
+    "staging_dir",
+    "peers_dir",
+}
 
 
 def load_settings() -> Settings:
