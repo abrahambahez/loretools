@@ -6,13 +6,15 @@ from scholartools.models import SyncConfig
 def _client(config: SyncConfig):
     try:
         import boto3
+        from botocore.config import Config
     except ImportError:
         raise ImportError(
-            "boto3 is required for S3 sync. Install it with: pip install boto3"
+            "boto3 is required for S3 sync. Install it with: uv sync --extra sync"
         )
     kwargs = dict(
         aws_access_key_id=config.access_key,
         aws_secret_access_key=config.secret_key,
+        config=Config(connect_timeout=10, read_timeout=60, retries={"max_attempts": 3}),
     )
     if config.endpoint:
         kwargs["endpoint_url"] = config.endpoint
