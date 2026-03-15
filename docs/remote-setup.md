@@ -363,6 +363,7 @@ On the **new device**:
 | `local device keypair not found` (in push) | same as above | same fix |
 | `PushResult(errors=['sync not configured'])` | no `sync` block in config.json | add `sync` block with bucket + credentials |
 | `PeerInitResult(error='key already exists ...')` | key already initialized | safe to ignore; key is reused |
+| `ModuleNotFoundError: No module named 'boto3'` | boto3 not installed | `uv sync --extra sync` |
 | `PeerRegisterResult(error='admin keypair does not match ...')` | key file replaced after initial register | delete `{peers_dir}/_admin` and re-register |
 | S3 `NoCredentialsError` | wrong access_key / secret_key | verify IAM credentials in config.json |
 | S3 `NoSuchBucket` | bucket name typo or wrong region | verify bucket name in config.json |

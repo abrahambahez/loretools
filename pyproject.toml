@@ -19,6 +19,9 @@ dependencies = [
 scholartools-test = "scholartools._shell:main"
 scht = "scholartools._shell:main"
 
+[project.optional-dependencies]
+sync = ["boto3>=1.34"]
+
 [dependency-groups]
 dev = [
     "pytest>=8.0",
