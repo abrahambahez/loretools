@@ -83,8 +83,8 @@ def make_peer_ctx(tmp_path, peer_id, device_id, s3: MockS3, records=None):
         api_sources=[],
         peers_dir=str(data_dir / "peers"),
         data_dir=str(data_dir),
-        admin_peer_id=peer_id,
-        admin_device_id=device_id,
+        peer_id=peer_id,
+        device_id=device_id,
         sync_config=make_sync_config(),
     )
     return ctx, _records

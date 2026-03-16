@@ -40,6 +40,7 @@ from scholartools.models import (
     PeerRegisterResult,
     PeerRevokeDeviceResult,
     PeerRevokeResult,
+    PeerSettings,
     PrefetchResult,
     PullResult,
     PushResult,
@@ -69,8 +70,8 @@ def _build_ctx() -> LibraryCtx:
         read_all, write_all = make_sync_storage(
             str(s.local.library_file),
             str(s.local.library_dir),
-            "_admin",
-            "_admin",
+            s.peer.peer_id if s.peer else "",
+            s.peer.device_id if s.peer else "",
         )
     else:
         read_all, write_all = make_storage(str(s.local.library_file))
@@ -134,6 +135,8 @@ def _build_ctx() -> LibraryCtx:
         citekey_settings=s.citekey,
         peers_dir=str(s.local.peers_dir),
         data_dir=str(s.local.library_dir),
+        peer_id=s.peer.peer_id if s.peer else "",
+        device_id=s.peer.device_id if s.peer else "",
         sync_config=s.sync,
     )
 
@@ -288,6 +291,10 @@ def peer_revoke(peer_id: str) -> PeerRevokeResult:
     return _run(peers_service.peer_revoke(peer_id, _get_ctx()))
 
 
+def peer_register_self() -> Result:
+    return _run(peers_service.peer_register_self(_get_ctx()))
+
+
 def push() -> PushResult:
     return _run(sync_service.push(_get_ctx()))
 
@@ -328,11 +335,9 @@ def resolve_conflict(uid: str, field: str, winning_value) -> Result:
 
     from scholartools.services.hlc import now as hlc_now
 
-    ts = hlc_now(ctx.admin_peer_id)
+    ts = hlc_now(ctx.peer_id)
 
-    key_path = (
-        CONFIG_PATH.parent / "keys" / ctx.admin_peer_id / f"{ctx.admin_device_id}.key"
-    )
+    key_path = CONFIG_PATH.parent / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
     if not key_path.exists():
         return Result(ok=False, error="local device keypair not found")
     privkey = key_path.read_bytes()
@@ -343,14 +348,14 @@ def resolve_conflict(uid: str, field: str, winning_value) -> Result:
         "uid_confidence": "",
         "citekey": uid,
         "data": {field: winning_value},
-        "peer_id": ctx.admin_peer_id,
-        "device_id": ctx.admin_device_id,
+        "peer_id": ctx.peer_id,
+        "device_id": ctx.device_id,
         "timestamp_hlc": ts,
     }
     payload = _peers._canonical(entry_dict)
     entry_dict["signature"] = _peers._sign(payload, privkey)
 
-    remote_key = f"changes/{ctx.admin_peer_id}/{ts}.json"
+    remote_key = f"changes/{ctx.peer_id}/{ts}.json"
     try:
         with tempfile.NamedTemporaryFile(
             suffix=".json", delete=False, mode="w", encoding="utf-8"
@@ -375,15 +380,15 @@ def restore_reference(citekey: str) -> Result:
     if not ctx.data_dir:
         return Result(ok=False, error="data_dir not configured")
 
-    ts = hlc_now(ctx.admin_peer_id)
+    ts = hlc_now(ctx.peer_id)
     entry = ChangeLogEntry(
         op="restore_reference",
         uid="",
         uid_confidence="",
         citekey=citekey,
         data={},
-        peer_id=ctx.admin_peer_id,
-        device_id=ctx.admin_device_id,
+        peer_id=ctx.peer_id,
+        device_id=ctx.device_id,
         timestamp_hlc=ts,
         signature="",
     )

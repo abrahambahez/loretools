@@ -35,6 +35,7 @@ def reset_ctx(tmp_path, monkeypatch):
         "access_key": "a",
         "secret_key": "s",
     }
+    data["peer"] = {"peer_id": "peer-a", "device_id": "dev-1"}
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps(data))
     monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)

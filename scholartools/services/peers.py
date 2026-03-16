@@ -22,6 +22,7 @@ from scholartools.models import (
     PeerRegisterResult,
     PeerRevokeDeviceResult,
     PeerRevokeResult,
+    Result,
     VerifyEntryResult,
 )
 
@@ -48,39 +49,31 @@ def _verify(payload: bytes, signature: str, public_key_bytes: bytes) -> bool:
         return False
 
 
-def _load_admin_key(ctx: LibraryCtx) -> bytes | None:
-    key_path = (
-        CONFIG_PATH.parent / "keys" / ctx.admin_peer_id / f"{ctx.admin_device_id}.key"
-    )
+def _load_caller_key(ctx: LibraryCtx) -> bytes | None:
+    key_path = CONFIG_PATH.parent / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
     return key_path.read_bytes() if key_path.exists() else None
 
 
-def _admin_key_matches_record(
-    admin_private_bytes: bytes,
-    peers_dir: Path,
-    admin_peer_id: str,
-    admin_device_id: str,
-) -> bool:
-    record_path = peers_dir / admin_peer_id
+def _check_admin_role(ctx: LibraryCtx, peers_dir: Path) -> Result:
+    key_path = CONFIG_PATH.parent / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
+    if not key_path.exists():
+        return Result(ok=False, error="local device keypair not found")
+    record_path = peers_dir / ctx.peer_id
     if not record_path.exists():
-        return True
+        return Result(ok=False, error="caller peer not registered")
     try:
         data = json.loads(record_path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
-        return False
+        return Result(ok=False, error="caller peer not registered")
     device = next(
-        (d for d in data.get("devices", []) if d["device_id"] == admin_device_id),
+        (d for d in data.get("devices", []) if d["device_id"] == ctx.device_id),
         None,
     )
-    if not device:
-        return False
-    priv = Ed25519PrivateKey.from_private_bytes(admin_private_bytes)
-    expected = (
-        base64.urlsafe_b64encode(priv.public_key().public_bytes_raw())
-        .rstrip(b"=")
-        .decode()
-    )
-    return expected == device["public_key"]
+    if device is None:
+        return Result(ok=False, error="caller peer not registered")
+    if device.get("role") != "admin":
+        return Result(ok=False, error="caller is not an admin")
+    return Result(ok=True)
 
 
 async def peer_init(peer_id: str, device_id: str, ctx: LibraryCtx) -> PeerInitResult:
@@ -102,31 +95,23 @@ async def peer_register(identity: PeerIdentity, ctx: LibraryCtx) -> PeerRegister
     if not ctx.peers_dir:
         return PeerRegisterResult(error="peers_dir not configured in context")
     peers_dir = Path(ctx.peers_dir)
-    admin_private_bytes = _load_admin_key(ctx)
-    if admin_private_bytes is None:
-        return PeerRegisterResult(error="admin keypair not found")
-    if not _admin_key_matches_record(
-        admin_private_bytes, peers_dir, ctx.admin_peer_id, ctx.admin_device_id
-    ):
-        return PeerRegisterResult(
-            error="admin keypair does not match registered admin record"
-        )
-    is_admin_self = (
-        identity.peer_id == ctx.admin_peer_id
-        and identity.device_id == ctx.admin_device_id
-    )
+    check = _check_admin_role(ctx, peers_dir)
+    if not check.ok:
+        return PeerRegisterResult(error=check.error)
+    caller_private_bytes = _load_caller_key(ctx)
+    is_self = identity.peer_id == ctx.peer_id and identity.device_id == ctx.device_id
     now = datetime.now(timezone.utc)
     device = DeviceIdentity(
         device_id=identity.device_id,
         public_key=identity.public_key,
         registered_at=now,
-        role="admin" if is_admin_self else "peer",
+        role="admin" if is_self else "contributor",
     )
     record = PeerRecord(peer_id=identity.peer_id, devices=[device])
     record_dict = json.loads(record.model_dump_json())
     record_dict.pop("signature", None)
     payload = _canonical(record_dict)
-    record_dict["signature"] = _sign(payload, admin_private_bytes)
+    record_dict["signature"] = _sign(payload, caller_private_bytes)
     peers_dir.mkdir(parents=True, exist_ok=True)
     (peers_dir / identity.peer_id).write_text(
         json.dumps(record_dict, ensure_ascii=False), encoding="utf-8"
@@ -140,15 +125,10 @@ async def peer_add_device(
     if not ctx.peers_dir:
         return PeerAddDeviceResult(error="peers_dir not configured in context")
     peers_dir = Path(ctx.peers_dir)
-    admin_private_bytes = _load_admin_key(ctx)
-    if admin_private_bytes is None:
-        return PeerAddDeviceResult(error="admin keypair not found")
-    if not _admin_key_matches_record(
-        admin_private_bytes, peers_dir, ctx.admin_peer_id, ctx.admin_device_id
-    ):
-        return PeerAddDeviceResult(
-            error="admin keypair does not match registered admin record"
-        )
+    check = _check_admin_role(ctx, peers_dir)
+    if not check.ok:
+        return PeerAddDeviceResult(error=check.error)
+    caller_private_bytes = _load_caller_key(ctx)
     record_path = peers_dir / peer_id
     if not record_path.exists():
         return PeerAddDeviceResult(error=f"peer {peer_id} not found")
@@ -162,7 +142,7 @@ async def peer_add_device(
     record_dict["devices"].append(json.loads(new_device.model_dump_json()))
     record_dict.pop("signature", None)
     payload = _canonical(record_dict)
-    record_dict["signature"] = _sign(payload, admin_private_bytes)
+    record_dict["signature"] = _sign(payload, caller_private_bytes)
     record_path.write_text(
         json.dumps(record_dict, ensure_ascii=False), encoding="utf-8"
     )
@@ -175,15 +155,10 @@ async def peer_revoke_device(
     if not ctx.peers_dir:
         return PeerRevokeDeviceResult(error="peers_dir not configured in context")
     peers_dir = Path(ctx.peers_dir)
-    admin_private_bytes = _load_admin_key(ctx)
-    if admin_private_bytes is None:
-        return PeerRevokeDeviceResult(error="admin keypair not found")
-    if not _admin_key_matches_record(
-        admin_private_bytes, peers_dir, ctx.admin_peer_id, ctx.admin_device_id
-    ):
-        return PeerRevokeDeviceResult(
-            error="admin keypair does not match registered admin record"
-        )
+    check = _check_admin_role(ctx, peers_dir)
+    if not check.ok:
+        return PeerRevokeDeviceResult(error=check.error)
+    caller_private_bytes = _load_caller_key(ctx)
     record_path = peers_dir / peer_id
     if not record_path.exists():
         return PeerRevokeDeviceResult(error=f"peer {peer_id} not found")
@@ -200,7 +175,7 @@ async def peer_revoke_device(
         )
     record_dict.pop("signature", None)
     payload = _canonical(record_dict)
-    record_dict["signature"] = _sign(payload, admin_private_bytes)
+    record_dict["signature"] = _sign(payload, caller_private_bytes)
     record_path.write_text(
         json.dumps(record_dict, ensure_ascii=False), encoding="utf-8"
     )
@@ -211,15 +186,10 @@ async def peer_revoke(peer_id: str, ctx: LibraryCtx) -> PeerRevokeResult:
     if not ctx.peers_dir:
         return PeerRevokeResult(error="peers_dir not configured in context")
     peers_dir = Path(ctx.peers_dir)
-    admin_private_bytes = _load_admin_key(ctx)
-    if admin_private_bytes is None:
-        return PeerRevokeResult(error="admin keypair not found")
-    if not _admin_key_matches_record(
-        admin_private_bytes, peers_dir, ctx.admin_peer_id, ctx.admin_device_id
-    ):
-        return PeerRevokeResult(
-            error="admin keypair does not match registered admin record"
-        )
+    check = _check_admin_role(ctx, peers_dir)
+    if not check.ok:
+        return PeerRevokeResult(error=check.error)
+    caller_private_bytes = _load_caller_key(ctx)
     record_path = peers_dir / peer_id
     if not record_path.exists():
         return PeerRevokeResult(error=f"peer {peer_id} not found")
@@ -229,11 +199,49 @@ async def peer_revoke(peer_id: str, ctx: LibraryCtx) -> PeerRevokeResult:
         device["revoked_at"] = now
     record_dict.pop("signature", None)
     payload = _canonical(record_dict)
-    record_dict["signature"] = _sign(payload, admin_private_bytes)
+    record_dict["signature"] = _sign(payload, caller_private_bytes)
     record_path.write_text(
         json.dumps(record_dict, ensure_ascii=False), encoding="utf-8"
     )
     return PeerRevokeResult(revoked=True)
+
+
+async def peer_register_self(ctx: LibraryCtx) -> Result:
+    if not ctx.peers_dir:
+        return Result(ok=False, error="peers_dir not configured in context")
+    peers_dir = Path(ctx.peers_dir)
+    if peers_dir.exists() and any(peers_dir.iterdir()):
+        return Result(
+            ok=False,
+            error="peer directory is not empty; use peer_register() with an existing admin",
+        )
+    key_path = CONFIG_PATH.parent / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
+    if not key_path.exists():
+        return Result(ok=False, error="local device keypair not found")
+    private_bytes = key_path.read_bytes()
+    priv = Ed25519PrivateKey.from_private_bytes(private_bytes)
+    pub_b64 = (
+        base64.urlsafe_b64encode(priv.public_key().public_bytes_raw())
+        .rstrip(b"=")
+        .decode()
+    )
+    now = datetime.now(timezone.utc)
+    device = DeviceIdentity(
+        device_id=ctx.device_id,
+        public_key=pub_b64,
+        registered_at=now,
+        role="admin",
+    )
+    record = PeerRecord(peer_id=ctx.peer_id, devices=[device])
+    record_dict = json.loads(record.model_dump_json())
+    record_dict.pop("signature", None)
+    payload = _canonical(record_dict)
+    record_dict["signature"] = _sign(payload, private_bytes)
+    peers_dir.mkdir(parents=True, exist_ok=True)
+    (peers_dir / ctx.peer_id).write_text(
+        json.dumps(record_dict, ensure_ascii=False), encoding="utf-8"
+    )
+    return Result(ok=True)
 
 
 def verify_entry(

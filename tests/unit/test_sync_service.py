@@ -39,8 +39,8 @@ def make_ctx(tmp_path, sync_config=None, records=None):
         api_sources=[],
         peers_dir=str(tmp_path / "peers"),
         data_dir=str(tmp_path),
-        admin_peer_id="peer-a",
-        admin_device_id="dev-1",
+        peer_id="peer-a",
+        device_id="dev-1",
         sync_config=sync_config,
     ), _records
 

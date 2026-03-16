@@ -68,6 +68,13 @@
     "notes": "399 unit + integration tests passing. sha256 content-addressed blobs, link_file/unlink_file ops in change log, lazy get_file with cache, prefetch_blobs, pull LWW for blob_ref, upload_bytes for .meta sidecars. No regressions."
   },
   {
+    "id": "role-logic",
+    "title": "Role logic — per-peer config identity and admin/contributor roles",
+    "spec": "specs/010-role-logic.md",
+    "passes": true,
+    "notes": "387 unit + 18 integration tests passing (8 pre-existing boto3 failures unchanged). PeerSettings model, peer block in Settings/config validation, LibraryCtx.peer_id/device_id, _check_admin_role, peer_register_self, bootstrap script --role flag, remote-setup.md updated."
+  },
+  {
     "id": "audit",
     "title": "Database audit — integrity checks, orphaned files, missing archives, schema violations",
     "spec": null,

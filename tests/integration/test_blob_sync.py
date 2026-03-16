@@ -82,8 +82,8 @@ def make_peer_ctx(tmp_path, peer_id, device_id, records=None):
         api_sources=[],
         peers_dir=str(data_dir / "peers"),
         data_dir=str(data_dir),
-        admin_peer_id=peer_id,
-        admin_device_id=device_id,
+        peer_id=peer_id,
+        device_id=device_id,
         sync_config=make_sync_config(),
     )
     return ctx, _records
@@ -137,7 +137,7 @@ def push_signed_change_log(ctx: LibraryCtx, s3: MockS3, priv_bytes: bytes):
         entry_dict = json.loads(entry.model_dump_json())
         entry_dict.pop("signature", None)
         entry_dict["signature"] = sign_entry(entry_dict, priv_bytes)
-        key = f"changes/{ctx.admin_peer_id}/{entry.timestamp_hlc}.json"
+        key = f"changes/{ctx.peer_id}/{entry.timestamp_hlc}.json"
         s3.objects[key] = json.dumps(entry_dict).encode()
 
 

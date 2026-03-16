@@ -8,19 +8,21 @@ import pytest
 from scholartools.adapters.peer_directory import load_peer_directory
 from scholartools.services.peers import (
     _canonical,
+    _check_admin_role,
     _sign,
     _verify,
     make_pull_verifier,
     peer_add_device,
     peer_init,
     peer_register,
+    peer_register_self,
     peer_revoke,
     peer_revoke_device,
     verify_entry,
 )
 
 
-def _make_ctx(tmp_path: Path, admin_key_path: Path | None = None):
+def _make_ctx(tmp_path: Path, peer_id: str = "_admin", device_id: str = "_admin"):
     from unittest.mock import MagicMock
 
     from scholartools.models import LibraryCtx
@@ -28,8 +30,8 @@ def _make_ctx(tmp_path: Path, admin_key_path: Path | None = None):
     ctx = MagicMock(spec=LibraryCtx)
     ctx.peers_dir = str(tmp_path / "peers")
     ctx.data_dir = str(tmp_path)
-    ctx.admin_peer_id = "_admin"
-    ctx.admin_device_id = "_admin"
+    ctx.peer_id = peer_id
+    ctx.device_id = device_id
     return ctx
 
 
@@ -85,7 +87,6 @@ def test_verify_fails_wrong_key():
 
 @pytest.mark.asyncio
 async def test_peer_init_creates_key(monkeypatch, tmp_path):
-    keys_dir = tmp_path / "keys"
     monkeypatch.setattr(
         "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
     )
@@ -113,11 +114,163 @@ async def test_peer_init_rejects_duplicate(monkeypatch, tmp_path):
     assert "already exists" in result.error
 
 
+# --- DeviceIdentity default role ---
+
+
+def test_device_identity_default_role_is_contributor():
+    from scholartools.models import DeviceIdentity
+
+    d = DeviceIdentity(
+        device_id="x",
+        public_key="k",
+        registered_at=datetime.now(timezone.utc),
+    )
+    assert d.role == "contributor"
+
+
+def test_device_identity_old_peer_role_treated_as_non_admin():
+    from scholartools.models import DeviceIdentity
+
+    d = DeviceIdentity(
+        device_id="x",
+        public_key="k",
+        registered_at=datetime.now(timezone.utc),
+        role="peer",
+    )
+    assert d.role != "admin"
+
+
+# --- _check_admin_role ---
+
+
+@pytest.mark.asyncio
+async def test_check_admin_role_missing_keypair(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    ctx = _make_ctx(tmp_path)
+    peers_dir = Path(ctx.peers_dir)
+    peers_dir.mkdir(parents=True)
+    result = _check_admin_role(ctx, peers_dir)
+    assert not result.ok
+    assert "local device keypair not found" in result.error
+
+
+@pytest.mark.asyncio
+async def test_check_admin_role_missing_peer_record(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    ctx = _make_ctx(tmp_path)
+    await peer_init("_admin", "_admin", ctx)
+    peers_dir = Path(ctx.peers_dir)
+    peers_dir.mkdir(parents=True)
+    result = _check_admin_role(ctx, peers_dir)
+    assert not result.ok
+    assert "caller peer not registered" in result.error
+
+
+@pytest.mark.asyncio
+async def test_check_admin_role_missing_device_in_record(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    ctx = _make_ctx(tmp_path)
+    await peer_init("_admin", "_admin", ctx)
+    peers_dir = Path(ctx.peers_dir)
+    peers_dir.mkdir(parents=True)
+    record = {
+        "peer_id": "_admin",
+        "devices": [
+            {
+                "device_id": "other",
+                "public_key": "k",
+                "registered_at": datetime.now(timezone.utc).isoformat(),
+                "revoked_at": None,
+                "role": "admin",
+            }
+        ],
+        "signature": "dummy",
+    }
+    (peers_dir / "_admin").write_text(json.dumps(record), encoding="utf-8")
+    result = _check_admin_role(ctx, peers_dir)
+    assert not result.ok
+    assert "caller peer not registered" in result.error
+
+
+@pytest.mark.asyncio
+async def test_check_admin_role_non_admin_role(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    ctx = _make_ctx(tmp_path)
+    await peer_init("_admin", "_admin", ctx)
+    peers_dir = Path(ctx.peers_dir)
+    peers_dir.mkdir(parents=True)
+    record = {
+        "peer_id": "_admin",
+        "devices": [
+            {
+                "device_id": "_admin",
+                "public_key": "k",
+                "registered_at": datetime.now(timezone.utc).isoformat(),
+                "revoked_at": None,
+                "role": "contributor",
+            }
+        ],
+        "signature": "dummy",
+    }
+    (peers_dir / "_admin").write_text(json.dumps(record), encoding="utf-8")
+    result = _check_admin_role(ctx, peers_dir)
+    assert not result.ok
+    assert "caller is not an admin" in result.error
+
+
+@pytest.mark.asyncio
+async def test_check_admin_role_old_peer_role_rejected(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    ctx = _make_ctx(tmp_path)
+    await peer_init("_admin", "_admin", ctx)
+    peers_dir = Path(ctx.peers_dir)
+    peers_dir.mkdir(parents=True)
+    record = {
+        "peer_id": "_admin",
+        "devices": [
+            {
+                "device_id": "_admin",
+                "public_key": "k",
+                "registered_at": datetime.now(timezone.utc).isoformat(),
+                "revoked_at": None,
+                "role": "peer",
+            }
+        ],
+        "signature": "dummy",
+    }
+    (peers_dir / "_admin").write_text(json.dumps(record), encoding="utf-8")
+    result = _check_admin_role(ctx, peers_dir)
+    assert not result.ok
+    assert "caller is not an admin" in result.error
+
+
+@pytest.mark.asyncio
+async def test_check_admin_role_ok(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    ctx = _make_ctx(tmp_path)
+    await peer_init("_admin", "_admin", ctx)
+    await peer_register_self(ctx)
+    result = _check_admin_role(ctx, Path(ctx.peers_dir))
+    assert result.ok
+
+
 # --- peer_register ---
 
 
 @pytest.mark.asyncio
-async def test_peer_register_no_admin_key(monkeypatch, tmp_path):
+async def test_peer_register_no_keypair(monkeypatch, tmp_path):
     monkeypatch.setattr(
         "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
     )
@@ -127,44 +280,82 @@ async def test_peer_register_no_admin_key(monkeypatch, tmp_path):
     identity = PeerIdentity(peer_id="bob", device_id="desktop", public_key="AAAA")
     result = await peer_register(identity, ctx)
     assert result.error is not None
-    assert "admin keypair not found" in result.error
+    assert "local device keypair not found" in result.error
 
 
 @pytest.mark.asyncio
-async def test_peer_register_admin_self(monkeypatch, tmp_path):
+async def test_peer_register_blocked_when_not_admin(monkeypatch, tmp_path):
     monkeypatch.setattr(
         "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
     )
     ctx = _make_ctx(tmp_path)
-    init_result = await peer_init("_admin", "_admin", ctx)
-    assert init_result.error is None
-    result = await peer_register(init_result.identity, ctx)
-    assert result.error is None
-    assert result.peer_id == "_admin"
-    record_path = Path(ctx.peers_dir) / "_admin"
-    assert record_path.exists()
-    data = json.loads(record_path.read_text())
-    assert data["devices"][0]["role"] == "admin"
-    assert data["signature"] is not None
+    await peer_init("_admin", "_admin", ctx)
+    # No peer_register_self — caller not in directory
+    from scholartools.models import PeerIdentity
+
+    identity = PeerIdentity(peer_id="bob", device_id="desktop", public_key="AAAA")
+    result = await peer_register(identity, ctx)
+    assert result.error is not None
+    assert "caller peer not registered" in result.error
 
 
 @pytest.mark.asyncio
-async def test_peer_register_registers_peer(monkeypatch, tmp_path):
+async def test_peer_register_registers_contributor(monkeypatch, tmp_path):
     monkeypatch.setattr(
         "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
     )
     ctx = _make_ctx(tmp_path)
-    # Initialize and register admin first
-    admin_init = await peer_init("_admin", "_admin", ctx)
-    await peer_register(admin_init.identity, ctx)
-    # Initialize peer key
+    await peer_init("_admin", "_admin", ctx)
+    await peer_register_self(ctx)
     peer_init_result = await peer_init("alice", "laptop", ctx)
     result = await peer_register(peer_init_result.identity, ctx)
     assert result.error is None
     assert result.peer_id == "alice"
     record_path = Path(ctx.peers_dir) / "alice"
     data = json.loads(record_path.read_text())
-    assert data["devices"][0]["role"] == "peer"
+    assert data["devices"][0]["role"] == "contributor"
+
+
+# --- peer_register_self ---
+
+
+@pytest.mark.asyncio
+async def test_peer_register_self_on_empty_dir(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    ctx = _make_ctx(tmp_path)
+    await peer_init("_admin", "_admin", ctx)
+    result = await peer_register_self(ctx)
+    assert result.ok
+    record_path = Path(ctx.peers_dir) / "_admin"
+    assert record_path.exists()
+    data = json.loads(record_path.read_text())
+    assert data["devices"][0]["role"] == "admin"
+
+
+@pytest.mark.asyncio
+async def test_peer_register_self_fails_on_nonempty_dir(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    ctx = _make_ctx(tmp_path)
+    await peer_init("_admin", "_admin", ctx)
+    await peer_register_self(ctx)
+    result = await peer_register_self(ctx)
+    assert not result.ok
+    assert "peer directory is not empty" in result.error
+
+
+@pytest.mark.asyncio
+async def test_peer_register_self_fails_missing_keypair(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    ctx = _make_ctx(tmp_path)
+    result = await peer_register_self(ctx)
+    assert not result.ok
+    assert "local device keypair not found" in result.error
 
 
 # --- load_peer_directory ---
@@ -193,14 +384,14 @@ def test_load_peer_directory_excludes_revoked(tmp_path):
                 "public_key": _pub_b64(priv1),
                 "registered_at": now,
                 "revoked_at": None,
-                "role": "peer",
+                "role": "contributor",
             },
             {
                 "device_id": "phone",
                 "public_key": _pub_b64(priv2),
                 "registered_at": now,
-                "revoked_at": now,  # revoked
-                "role": "peer",
+                "revoked_at": now,
+                "role": "contributor",
             },
         ],
         "signature": "dummy",
@@ -270,8 +461,8 @@ async def test_peer_revoke_device(monkeypatch, tmp_path):
         "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
     )
     ctx = _make_ctx(tmp_path)
-    admin_init = await peer_init("_admin", "_admin", ctx)
-    await peer_register(admin_init.identity, ctx)
+    await peer_init("_admin", "_admin", ctx)
+    await peer_register_self(ctx)
     peer_init_result = await peer_init("alice", "laptop", ctx)
     await peer_register(peer_init_result.identity, ctx)
     result = await peer_revoke_device("alice", "laptop", ctx)
@@ -294,8 +485,8 @@ async def test_peer_revoke_all_devices(monkeypatch, tmp_path):
         "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
     )
     ctx = _make_ctx(tmp_path)
-    admin_init = await peer_init("_admin", "_admin", ctx)
-    await peer_register(admin_init.identity, ctx)
+    await peer_init("_admin", "_admin", ctx)
+    await peer_register_self(ctx)
     peer_init_result = await peer_init("alice", "laptop", ctx)
     await peer_register(peer_init_result.identity, ctx)
     second_device = await peer_init("alice", "phone", ctx)
@@ -305,6 +496,41 @@ async def test_peer_revoke_all_devices(monkeypatch, tmp_path):
     record_data = json.loads((Path(ctx.peers_dir) / "alice").read_text())
     for device in record_data["devices"]:
         assert device["revoked_at"] is not None
+
+
+# --- peer_register blocked when not admin ---
+
+
+@pytest.mark.asyncio
+async def test_peer_add_device_blocked_when_not_admin(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    admin_ctx = _make_ctx(tmp_path, "admin", "dev")
+    alice_ctx = _make_ctx(tmp_path, "alice", "laptop")
+    await peer_init("admin", "dev", admin_ctx)
+    await peer_register_self(admin_ctx)
+    alice_init = await peer_init("alice", "laptop", alice_ctx)
+    await peer_register(alice_init.identity, admin_ctx)
+    result = await peer_add_device("admin", alice_init.identity, alice_ctx)
+    assert result.error is not None
+    assert "caller is not an admin" in result.error
+
+
+@pytest.mark.asyncio
+async def test_peer_revoke_blocked_when_not_admin(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
+    )
+    admin_ctx = _make_ctx(tmp_path, "admin", "dev")
+    alice_ctx = _make_ctx(tmp_path, "alice", "laptop")
+    await peer_init("admin", "dev", admin_ctx)
+    await peer_register_self(admin_ctx)
+    alice_init = await peer_init("alice", "laptop", alice_ctx)
+    await peer_register(alice_init.identity, admin_ctx)
+    result = await peer_revoke("admin", alice_ctx)
+    assert result.error is not None
+    assert "caller is not an admin" in result.error
 
 
 # --- make_pull_verifier ---
@@ -327,7 +553,7 @@ def test_make_pull_verifier_pass(monkeypatch, tmp_path):
                 "public_key": pub_b64,
                 "registered_at": now,
                 "revoked_at": None,
-                "role": "peer",
+                "role": "contributor",
             }
         ],
         "signature": "dummy",

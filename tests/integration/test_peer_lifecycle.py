@@ -11,6 +11,7 @@ from scholartools.services.peers import (
     peer_add_device,
     peer_init,
     peer_register,
+    peer_register_self,
     peer_revoke_device,
     verify_entry,
 )
@@ -29,14 +30,13 @@ async def test_full_peer_lifecycle(monkeypatch, tmp_path):
     ctx = MagicMock(spec=LibraryCtx)
     ctx.peers_dir = str(tmp_path / "peers")
     ctx.data_dir = str(tmp_path)
-    ctx.admin_peer_id = "_admin"
-    ctx.admin_device_id = "_admin"
+    ctx.peer_id = "_admin"
+    ctx.device_id = "_admin"
 
-    # 1. Admin init + register (self-signed)
-    admin_init = await peer_init("_admin", "_admin", ctx)
-    assert admin_init.error is None
-    admin_reg = await peer_register(admin_init.identity, ctx)
-    assert admin_reg.error is None
+    # 1. Admin init + self-register (bootstrap)
+    await peer_init("_admin", "_admin", ctx)
+    admin_reg = await peer_register_self(ctx)
+    assert admin_reg.ok
 
     admin_record = json.loads((Path(ctx.peers_dir) / "_admin").read_text())
     assert admin_record["devices"][0]["role"] == "admin"
@@ -46,6 +46,10 @@ async def test_full_peer_lifecycle(monkeypatch, tmp_path):
     assert peer_init_r.error is None
     reg_r = await peer_register(peer_init_r.identity, ctx)
     assert reg_r.error is None
+    assert reg_r.peer_id == "alice"
+
+    alice_record = json.loads((Path(ctx.peers_dir) / "alice").read_text())
+    assert alice_record["devices"][0]["role"] == "contributor"
 
     # 3. Add a second device
     device2 = await peer_init("alice", "phone", ctx)

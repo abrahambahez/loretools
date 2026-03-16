@@ -131,8 +131,8 @@ class LibraryCtx(BaseModel):
     citekey_settings: CitekeySettings = Field(default_factory=CitekeySettings)
     peers_dir: str | None = None
     data_dir: str | None = None
-    admin_peer_id: str = "_admin"
-    admin_device_id: str = "_admin"
+    peer_id: str = ""
+    device_id: str = ""
     sync_config: "SyncConfig | None" = None
 
 
@@ -297,6 +297,12 @@ class SyncConfig(BaseModel):
     secret_key: str
 
 
+class PeerSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    peer_id: str
+    device_id: str
+
+
 class Settings(BaseModel):
     backend: str = "local"
     local: LocalSettings = Field(default_factory=LocalSettings)
@@ -304,6 +310,7 @@ class Settings(BaseModel):
     llm: LlmSettings = Field(default_factory=LlmSettings)
     citekey: CitekeySettings = Field(default_factory=CitekeySettings)
     sync: SyncConfig | None = None
+    peer: PeerSettings | None = None
 
 
 class StageResult(BaseModel):
@@ -334,7 +341,7 @@ class DeviceIdentity(BaseModel):
     public_key: str
     registered_at: datetime
     revoked_at: datetime | None = None
-    role: str = "peer"
+    role: str = "contributor"
 
 
 class PeerRecord(BaseModel):

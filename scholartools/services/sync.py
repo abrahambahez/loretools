@@ -42,9 +42,7 @@ def _save_sync_state(data_dir: Path, state: dict) -> None:
 
 
 def _load_privkey(ctx: LibraryCtx) -> bytes | None:
-    key_path = (
-        CONFIG_PATH.parent / "keys" / ctx.admin_peer_id / f"{ctx.admin_device_id}.key"
-    )
+    key_path = CONFIG_PATH.parent / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
     return key_path.read_bytes() if key_path.exists() else None
 
 
@@ -120,7 +118,7 @@ async def push(ctx: LibraryCtx) -> PushResult:
         entry_dict = json.loads(entry.model_dump_json())
         entry_dict.pop("signature", None)
         entry_dict["signature"] = _sign_entry(entry_dict, privkey)
-        remote_key = f"changes/{ctx.admin_peer_id}/{entry.timestamp_hlc}.json"
+        remote_key = f"changes/{ctx.peer_id}/{entry.timestamp_hlc}.json"
         try:
             with tempfile.NamedTemporaryFile(
                 suffix=".json", delete=False, mode="w", encoding="utf-8"
@@ -172,7 +170,7 @@ async def pull(ctx: LibraryCtx) -> PullResult:
 
     for key in remote_keys:
         parts = key.split("/")
-        if len(parts) >= 2 and parts[1] == ctx.admin_peer_id:
+        if len(parts) >= 2 and parts[1] == ctx.peer_id:
             continue
         try:
             with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
@@ -404,12 +402,12 @@ async def link_file(ctx: LibraryCtx, citekey: str, local_path: str) -> Result:
         except Exception as exc:
             return Result(ok=False, error=f"blob upload failed: {exc}")
 
-        ts = hlc_service.now(ctx.admin_peer_id)
+        ts = hlc_service.now(ctx.peer_id)
         meta = json.dumps(
             {
                 "citekey": citekey,
                 "filename": src.name,
-                "uploaded_by": ctx.admin_peer_id,
+                "uploaded_by": ctx.peer_id,
                 "timestamp_hlc": ts,
             },
             ensure_ascii=False,
@@ -419,7 +417,7 @@ async def link_file(ctx: LibraryCtx, citekey: str, local_path: str) -> Result:
         except Exception as exc:
             return Result(ok=False, error=f"meta upload failed: {exc}")
     else:
-        ts = hlc_service.now(ctx.admin_peer_id)
+        ts = hlc_service.now(ctx.peer_id)
 
     privkey = _load_privkey(ctx)
     entry_dict = {
@@ -429,8 +427,8 @@ async def link_file(ctx: LibraryCtx, citekey: str, local_path: str) -> Result:
         "citekey": citekey,
         "data": {},
         "blob_ref": blob_ref,
-        "peer_id": ctx.admin_peer_id,
-        "device_id": ctx.admin_device_id,
+        "peer_id": ctx.peer_id,
+        "device_id": ctx.device_id,
         "timestamp_hlc": ts,
         "signature": "",
     }
@@ -459,7 +457,7 @@ async def unlink_file(ctx: LibraryCtx, citekey: str) -> Result:
         return Result(ok=False, error=f"not found: {citekey}")
 
     data_dir = Path(ctx.data_dir)
-    ts = hlc_service.now(ctx.admin_peer_id)
+    ts = hlc_service.now(ctx.peer_id)
     privkey = _load_privkey(ctx)
 
     entry_dict = {
@@ -469,8 +467,8 @@ async def unlink_file(ctx: LibraryCtx, citekey: str) -> Result:
         "citekey": citekey,
         "data": {},
         "blob_ref": None,
-        "peer_id": ctx.admin_peer_id,
-        "device_id": ctx.admin_device_id,
+        "peer_id": ctx.peer_id,
+        "device_id": ctx.device_id,
         "timestamp_hlc": ts,
         "signature": "",
     }

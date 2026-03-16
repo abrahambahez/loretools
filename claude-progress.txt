@@ -221,3 +221,30 @@ decisions:
 broken:
   - tests/integration/test_staging_workflow.py — 4 pre-existing failures (semantic uid confidence gating)
 next: audit feature (feature_list.json id: audit)
+
+--- [2026-03-16] session 9 ---
+completed:
+  - feat 010 role-logic fully implemented and verified
+  - task-01: PeerSettings model; Settings.peer; LibraryCtx.admin_peer_id→peer_id, admin_device_id→device_id (defaults ""); DeviceIdentity.role default "peer"→"contributor"
+  - task-02: config.py — ValueError when sync present and peer absent
+  - task-03: __init__.py — _build_ctx() uses s.peer.peer_id/device_id; LibraryCtx gets peer_id/device_id from config; resolve_conflict/restore_reference renamed
+  - task-04: services/sync.py — all ctx.admin_peer_id→ctx.peer_id, ctx.admin_device_id→ctx.device_id (push, pull, link_file, unlink_file)
+  - task-05: services/peers.py — _load_admin_key→_load_caller_key; removed _admin_key_matches_record; added _check_admin_role (5-step sequence); peer_register/peer_add_device/peer_revoke_device/peer_revoke use _check_admin_role; role assignment "contributor" for non-self
+  - task-06: services/peers.py — peer_register_self() with empty-dir check
+  - task-07: __init__.py — peer_register_self sync wrapper; PeerSettings exported
+  - task-08: scripts/bootstrap_identity.py — rewritten with --role flag (admin calls peer_register_self; contributor prints public key)
+  - task-09: docs/remote-setup.md — section 3 simplified to bootstrap_identity --role admin; new section 7 "Adding a second researcher"; section 8 limitation removed; troubleshooting updated
+  - task-10: tests/unit/test_peers.py — fully rewritten: _make_ctx uses peer_id/device_id; all 5 _check_admin_role branches; peer_register_self on empty/nonempty/missing key; peer_register/add_device/revoke blocked when not admin; DeviceIdentity default role tests
+  - task-11: tests/integration/test_role_lifecycle.py — peer-A admin bootstrap, peer-B contributor, peer-A registers B, push entries to correct prefixes, peer-B cannot peer_register
+  - task-12: feature_list.json — role-logic entry added, passes: true
+  - task-13: 387 unit + 18 integration tests passing; ruff 28 errors all pre-existing
+  - Updated test_sync_api.py, test_sync_config.py, test_distributed_sync.py, test_blob_sync.py, test_blob_sync_service.py, test_sync_service.py to use new peer_id/device_id field names
+pending: none
+decisions:
+  - _check_admin_role checks the peer directory record for role=="admin" — no keypair matching
+  - peer_register_self only succeeds on empty peers_dir — bootstrap for first admin only
+  - Old "peer" role value fails _check_admin_role (role != "admin") — no migration needed
+  - sync block requires peer block in config — enforced in load_settings()
+broken:
+  - tests/integration/test_staging_workflow.py — 4 pre-existing failures (semantic uid confidence gating unchanged)
+next: audit feature (feature_list.json id: audit)

@@ -85,6 +85,7 @@ def test_ctx_uses_sync_adapter_with_sync_block(tmp_path, monkeypatch):
         "access_key": "a",
         "secret_key": "s",
     }
+    data["peer"] = {"peer_id": "peer-a", "device_id": "dev-1"}
 
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps(data))
@@ -94,3 +95,5 @@ def test_ctx_uses_sync_adapter_with_sync_block(tmp_path, monkeypatch):
     ctx = scholartools._build_ctx()
     assert ctx.sync_config is not None
     assert ctx.sync_config.bucket == "test"
+    assert ctx.peer_id == "peer-a"
+    assert ctx.device_id == "dev-1"

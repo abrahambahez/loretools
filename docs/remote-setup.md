@@ -16,9 +16,10 @@ This guide covers:
 4. [Fresh setup](#4-fresh-setup-new-library)
 5. [Migration from an existing library](#5-migration-from-an-existing-library)
 6. [Verify remote state](#6-verify-remote-state)
-7. [Adding a second device](#7-adding-a-second-device)
-8. [Limitations](#8-limitations)
-9. [Troubleshooting](#9-troubleshooting)
+7. [Adding a second researcher](#7-adding-a-second-researcher)
+8. [Adding a second device](#8-adding-a-second-device)
+9. [Limitations](#9-limitations)
+10. [Troubleshooting](#10-troubleshooting)
 
 ---
 
@@ -104,62 +105,29 @@ Notes:
 
 ## 3. identity bootstrap
 
-scholartools uses two distinct keypairs:
+Each researcher has one keypair at `~/.config/scholartools/keys/PEER_ID/DEVICE_ID.key`.
+The first researcher self-registers as admin; subsequent researchers generate a keypair
+and share their public key for the admin to register.
 
-| keypair | path | purpose |
-|---|---|---|
-| `_admin/_admin` | `~/.config/scholartools/keys/_admin/_admin.key` | signs all push entries and peer records |
-| `PEER_ID/DEVICE_ID` | `~/.config/scholartools/keys/PEER_ID/DEVICE_ID.key` | your identity in the peer directory |
+**Required before any push or link_file call.** Also add the `peer` block to
+`config.json` (the script prints it for you).
 
-**Both must be created before any push or link_file call.** The `_admin` keypair is the
-local signing authority. Your personal peer keypair is your identity registered in the
-shared peer directory so other devices/peers can verify your signatures during pull.
-
-### step 3a — initialize the admin signing keypair
-
-```python
-import scholartools as st
-
-admin = st.peer_init("_admin", "_admin")
-print(admin)
-# PeerInitResult(identity=PeerIdentity(peer_id='_admin', device_id='_admin', public_key='...'))
-```
-
-Key written to: `~/.config/scholartools/keys/_admin/_admin.key` (mode 0600).
-
-### step 3b — initialize your personal peer keypair
-
-```python
-result = st.peer_init("YOUR_PEER_ID", "YOUR_DEVICE_ID")
-print(result)
-# PeerInitResult(identity=PeerIdentity(peer_id='yourname', device_id='laptop', public_key='...'))
-```
-
-Pick stable, readable identifiers:
-- `peer_id`: your researcher handle (e.g. `"sabhz"`)
-- `device_id`: the machine (e.g. `"laptop"`, `"desktop"`)
-
-### step 3c — register your peer identity
-
-```python
-from scholartools import PeerIdentity
-
-identity = PeerIdentity(
-    peer_id="YOUR_PEER_ID",
-    device_id="YOUR_DEVICE_ID",
-    public_key=result.identity.public_key,
-)
-reg = st.peer_register(identity)
-print(reg)
-# PeerRegisterResult(peer_id='yourname')
-```
-
-This writes a signed peer record to `{library_dir}/peers/YOUR_PEER_ID`.
-
-### automated: `scripts/bootstrap_identity.py`
+### First researcher (admin)
 
 ```bash
-uv run python scripts/bootstrap_identity.py --peer-id sabhz --device-id laptop
+uv run python scripts/bootstrap_identity.py --peer-id sabhz --device-id laptop --role admin
+```
+
+This generates the keypair, registers the peer as admin in the local peer directory,
+and prints the `peer` block to add to `config.json`.
+
+Add the printed block to `~/.config/scholartools/config.json`:
+
+```json
+{
+  "peer": {"peer_id": "sabhz", "device_id": "laptop"},
+  "sync": { ... }
+}
 ```
 
 ---
@@ -271,7 +239,50 @@ print(f"blobs:     {len(blobs)}")
 
 ---
 
-## 7. adding a second device
+## 7. adding a second researcher
+
+On the **new researcher's machine**:
+
+1. Install scholartools and configure `config.json` with the same bucket credentials
+   and their own `library_dir`. Do **not** add a `peer` block yet.
+
+2. Generate a keypair:
+
+   ```bash
+   uv run python scripts/bootstrap_identity.py --peer-id alice --device-id laptop
+   ```
+
+   The script prints the public key. Share it with the admin.
+
+3. **Admin-side**: register the new researcher:
+
+   ```python
+   from scholartools import PeerIdentity
+   st.peer_register(PeerIdentity(
+       peer_id="alice",
+       device_id="laptop",
+       public_key="<public key from step 2>",
+   ))
+   st.push()
+   ```
+
+4. New researcher: add the `peer` block to their `config.json`:
+
+   ```json
+   {"peer": {"peer_id": "alice", "device_id": "laptop"}, "sync": { ... }}
+   ```
+
+5. Copy or pull the peer directory so verification works:
+
+   ```bash
+   scp -r admin-machine:{library_dir}/peers/ {new_library_dir}/peers/
+   ```
+
+   Or pull after the admin has pushed the updated peer directory.
+
+---
+
+## 8. adding a second device
 
 On the **new device**:
 
@@ -338,14 +349,7 @@ On the **new device**:
 
 ---
 
-## 8. limitations
-
-- **Multi-researcher sync (different `peer_id` per researcher) is not yet fully wired.**
-  The current `_build_ctx()` hardcodes the signing identity as `_admin/_admin` for all
-  peers. Two researchers pushing to the same bucket would collide under the same
-  `changes/_admin/` prefix and neither would pull the other's entries (pull skips own
-  `peer_id`). Multi-researcher support requires configuring `admin_peer_id` and
-  `admin_device_id` per researcher in `config.json` — tracked as a future improvement.
+## 9. limitations
 
 - **Large files (> 5 GB)**: boto3 single-part upload stalls. Academic PDFs (< 100 MB)
   are unaffected. Multipart support is deferred.
@@ -355,15 +359,17 @@ On the **new device**:
 
 ---
 
-## 9. troubleshooting
+## 10. troubleshooting
 
 | error | cause | fix |
 |---|---|---|
-| `admin keypair not found` | `_admin/_admin.key` missing | run `peer_init("_admin", "_admin")` first |
-| `local device keypair not found` (in push) | same as above | same fix |
+| `local device keypair not found` | keypair not yet generated | run `bootstrap_identity.py --peer-id … --device-id …` |
+| `caller peer not registered` | `peer` block set but `peer_register_self` not run | run `bootstrap_identity.py --role admin` |
+| `caller is not an admin` | trying to register/revoke peers without admin role | have the admin perform the operation |
+| `peer directory is not empty; use peer_register()` | `peer_register_self` called on non-empty peer directory | use `peer_register()` with an existing admin |
+| `config.json has a 'sync' block but no 'peer' block` | `sync` added but identity not configured | add `peer` block and run bootstrap |
 | `PushResult(errors=['sync not configured'])` | no `sync` block in config.json | add `sync` block with bucket + credentials |
 | `PeerInitResult(error='key already exists ...')` | key already initialized | safe to ignore; key is reused |
 | `ModuleNotFoundError: No module named 'boto3'` | boto3 not installed | `uv sync --extra sync` |
-| `PeerRegisterResult(error='admin keypair does not match ...')` | key file replaced after initial register | delete `{peers_dir}/_admin` and re-register |
 | S3 `NoCredentialsError` | wrong access_key / secret_key | verify IAM credentials in config.json |
 | S3 `NoSuchBucket` | bucket name typo or wrong region | verify bucket name in config.json |
