@@ -103,5 +103,11 @@
     "title": "Social annotation — structured, shareable annotations on reference objects",
     "spec": null,
     "passes": false
+  },
+  {
+    "id": "local-file-progressive-enhancement",
+    "title": "Local-first file ops — progressive enhancement stacking blob sync on local copy",
+    "spec": "specs/011-local-file-progressive-enhancement.md",
+    "passes": false
   }
 ]
