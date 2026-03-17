@@ -106,6 +106,56 @@ def test_partial_config_raises_with_message(tmp_path, monkeypatch):
         load_settings()
 
 
+def _base_config(library_dir: str) -> dict:
+    return {
+        "backend": "local",
+        "local": {"library_dir": library_dir},
+        "apis": {},
+        "llm": {},
+    }
+
+
+def test_sync_without_peer_raises(tmp_path, monkeypatch):
+    config_path = tmp_path / "config.json"
+    config = _base_config(str(tmp_path / "lib"))
+    config["sync"] = {"bucket": "b", "access_key": "a", "secret_key": "s"}
+    config_path.write_text(json.dumps(config))
+    monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
+    with pytest.raises(ValueError, match="peer"):
+        load_settings()
+
+
+def test_sync_with_peer_passes(tmp_path, monkeypatch):
+    config_path = tmp_path / "config.json"
+    config = _base_config(str(tmp_path / "lib"))
+    config["sync"] = {"bucket": "b", "access_key": "a", "secret_key": "s"}
+    config["peer"] = {"peer_id": "alice", "device_id": "laptop"}
+    config_path.write_text(json.dumps(config))
+    monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
+    s = load_settings()
+    assert s.peer is not None
+    assert s.peer.peer_id == "alice"
+
+
+def test_no_sync_no_peer_passes(tmp_path, monkeypatch):
+    config_path = tmp_path / "config.json"
+    config = _base_config(str(tmp_path / "lib"))
+    config_path.write_text(json.dumps(config))
+    monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
+    s = load_settings()
+    assert s.sync is None
+    assert s.peer is None
+
+
+def test_peer_settings_rejects_extra_keys(tmp_path, monkeypatch):
+    from pydantic import ValidationError
+
+    from scholartools.models import PeerSettings
+
+    with pytest.raises(ValidationError):
+        PeerSettings(peer_id="alice", device_id="laptop", extra_field="bad")
+
+
 def test_api_keys_not_in_settings(tmp_path, monkeypatch):
     config_path = tmp_path / "config.json"
     monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
