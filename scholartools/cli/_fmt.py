@@ -38,11 +38,11 @@ def output(result: Any, plain: bool) -> str:
         return json.dumps(envelope, default=str)
 
     data = _serialize(result)
+    if isinstance(data, dict):
+        data.pop("error", None)
     if plain:
         if isinstance(data, dict):
-            return "\n".join(
-                f"{k}={v}" for k, v in data.items() if k not in ("ok", "error")
-            )
+            return "\n".join(f"{k}={v}" for k, v in data.items() if k != "ok")
         return str(data)
     return json.dumps({"ok": ok, "data": data, "error": error}, default=str)
 
