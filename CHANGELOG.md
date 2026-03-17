@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.4] - 2026-03-16
+
+### Fixed
+- Strip redundant `error` field from CLI JSON `data` envelope
+
+### Changed
+- Updated README install instructions to use `uv sync` and `uv tool install`
+
 ## [0.8.1] - 2026-03-16
 
 ### Fixed

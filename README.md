@@ -7,7 +7,13 @@ Reference management library built for AI agents. Local-first, no GUI, no human 
 ```bash
 git clone https://github.com/abrahambahez/scholartools
 cd scholartools
-uv pip install -e .
+uv sync
+```
+
+To use `scht` without `uv run`, install as a tool:
+
+```bash
+uv tool install .
 ```
 
 ## config
