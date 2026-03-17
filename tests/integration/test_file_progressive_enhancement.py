@@ -106,7 +106,6 @@ def test_local_only_full_workflow(tmp_path):
 
     move_result = asyncio.run(move_file("jones2024", "jones2024_v2.pdf", ctx))
     assert move_result.error is None
-    new_path = Path(move_result.new_path)
 
     list_result = asyncio.run(list_files(ctx))
     assert list_result.total == 1
