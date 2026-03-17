@@ -37,6 +37,8 @@ Config is loaded from `~/.config/scholartools/config.json`. If the file doesn't 
 }
 ```
 
+When `sync` is configured, a `peer` block is also required (see [peer identity & distributed sync](#peer-identity--distributed-sync) below).
+
 `library_dir` controls where `library.json`, `files/`, and `staging/` are stored. All other paths are derived from it.
 
 Set `apis.email` to identify your requests to Crossref and OpenAlex (recommended — unlocks polite-pool rate limits).
@@ -103,7 +105,10 @@ import scholartools
 # initialise a local peer identity (generates Ed25519 keypair)
 scholartools.peer_init(peer_id="alice", device_id="laptop")
 
-# register another peer (requires admin keypair)
+# bootstrap admin on an empty peer directory (first-time setup)
+scholartools.peer_register_self()
+
+# register another peer (requires admin role)
 scholartools.peer_register(peer_id="bob", pubkey_hex="<hex>")
 
 # device lifecycle
@@ -112,10 +117,14 @@ scholartools.peer_revoke_device(peer_id="bob", device_id="old-tablet")
 scholartools.peer_revoke(peer_id="bob")   # revoke entire peer
 ```
 
-To enable sync, add a `sync` block to `config.json`:
+To enable sync, add `peer` and `sync` blocks to `config.json`:
 
 ```json
 {
+  "peer": {
+    "peer_id": "alice",
+    "device_id": "laptop"
+  },
   "sync": {
     "bucket": "my-library-sync",
     "access_key": "AKIAIOSFODNN7EXAMPLE",
@@ -125,7 +134,7 @@ To enable sync, add a `sync` block to `config.json`:
 }
 ```
 
-Omitting `endpoint` targets AWS S3. Without a `sync` block the library runs local-only and the functions below are no-ops.
+`peer` is required when `sync` is present. Omitting `endpoint` targets AWS S3. Without a `sync` block the library runs local-only and the functions below are no-ops.
 
 ```python
 # push local change log entries to remote backend

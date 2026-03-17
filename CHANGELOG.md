@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-03-16
+
+### Fixed
+- `link_file` local-only path now copies the file to `files_dir` and sets `file_record`; previously only `blob_ref` was computed, leaving local files unreachable
+- `unlink_file` now deletes from `files_dir` and clears `file_record` unconditionally; `blob_ref` cleanup remains sync-only
+- `get_file` falls back to `file_record.path` when `sync_config` is absent or `blob_ref` is not set
+
+## [0.7.0] - 2026-03-16
+
+### Added
+- `peer_register_self` — bootstraps admin identity on an empty peer directory without requiring an existing admin keypair
+- `PeerSettings` model exported from public API
+- `scripts/bootstrap_identity.py` — `--role admin` calls `peer_register_self`; `--role contributor` prints public key for out-of-band registration
+
+### Changed
+- `LibraryCtx.admin_peer_id` / `admin_device_id` renamed to `peer_id` / `device_id`; populated from `config.json` `peer` block
+- `config.json` now requires a `peer` block when `sync` is configured; `load_settings()` raises `ValueError` if absent
+- `DeviceIdentity.role` default changed from `"peer"` to `"contributor"`; `peer_register` assigns `"contributor"` to non-self entries
+- `peer_revoke_device`, `peer_revoke`, `peer_register`, `peer_add_device` now verify caller has `"admin"` role in peer directory
+
 ## [0.6.1] - 2026-03-14
 
 ### Fixed
@@ -115,7 +135,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PDF extraction via pdfplumber with Claude vision fallback
 - Local JSON backend
 
-[Unreleased]: https://github.com/abrahambahez/scholartools/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/abrahambahez/scholartools/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/abrahambahez/scholartools/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/abrahambahez/scholartools/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/abrahambahez/scholartools/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/abrahambahez/scholartools/compare/v0.5.2...v0.6.0
 [0.5.2]: https://github.com/abrahambahez/scholartools/compare/v0.5.1...v0.5.2
