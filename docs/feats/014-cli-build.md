@@ -17,6 +17,8 @@ Each GitHub release publishes three platform zip assets and two standalone insta
 - `scht-<version>-macos-arm64.zip`
 - `scht-<version>-linux-x86_64.zip`
 - `scht-<version>-windows-x86_64.zip`
+
+macOS x86_64 is not built — GitHub's `macos-12` (Intel) runner was removed and `macos-13` is available but deferred until a user requests it.
 - `install.sh` (macOS/Linux bootstrapper)
 - `install.ps1` (Windows bootstrapper)
 

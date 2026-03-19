@@ -33,7 +33,7 @@ Build and release a PyInstaller-based distribution pipeline that packages the `s
 
 ## acceptance criteria (EARS format)
 
-- when a version tag `v*` is pushed, the system must trigger a GitHub Actions matrix build across macOS arm64, Linux x86_64, and Windows x86_64
+- when a version tag `v*` is pushed, the system must trigger a GitHub Actions matrix build across macOS arm64, Linux x86_64, and Windows x86_64 (macOS x86_64 excluded — GitHub's macos-12 runner was removed; add back only if users request it)
 - when the GitHub Actions build completes, the system must publish exactly three `.zip` assets (`scht-<version>-macos-arm64.zip`, `scht-<version>-linux-x86_64.zip`, `scht-<version>-windows-x86_64.zip`) plus `install.sh` and `install.ps1` as separate release assets
 - when a researcher runs `install.sh` (macOS/Linux) or `install.ps1` (Windows), the system must download the correct platform zip, place the binary on PATH, and create an initial `~/.config/scholartools/config.json` via interactive prompts
 - when a researcher on macOS downloads and unzips `scht-<version>-macos-arm64.zip`, the system must contain a top-level `scht` binary executable
