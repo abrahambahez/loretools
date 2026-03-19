@@ -221,8 +221,8 @@ Download `scholartools.mcpb` from GitHub Releases and double-click it. Claude De
 To build the bundle from source:
 
 ```bash
-npm install -g @anthropic-ai/mcpb   # one-time
-mcpb pack                            # produces scholartools.mcpb
+npm install -g @anthropic-ai/mcpb          # one-time
+mcpb pack . dist/scholartools.mcpb         # produces dist/scholartools.mcpb
 ```
 
 ## dev

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-03-18
+
+### Added
+- MCP server (`scht-mcp`) — 7 tools exposing the full research workflow to Claude Desktop and any MCP-compatible client: `discover`, `fetch`, `ingest_file`, `staging`, `library`, `manage_reference`, `files`
+- `mcp>=1.0` optional dependency group; `scht-mcp` entry point registered in `pyproject.toml`
+- `.mcpb` bundle support — `manifest.json` and `.mcpbignore` for `mcpb pack . dist/scholartools.mcpb`
+- `docs/manuals/claude-desktop-setup.md` — user-facing install guide and opinionated workflow manual covering all five research phases
+
 ## [0.8.4] - 2026-03-16
 
 ### Fixed

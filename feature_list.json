@@ -114,6 +114,14 @@
     "id": "cli",
     "title": "CLI for scholartools public API — scht command-line tool",
     "spec": "specs/012-cli.md",
-    "passes": false
+    "passes": true,
+    "notes": "480 tests passing. Full scht CLI covering refs, files, staging, discover, fetch, extract, sync, peers subcommand groups. All commands output JSON envelopes. scht entry point registered."
+  },
+  {
+    "id": "mcp-server",
+    "title": "MCP server — 7-tool Claude Desktop integration via scht-mcp and .mcpb bundle",
+    "spec": "specs/014-mcp-server.md",
+    "passes": true,
+    "notes": "34 unit + 17 integration tests passing. FastMCP stdio server with trigger-condition descriptions. discover, fetch, ingest_file, staging, library, manage_reference, files tools. Path traversal rejection at MCP boundary. manifest.json + .mcpbignore for mcpb pack. User workflow manual at docs/manuals/claude-desktop-setup.md."
   }
 ]

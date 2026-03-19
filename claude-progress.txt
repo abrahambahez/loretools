@@ -270,3 +270,26 @@ decisions:
 broken:
   - tests/integration/test_staging_workflow.py — 4 pre-existing failures (semantic uid confidence gating unchanged)
 next: audit feature (feature_list.json id: audit)
+
+--- [2026-03-18] session N ---
+completed:
+  - feat 013/spec 014: MCP server — full implementation across 8 tasks
+      task-01: scholartools/mcp_server.py scaffold, FastMCP instance, scht-mcp entry point
+      task-02: discover, fetch, ingest_file tools with path traversal guard
+      task-03: staging tool (list/delete/merge routing)
+      task-04: library tool (list/filter/get routing)
+      task-05: manage_reference tool (add/update/delete/rename routing)
+      task-06: files tool (link/unlink/move/list routing + path traversal guard)
+      task-07: docs/manuals/claude-desktop-setup.md — user workflow manual (5 phases)
+      task-08: integration tests (17 @pytest.mark.integration) + unit tests (34 total)
+  - manifest.json entry point fixed (src/scholartools/mcp.py → scholartools/mcp_server.py via scht-mcp)
+  - .mcpbignore added — dist/scholartools.mcpb builds at 114KB (down from 117MB)
+  - README, CHANGELOG, feature_list.json, pyproject.toml bumped to v0.9.0
+  - CLI feature (was passes: false) flipped to passes: true
+pending: none — all spec 014 tasks complete
+decisions:
+  - mcpb bundle uses uv run --project ${__dirname} scht-mcp; relies on uv at install site
+  - tool descriptions use trigger-condition format per feat doc
+  - all Result objects serialized via .model_dump() — no manual field reconstruction
+broken: 8 pre-existing S3/boto3 unit test failures (boto3 not installed in dev env, unrelated to MCP)
+next: local-file-progressive-enhancement (passes: false, spec 011) or audit feature
