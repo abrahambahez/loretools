@@ -1,0 +1,68 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            platform: macos-arm64
+          - os: macos-13
+            platform: macos-x86_64
+          - os: ubuntu-latest
+            platform: linux-x86_64
+          - os: windows-latest
+            platform: windows-x86_64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Sync dependencies
+        run: uv sync --extra sync
+
+      - name: Extract version (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          VERSION=$(grep '^version' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+          echo "SCHT_VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Extract version (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path pyproject.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
+          echo "SCHT_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Install PyInstaller
+        run: uv run pip install pyinstaller
+
+      - name: Build with PyInstaller
+        run: uv run pyinstaller .build/pyinstaller.spec --distpath dist --workpath .build/work --noconfirm
+
+      - name: Zip bundle (Unix)
+        if: runner.os != 'Windows'
+        run: cd dist && zip -r ../scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip scht/
+
+      - name: Zip bundle (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path dist\scht\* -DestinationPath scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip
