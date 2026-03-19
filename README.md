@@ -214,17 +214,6 @@ scholartools.restore_reference("vaswani2017")   # undo a remote delete
 
 Crossref · Semantic Scholar · arXiv · OpenAlex · DOAJ · Google Books — queried concurrently, results normalized to CSL-JSON. All sources retry up to 3 times with a 5s delay on rate limits or server errors.
 
-## Claude Desktop (MCPB)
-
-Download `scholartools.mcpb` from GitHub Releases and double-click it. Claude Desktop handles Python and dependencies via uv automatically — no terminal required.
-
-To build the bundle from source:
-
-```bash
-npm install -g @anthropic-ai/mcpb          # one-time
-mcpb pack . dist/scholartools.mcpb         # produces dist/scholartools.mcpb
-```
-
 ## dev
 
 ```bash

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- MCP server (`scht-mcp`), `mcp` optional dependency group, `.mcpb` bundle artifacts, and `docs/manuals/claude-desktop-setup.md` — MCP integration produced a brittle test surface with no viable researcher workflow; the CLI (`scht`) remains the primary interface
+
 ## [0.9.1] - 2026-03-19
 
 ### Changed
