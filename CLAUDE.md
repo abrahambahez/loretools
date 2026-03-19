@@ -18,6 +18,10 @@
 - lint: uv run ruff check .
 - lint-fix: uv run ruff check --fix .
 
+## CI/CD
+- the build-release workflow triggers ONLY on `v*` tags — pushing to main does NOT trigger it
+- to release: `git tag vX.Y.Z[-rcN] && git push origin vX.Y.Z[-rcN]`
+
 ## workflow
 This project uses RPI-SDD workflow.
 
