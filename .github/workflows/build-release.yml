@@ -46,7 +46,7 @@ jobs:
           echo "SCHT_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Install PyInstaller
-        run: uv run pip install pyinstaller
+        run: uv pip install pyinstaller
 
       - name: Build with PyInstaller
         run: uv run pyinstaller .build/pyinstaller.spec --distpath dist --workpath .build/work --noconfirm
