@@ -107,5 +107,34 @@ def manage_reference(
         return {"error": f"unknown action: {action}"}
 
 
+@mcp.tool()
+def files(
+    action: str,
+    citekey: str | None = None,
+    file_path: str | None = None,
+    dest_name: str | None = None,
+    page: int = 1,
+) -> dict:
+    """Use when attaching, detaching, moving, or listing PDF files for committed library records. Call with action='link' and citekey/file_path, action='unlink' with citekey, action='move' with citekey/dest_name, or action='list' to see all archived files."""
+    if file_path and ".." in file_path:
+        return {"error": "path traversal not allowed"}
+    if action == "link":
+        if not citekey or not file_path:
+            return {"error": "citekey and file_path required for link"}
+        return st.link_file(citekey, file_path).model_dump()
+    elif action == "unlink":
+        if not citekey:
+            return {"error": "citekey required for unlink"}
+        return st.unlink_file(citekey).model_dump()
+    elif action == "move":
+        if not citekey or not dest_name:
+            return {"error": "citekey and dest_name required for move"}
+        return st.move_file(citekey, dest_name).model_dump()
+    elif action == "list":
+        return st.list_files(page=page).model_dump()
+    else:
+        return {"error": f"unknown action: {action}"}
+
+
 def main():
     mcp.run()

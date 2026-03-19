@@ -142,6 +142,41 @@ def test_manage_reference_delete():
     assert isinstance(result, dict)
 
 
+def test_files_unknown_action():
+    result = mcp_server.files("unknown")
+    assert result == {"error": "unknown action: unknown"}
+
+
+def test_files_link_path_traversal():
+    result = mcp_server.files(
+        "link", citekey="smith2020", file_path="/some/../path/file.pdf"
+    )
+    assert result == {"error": "path traversal not allowed"}
+
+
+def test_files_link_missing_params():
+    result = mcp_server.files("link", citekey="smith2020")
+    assert result == {"error": "citekey and file_path required for link"}
+    result = mcp_server.files("link", file_path="/some/file.pdf")
+    assert result == {"error": "citekey and file_path required for link"}
+
+
+def test_files_list():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"items": [], "total": 0}
+    with patch("scholartools.mcp_server.st.list_files", return_value=mock_result):
+        result = mcp_server.files("list")
+    assert isinstance(result, dict)
+
+
+def test_files_unlink():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"citekey": "smith2020", "error": None}
+    with patch("scholartools.mcp_server.st.unlink_file", return_value=mock_result):
+        result = mcp_server.files("unlink", citekey="smith2020")
+    assert isinstance(result, dict)
+
+
 def test_tool_descriptions_present():
     tools = {t.name: t for t in mcp_server.mcp._tool_manager.list_tools()}
     assert "discover" in tools
