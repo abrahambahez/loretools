@@ -27,7 +27,7 @@ Replace the current `.build/install.sh` and `.build/install.ps1` with two canoni
 
 ## tasks
 
-- [ ] task-01: write `install.sh` at repo root (blocks: none)
+- [x] task-01: write `install.sh` at repo root (blocks: none)
   - detect OS via `uname -s` (Darwin vs Linux) and arch via `uname -m` (arm64/aarch64 vs x86_64)
   - map to correct asset name: `scht-<version>-macos-arm64.zip` or `scht-<version>-linux-x86_64.zip`
   - fetch latest version from GitHub API (`/repos/abrahambahez/scholartools/releases/latest`)
@@ -38,7 +38,7 @@ Replace the current `.build/install.sh` and `.build/install.ps1` with two canoni
   - support `--uninstall`: remove binary, print a warning that config contains library settings, then prompt for explicit confirmation before deleting `~/.config/scholartools/`; abort config deletion if user declines
   - delete `.build/install.sh`
 
-- [ ] task-02: write `install.ps1` at repo root (blocks: none)
+- [x] task-02: write `install.ps1` at repo root (blocks: none)
   - fetch latest version from GitHub API
   - download `scht-<version>-windows-x86_64.zip` to temp dir
   - extract to `%LOCALAPPDATA%\Programs\scht\`
@@ -48,12 +48,12 @@ Replace the current `.build/install.sh` and `.build/install.ps1` with two canoni
   - support `-Uninstall` switch: remove binary dir, print a warning that config contains library settings, then prompt for explicit confirmation before deleting `%USERPROFILE%\.config\scholartools\`; abort config deletion if user declines
   - delete `.build/install.ps1`
 
-- [ ] task-03: update README (blocks: task-01, task-02)
+- [x] task-03: update README (blocks: task-01, task-02)
   - replace current `## install` section with the two one-liner commands as primary method
   - keep `## dev` section for contributors (uv sync approach stays there, not in install)
   - add brief note that re-running the script updates the binary
 
-- [ ] task-04: smoke test (blocks: task-01, task-02, task-03)
+- [x] task-04: smoke test (blocks: task-01, task-02, task-03)
   - run `install.sh` locally (Linux or macOS) against a real release tag
   - verify `scht --version` and `scht refs list` work in a new shell
   - verify re-run detects existing install and updates without config prompt
