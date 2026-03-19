@@ -46,5 +46,36 @@ def staging(
         return {"error": f"unknown action: {action}"}
 
 
+@mcp.tool()
+def library(
+    action: str,
+    query: str | None = None,
+    author: str | None = None,
+    year: int | None = None,
+    ref_type: str | None = None,
+    has_file: bool | None = None,
+    citekey: str | None = None,
+    page: int = 1,
+) -> dict:
+    """Use when querying the committed library. Read-only — use manage_reference for writes. Call with action='list' for all refs, action='filter' with optional query/author/year/ref_type/has_file to narrow results, or action='get' with a citekey to fetch a single record."""
+    if action == "list":
+        return st.list_references(page=page).model_dump()
+    elif action == "filter":
+        return st.filter_references(
+            query=query,
+            author=author,
+            year=year,
+            ref_type=ref_type,
+            has_file=has_file,
+            page=page,
+        ).model_dump()
+    elif action == "get":
+        if not citekey:
+            return {"error": "citekey required for get"}
+        return st.get_reference(citekey).model_dump()
+    else:
+        return {"error": f"unknown action: {action}"}
+
+
 def main():
     mcp.run()

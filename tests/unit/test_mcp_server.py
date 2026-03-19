@@ -68,6 +68,49 @@ def test_staging_merge():
     assert isinstance(result, dict)
 
 
+def test_library_unknown_action():
+    result = mcp_server.library("unknown")
+    assert result == {"error": "unknown action: unknown"}
+
+
+def test_library_get_missing_citekey():
+    result = mcp_server.library("get")
+    assert result == {"error": "citekey required for get"}
+
+
+def test_library_list():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"items": [], "total": 0}
+    with patch("scholartools.mcp_server.st.list_references", return_value=mock_result):
+        result = mcp_server.library("list")
+    assert isinstance(result, dict)
+
+
+def test_library_filter():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"items": [], "total": 0}
+    with patch(
+        "scholartools.mcp_server.st.filter_references", return_value=mock_result
+    ):
+        result = mcp_server.library(
+            "filter",
+            query="test",
+            author="Smith",
+            year=2020,
+            ref_type="article",
+            has_file=True,
+        )
+    assert isinstance(result, dict)
+
+
+def test_library_get():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"reference": None, "error": None}
+    with patch("scholartools.mcp_server.st.get_reference", return_value=mock_result):
+        result = mcp_server.library("get", citekey="smith2020")
+    assert isinstance(result, dict)
+
+
 def test_tool_descriptions_present():
     tools = {t.name: t for t in mcp_server.mcp._tool_manager.list_tools()}
     assert "discover" in tools
