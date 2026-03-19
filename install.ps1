@@ -31,20 +31,21 @@ Write-Host "Fetching latest scholartools release..."
 $release = Invoke-RestMethod "https://api.github.com/repos/$Repo/releases/latest"
 $version = $release.tag_name
 if (-not $version) { Write-Error "Could not determine latest release."; exit 1 }
+$asset = $release.assets | Where-Object { $_.name -like "*windows*" } | Select-Object -First 1
+if (-not $asset) { Write-Error "Could not find Windows release asset."; exit 1 }
 Write-Host "Installing scht $version"
 
-$versionNum = $version.TrimStart("v")
-$filename   = "scht-$versionNum-windows-x86_64.zip"
-$url        = "https://github.com/$Repo/releases/download/$version/$filename"
-$tmp        = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
+$filename = $asset.name
+$url      = $asset.browser_download_url
+$tmp      = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
 New-Item -ItemType Directory -Path $tmp | Out-Null
 
 Write-Host "Downloading $filename..."
 Invoke-WebRequest -Uri $url -OutFile "$tmp\$filename"
 Expand-Archive -Path "$tmp\$filename" -DestinationPath $tmp
 
-New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
-Copy-Item "$tmp\scht\scht.exe" "$BinDir\scht.exe" -Force
+if (Test-Path $BinDir) { Remove-Item -Recurse -Force $BinDir }
+Copy-Item "$tmp\scht" $BinDir -Recurse
 Remove-Item -Recurse -Force $tmp
 
 $currentPath = [Environment]::GetEnvironmentVariable("Path", $pathScope)

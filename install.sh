@@ -2,6 +2,7 @@
 set -e
 
 REPO="abrahambahez/scholartools"
+LIB_DIR="$HOME/.local/lib/scholartools"
 BIN_DIR="$HOME/.local/bin"
 BIN="$BIN_DIR/scht"
 CONFIG_DIR="$HOME/.config/scholartools"
@@ -103,11 +104,15 @@ EOF
 }
 
 uninstall() {
-    if [ -f "$BIN" ]; then
+    if [ -L "$BIN" ] || [ -f "$BIN" ]; then
         rm "$BIN"
         echo "Removed $BIN"
     else
         echo "scht binary not found at $BIN — nothing to remove"
+    fi
+    if [ -d "$LIB_DIR" ]; then
+        rm -rf "$LIB_DIR"
+        echo "Removed $LIB_DIR"
     fi
 
     if [ -d "$CONFIG_DIR" ]; then
@@ -130,18 +135,17 @@ fi
 PLATFORM=$(detect_platform)
 
 echo "Fetching latest scholartools release..."
-VERSION=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
-    | grep '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest")
+VERSION=$(echo "$RELEASE_JSON" | grep '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+URL=$(echo "$RELEASE_JSON" | grep "browser_download_url" | grep "$PLATFORM" | sed 's/.*"browser_download_url": *"\([^"]*\)".*/\1/')
 
-if [ -z "$VERSION" ]; then
-    echo "error: could not determine latest release" >&2
+if [ -z "$VERSION" ] || [ -z "$URL" ]; then
+    echo "error: could not find release asset for $PLATFORM" >&2
     exit 1
 fi
 echo "Installing scht $VERSION"
 
-VERSION_NUM="${VERSION#v}"
-FILENAME="scht-${VERSION_NUM}-${PLATFORM}.zip"
-URL="https://github.com/$REPO/releases/download/$VERSION/$FILENAME"
+FILENAME=$(basename "$URL")
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
@@ -153,9 +157,11 @@ case "$PLATFORM" in
     macos-*) xattr -dr com.apple.quarantine "$TMP/scht" 2>/dev/null || true ;;
 esac
 
-mkdir -p "$BIN_DIR"
-cp "$TMP/scht/scht" "$BIN"
-chmod +x "$BIN"
+mkdir -p "$LIB_DIR" "$BIN_DIR"
+rm -rf "$LIB_DIR"
+cp -r "$TMP/scht" "$LIB_DIR"
+ln -sf "$LIB_DIR/scht" "$BIN"
+chmod +x "$LIB_DIR/scht"
 
 ensure_path
 
