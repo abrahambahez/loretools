@@ -121,7 +121,7 @@
     "id": "mcp-server",
     "title": "MCP server — 7-tool Claude Desktop integration via scht-mcp and .mcpb bundle",
     "spec": "specs/014-mcp-server.md",
-    "passes": true,
-    "notes": "34 unit + 17 integration tests passing. FastMCP stdio server with trigger-condition descriptions. discover, fetch, ingest_file, staging, library, manage_reference, files tools. Path traversal rejection at MCP boundary. manifest.json + .mcpbignore for mcpb pack. User workflow manual at docs/manuals/claude-desktop-setup.md."
+    "passes": false,
+    "notes": "MCP support removed in v0.10.0. See specs/015-remove-mcp.md."
   }
 ]

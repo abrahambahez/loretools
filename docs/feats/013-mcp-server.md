@@ -1,7 +1,9 @@
 # feat 013: MCP server
 
-version: 0.1
-status: draft
+version: 0.2
+status: deprecated
+
+> **Deprecated (2026-03-19):** MCP support is being removed. The test surface was too brittle for researchers and the integration added maintenance cost without clear user benefit. MCP-based agent access will be reconsidered in a future iteration with a cleaner integration model. See specs/015-remove-mcp.md.
 
 ## what this is
 
