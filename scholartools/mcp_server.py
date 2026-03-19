@@ -77,5 +77,35 @@ def library(
         return {"error": f"unknown action: {action}"}
 
 
+@mcp.tool()
+def manage_reference(
+    action: str,
+    ref: dict | None = None,
+    citekey: str | None = None,
+    fields: dict | None = None,
+    old_key: str | None = None,
+    new_key: str | None = None,
+) -> dict:
+    """Use when mutating committed library records. Separate from library (read-only). Call with action='add' and ref dict to add a new reference, action='update' with citekey and fields dict for partial updates, action='delete' with citekey, or action='rename' with old_key and new_key."""
+    if action == "add":
+        if ref is None:
+            return {"error": "ref required for add"}
+        return st.add_reference(ref).model_dump()
+    elif action == "update":
+        if not citekey:
+            return {"error": "citekey required for update"}
+        return st.update_reference(citekey, fields or {}).model_dump()
+    elif action == "delete":
+        if not citekey:
+            return {"error": "citekey required for delete"}
+        return st.delete_reference(citekey).model_dump()
+    elif action == "rename":
+        if not old_key or not new_key:
+            return {"error": "old_key and new_key required for rename"}
+        return st.rename_reference(old_key, new_key).model_dump()
+    else:
+        return {"error": f"unknown action: {action}"}
+
+
 def main():
     mcp.run()

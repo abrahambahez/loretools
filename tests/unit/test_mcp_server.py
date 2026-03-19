@@ -111,6 +111,37 @@ def test_library_get():
     assert isinstance(result, dict)
 
 
+def test_manage_reference_unknown_action():
+    result = mcp_server.manage_reference("unknown")
+    assert result == {"error": "unknown action: unknown"}
+
+
+def test_manage_reference_add_missing_ref():
+    result = mcp_server.manage_reference("add")
+    assert result == {"error": "ref required for add"}
+
+
+def test_manage_reference_update_missing_citekey():
+    result = mcp_server.manage_reference("update")
+    assert result == {"error": "citekey required for update"}
+
+
+def test_manage_reference_add():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"citekey": "smith2020", "error": None}
+    with patch("scholartools.mcp_server.st.add_reference", return_value=mock_result):
+        result = mcp_server.manage_reference("add", ref={"title": "Test"})
+    assert isinstance(result, dict)
+
+
+def test_manage_reference_delete():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"citekey": "smith2020", "error": None}
+    with patch("scholartools.mcp_server.st.delete_reference", return_value=mock_result):
+        result = mcp_server.manage_reference("delete", citekey="smith2020")
+    assert isinstance(result, dict)
+
+
 def test_tool_descriptions_present():
     tools = {t.name: t for t in mcp_server.mcp._tool_manager.list_tools()}
     assert "discover" in tools
