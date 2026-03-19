@@ -177,6 +177,86 @@ def test_files_unlink():
     assert isinstance(result, dict)
 
 
+def test_staging_delete():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"deleted": True, "error": None}
+    with patch("scholartools.mcp_server.st.delete_staged", return_value=mock_result):
+        result = mcp_server.staging("delete", citekey="smith2020")
+    assert isinstance(result, dict)
+
+
+def test_library_filter_with_page():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"items": [], "total": 0}
+    with patch(
+        "scholartools.mcp_server.st.filter_references", return_value=mock_result
+    ):
+        result = mcp_server.library(
+            "filter",
+            query="test",
+            author="Smith",
+            year=2020,
+            ref_type="article",
+            has_file=True,
+            page=2,
+        )
+    assert isinstance(result, dict)
+
+
+def test_manage_reference_update():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"citekey": "smith2020", "error": None}
+    with patch("scholartools.mcp_server.st.update_reference", return_value=mock_result):
+        result = mcp_server.manage_reference(
+            "update", citekey="smith2020", fields={"title": "New Title"}
+        )
+    assert isinstance(result, dict)
+
+
+def test_manage_reference_rename():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {
+        "old_key": "smith2020",
+        "new_key": "smith2021",
+        "error": None,
+    }
+    with patch("scholartools.mcp_server.st.rename_reference", return_value=mock_result):
+        result = mcp_server.manage_reference(
+            "rename", old_key="smith2020", new_key="smith2021"
+        )
+    assert isinstance(result, dict)
+
+
+def test_files_link():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"citekey": "smith2020", "error": None}
+    with patch("scholartools.mcp_server.st.link_file", return_value=mock_result):
+        result = mcp_server.files(
+            "link", citekey="smith2020", file_path="/some/file.pdf"
+        )
+    assert isinstance(result, dict)
+
+
+def test_files_move():
+    mock_result = MagicMock()
+    mock_result.model_dump.return_value = {"new_path": "/files/new.pdf", "error": None}
+    with patch("scholartools.mcp_server.st.move_file", return_value=mock_result):
+        result = mcp_server.files("move", citekey="smith2020", dest_name="new.pdf")
+    assert isinstance(result, dict)
+
+
+def test_files_unlink_missing_citekey():
+    result = mcp_server.files("unlink")
+    assert result == {"error": "citekey required for unlink"}
+
+
+def test_files_move_missing_params():
+    result = mcp_server.files("move", citekey="smith2020")
+    assert result == {"error": "citekey and dest_name required for move"}
+    result = mcp_server.files("move", dest_name="new.pdf")
+    assert result == {"error": "citekey and dest_name required for move"}
+
+
 def test_tool_descriptions_present():
     tools = {t.name: t for t in mcp_server.mcp._tool_manager.list_tools()}
     assert "discover" in tools
