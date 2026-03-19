@@ -1,3 +1,5 @@
+param([switch]$Uninstall)
+
 $ErrorActionPreference = "Stop"
 
 $Repo    = "abrahambahez/scholartools"
@@ -5,14 +7,32 @@ $BinDir  = "$env:LOCALAPPDATA\Programs\scht"
 $CfgDir  = "$env:USERPROFILE\.config\scholartools"
 $CfgFile = "$CfgDir\config.json"
 
-# ── fetch latest release ───────────────────────────────────────────────────────
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$pathScope = if ($isAdmin) { "Machine" } else { "User" }
+
+if ($Uninstall) {
+    if (Test-Path $BinDir) {
+        Remove-Item -Recurse -Force $BinDir
+        Write-Host "Removed $BinDir"
+    }
+    Write-Host ""
+    Write-Host "WARNING: $CfgDir contains your library settings (paths, API keys, sources)."
+    $confirm = Read-Host "Delete config directory? This cannot be undone. Type Y to confirm"
+    if ($confirm -eq "Y") {
+        Remove-Item -Recurse -Force $CfgDir
+        Write-Host "Removed $CfgDir"
+    } else {
+        Write-Host "Config directory left intact."
+    }
+    exit 0
+}
+
 Write-Host "Fetching latest scholartools release..."
 $release = Invoke-RestMethod "https://api.github.com/repos/$Repo/releases/latest"
 $version = $release.tag_name
 if (-not $version) { Write-Error "Could not determine latest release."; exit 1 }
 Write-Host "Installing scht $version"
 
-# ── download & extract ────────────────────────────────────────────────────────
 $versionNum = $version.TrimStart("v")
 $filename   = "scht-$versionNum-windows-x86_64.zip"
 $url        = "https://github.com/$Repo/releases/download/$version/$filename"
@@ -27,17 +47,15 @@ New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
 Copy-Item "$tmp\scht\scht.exe" "$BinDir\scht.exe" -Force
 Remove-Item -Recurse -Force $tmp
 
-# ── ensure PATH ───────────────────────────────────────────────────────────────
-$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
-if ($userPath -notlike "*$BinDir*") {
-    [Environment]::SetEnvironmentVariable("Path", "$userPath;$BinDir", "User")
-    Write-Host "Added $BinDir to your user PATH (restart your terminal to apply)."
+$currentPath = [Environment]::GetEnvironmentVariable("Path", $pathScope)
+if ($currentPath -notlike "*$BinDir*") {
+    [Environment]::SetEnvironmentVariable("Path", "$currentPath;$BinDir", $pathScope)
+    Write-Host "Added $BinDir to $pathScope PATH (restart your terminal to apply)."
 }
 
 Write-Host ""
 Write-Host "scht $version installed to $BinDir\scht.exe"
 
-# ── config setup ──────────────────────────────────────────────────────────────
 if (Test-Path $CfgFile) {
     Write-Host ""
     Write-Host "Config already exists at $CfgFile — skipping setup."
@@ -48,10 +66,8 @@ Write-Host ""
 Write-Host "── Initial setup ────────────────────────────────────────────────────────"
 Write-Host ""
 
-# email
 $email = Read-Host "Scholar email (used for polite API access, e.g. you@uni.edu)"
 
-# library path
 Write-Host ""
 Write-Host "Where should your library live?"
 Write-Host "  1) $env:LOCALAPPDATA\scholartools  (default)"
@@ -65,7 +81,6 @@ $libraryDir = switch ($choice) {
 }
 Write-Host "Library: $libraryDir"
 
-# sources
 Write-Host ""
 Write-Host "Enable search sources (press Enter to keep, 'n' to disable):"
 $allSources = @("crossref","semantic_scholar","arxiv","openalex","doaj","google_books")
@@ -76,10 +91,8 @@ foreach ($src in $allSources) {
     $sourcesJson += "{`"name`":`"$src`",`"enabled`":$enabled}"
 }
 
-# ── write config ──────────────────────────────────────────────────────────────
 New-Item -ItemType Directory -Force -Path $CfgDir | Out-Null
 
-# Normalize Windows backslashes to forward slashes for JSON
 $libraryDirJson = $libraryDir.Replace("\", "/")
 
 @"
