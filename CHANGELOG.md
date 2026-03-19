@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-03-19
+
+### Changed
+- Replaced `boto3`/`botocore` with `minio>=7.0.0` in the `sync` optional dependency group — reduces sync extra weight from ~15 MB to ~500 KB (ADR-005)
+- S3 adapter (`adapters/s3_sync.py`) rewritten to use MinIO SDK; all 6 operations mapped to direct equivalents
+
+### Fixed
+- 8 unit test failures that occurred when `boto3` was not installed are now resolved
+
 ## [0.9.0] - 2026-03-18
 
 ### Added
