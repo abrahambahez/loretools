@@ -18,6 +18,16 @@ irm https://raw.githubusercontent.com/abrahambahez/scholartools/main/install.ps1
 
 Re-running the script updates the binary in place.
 
+To uninstall:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/abrahambahez/scholartools/main/install.sh) --uninstall
+```
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/abrahambahez/scholartools/main/install.ps1))) -Uninstall
+```
+
 ## config
 
 Config is loaded from `~/.config/scholartools/config.json`. If the file doesn't exist it is created automatically with defaults.
