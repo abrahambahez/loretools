@@ -21,7 +21,7 @@
   {
     "id": "list-pagination",
     "title": "List pagination — paginated, projected summary for all list endpoints",
-    "spec": "specs/003-list-pagination.md",
+    "spec": "specs/016-list-pagination.md",
     "passes": true,
     "notes": "193 tests passing. ReferenceRow/FileRow projection, 10-record pages, citekey sort, merge file rename fix included."
   },
@@ -56,7 +56,7 @@
   {
     "id": "distributed-sync-phase1",
     "title": "Distributed sync phase 1 — append-only change log, push/pull, conflict resolution, S3-compatible backend",
-    "spec": "specs/008-distributed-sync-phase1.md",
+    "spec": "specs/017-distributed-sync-phase1.md",
     "passes": true,
     "notes": "328 unit tests + 5 integration tests passing. HLC timestamps (services/hlc.py), ChangeLogEntry/ConflictRecord/PushResult/PullResult/SyncConfig models, S3 adapter (boto3 optional import), conflicts_store adapter, sync service (push/pull/create_snapshot), SyncCompositeAdapter (change log on every write), Settings.sync wiring, 6 public API functions (push/pull/create_snapshot/list_conflicts/resolve_conflict/restore_reference). _field_timestamps on Reference for per-field LWW tracking."
   },
