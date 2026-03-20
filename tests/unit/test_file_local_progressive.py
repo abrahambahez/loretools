@@ -45,58 +45,6 @@ def make_sync_config():
     )
 
 
-def test_link_file_local_only(tmp_path):
-    from scholartools.services.sync import link_file
-
-    src = tmp_path / "paper.pdf"
-    src.write_bytes(b"pdf data")
-    ctx, records, files_dir = make_ctx(
-        tmp_path, records=[{"id": "smith2020", "type": "article"}]
-    )
-
-    result = asyncio.run(link_file(ctx, "smith2020", str(src)))
-
-    assert result.ok
-    assert records[0].get("_file") is not None
-    assert records[0]["_file"]["size_bytes"] == len(b"pdf data")
-    assert records[0]["_file"]["mime_type"] == "application/pdf"
-    assert (files_dir / "smith2020.pdf").exists()
-    assert records[0].get("blob_ref") is None
-    assert "blob_ref" not in records[0].get("_field_timestamps", {})
-    assert not (tmp_path / "change_log").exists()
-
-
-def test_unlink_file_local_only(tmp_path):
-    from scholartools.services.sync import unlink_file
-
-    files_dir = tmp_path / "files"
-    files_dir.mkdir()
-    (files_dir / "smith2020.pdf").write_bytes(b"pdf data")
-
-    ctx, records, _ = make_ctx(
-        tmp_path,
-        records=[
-            {
-                "id": "smith2020",
-                "type": "article",
-                "_file": {
-                    "path": str(files_dir / "smith2020.pdf"),
-                    "mime_type": "application/pdf",
-                    "size_bytes": 8,
-                    "added_at": "2026-01-01T00:00:00+00:00",
-                },
-            }
-        ],
-    )
-
-    result = asyncio.run(unlink_file(ctx, "smith2020"))
-
-    assert result.ok
-    assert records[0].get("_file") is None
-    assert not (files_dir / "smith2020.pdf").exists()
-    assert not (tmp_path / "change_log").exists()
-
-
 def test_get_file_local_only(tmp_path):
     from scholartools.services.sync import get_file
 

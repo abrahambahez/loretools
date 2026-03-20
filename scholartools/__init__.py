@@ -53,9 +53,6 @@ from scholartools.models import (
     FileRow as FileRow,
 )
 from scholartools.models import (
-    LinkResult as LinkResult,
-)
-from scholartools.models import (
     PeerRecord as PeerRecord,
 )
 from scholartools.models import (
@@ -65,10 +62,10 @@ from scholartools.models import (
     ReferenceRow as ReferenceRow,
 )
 from scholartools.models import (
-    SyncConfig as SyncConfig,
+    ReindexResult as ReindexResult,
 )
 from scholartools.models import (
-    UnlinkResult as UnlinkResult,
+    SyncConfig as SyncConfig,
 )
 from scholartools.models import (
     VerifyEntryResult as VerifyEntryResult,
@@ -246,12 +243,24 @@ def extract_from_file(file_path: str) -> ExtractResult:
     return _run(extract.extract_from_file(file_path, _get_ctx()))
 
 
-def link_file(citekey: str, file_path: str) -> Result:
-    return _run(sync_service.link_file(_get_ctx(), citekey, file_path))
+def attach_file(citekey: str, path: str) -> Result:
+    return _run(sync_service.attach_file(_get_ctx(), citekey, path))
 
 
-def unlink_file(citekey: str) -> Result:
-    return _run(sync_service.unlink_file(_get_ctx(), citekey))
+def detach_file(citekey: str) -> Result:
+    return _run(sync_service.detach_file(_get_ctx(), citekey))
+
+
+def sync_file(citekey: str) -> Result:
+    return _run(sync_service.sync_file(_get_ctx(), citekey))
+
+
+def unsync_file(citekey: str) -> Result:
+    return _run(sync_service.unsync_file(_get_ctx(), citekey))
+
+
+def reindex_files() -> ReindexResult:
+    return _run(files.reindex_files(_get_ctx()))
 
 
 def get_file(citekey: str):
