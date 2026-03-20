@@ -890,3 +890,69 @@ def test_prefetch_blobs_legacy_no_ext_evicted_and_replaced(tmp_path):
     assert not legacy.exists()
     assert result.fetched == 1
     assert (cache_dir / f"{sha256}.pdf").exists()
+
+
+# --- attach_file tests ---
+
+
+def test_attach_file_missing_path(tmp_path):
+    from scholartools.services.sync import attach_file
+
+    ctx, _ = make_ctx(tmp_path, records=[{"id": "s2024", "type": "article"}])
+    result = asyncio.run(attach_file(ctx, "s2024", str(tmp_path / "missing.pdf")))
+    assert not result.ok
+    assert "not found" in result.error
+
+
+def test_attach_file_unknown_citekey(tmp_path):
+    from scholartools.services.sync import attach_file
+
+    pdf = write_pdf(tmp_path)
+    ctx, _ = make_ctx(tmp_path, records=[])
+    result = asyncio.run(attach_file(ctx, "nope", str(pdf)))
+    assert not result.ok
+    assert "not found" in result.error
+
+
+def test_attach_file_outside_files_dir_copies(tmp_path):
+    from scholartools.services.sync import attach_file
+
+    pdf = write_pdf(tmp_path, name="paper.pdf")
+    ctx, records = make_ctx(tmp_path, records=[{"id": "s2024", "type": "article"}])
+    result = asyncio.run(attach_file(ctx, "s2024", str(pdf)))
+    assert result.ok
+    assert records[0]["_file"]["path"] == "s2024.pdf"
+    dest = tmp_path / "files" / "s2024.pdf"
+    assert dest.exists()
+    assert records[0].get("blob_ref") is None
+
+
+def test_attach_file_inside_files_dir_no_copy(tmp_path):
+    from scholartools.services.sync import attach_file
+
+    files_dir = tmp_path / "files"
+    files_dir.mkdir()
+    pdf = files_dir / "s2024.pdf"
+    pdf.write_bytes(b"pdf content")
+    ctx, records = make_ctx(tmp_path, records=[{"id": "s2024", "type": "article"}])
+    result = asyncio.run(attach_file(ctx, "s2024", str(pdf)))
+    assert result.ok
+    assert records[0]["_file"]["path"] == "s2024.pdf"
+    assert list(files_dir.iterdir()) == [pdf]
+    assert records[0].get("blob_ref") is None
+
+
+def test_attach_file_does_not_set_blob_ref(tmp_path):
+    from scholartools.services.sync import attach_file
+
+    sync_config = make_sync_config()
+    pdf = write_pdf(tmp_path)
+    ctx, records = make_ctx(
+        tmp_path,
+        records=[{"id": "s2024", "type": "article"}],
+        sync_config=sync_config,
+    )
+    result = asyncio.run(attach_file(ctx, "s2024", str(pdf)))
+    assert result.ok
+    assert records[0].get("blob_ref") is None
+    assert not (tmp_path / "change_log").exists()
