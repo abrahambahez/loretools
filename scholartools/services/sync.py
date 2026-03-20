@@ -393,6 +393,38 @@ def _copy_to_files_dir(ctx: LibraryCtx, citekey: str, src: Path) -> FileRecord:
     )
 
 
+async def attach_file(ctx: LibraryCtx, citekey: str, path: str) -> Result:
+    src = Path(path).resolve()
+    if not src.exists():
+        return Result(ok=False, error=f"file not found: {path}")
+
+    records = await ctx.read_all()
+    record = next((r for r in records if r.get("id") == citekey), None)
+    if record is None:
+        return Result(ok=False, error=f"not found: {citekey}")
+
+    files_dir = Path(ctx.files_dir)
+    if src.is_relative_to(files_dir):
+        dest = src
+    else:
+        files_dir.mkdir(parents=True, exist_ok=True)
+        dest = files_dir / f"{citekey}{src.suffix}"
+        try:
+            shutil.copy2(src, dest)
+        except OSError as exc:
+            return Result(ok=False, error=f"file copy failed: {exc}")
+
+    file_record = FileRecord(
+        path=dest.name,
+        mime_type=_detect_mime(str(dest)),
+        size_bytes=dest.stat().st_size,
+        added_at=datetime.now(timezone.utc).isoformat(),
+    )
+    record["_file"] = file_record.model_dump()
+    await ctx.write_all(records)
+    return Result(ok=True)
+
+
 async def link_file(ctx: LibraryCtx, citekey: str, local_path: str) -> Result:
     if not ctx.data_dir:
         return Result(ok=False, error="data_dir not configured")
