@@ -536,6 +536,20 @@ async def unlink_file(ctx: LibraryCtx, citekey: str) -> Result:
     return Result(ok=True)
 
 
+def _fetch_blob_ext(ctx: LibraryCtx, sha256: str) -> str:
+    meta_key = f"blobs/{sha256}.meta"
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+        tmp_path = Path(tmp.name)
+    try:
+        s3_sync.download(ctx.sync_config, meta_key, tmp_path)
+        meta = json.loads(tmp_path.read_text(encoding="utf-8"))
+        return Path(meta.get("filename", "")).suffix
+    except Exception:
+        return ""
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+
 async def get_file(ctx: LibraryCtx, citekey: str) -> Path | None:
     if not ctx.data_dir:
         return None
@@ -551,7 +565,13 @@ async def get_file(ctx: LibraryCtx, citekey: str) -> Path | None:
         sha256 = blob_ref.removeprefix("sha256:")
         data_dir = Path(ctx.data_dir)
         ensure_blob_cache_dir(data_dir)
-        cache_path = blob_cache_path(data_dir, sha256)
+
+        ext = _fetch_blob_ext(ctx, sha256)
+        cache_path = blob_cache_path(data_dir, sha256, ext)
+
+        legacy_path = blob_cache_path(data_dir, sha256)
+        if legacy_path != cache_path and legacy_path.exists():
+            legacy_path.unlink(missing_ok=True)
 
         if cache_path.exists():
             cached_sha256 = compute_sha256_streaming(cache_path)
@@ -604,7 +624,12 @@ async def prefetch_blobs(
             continue
 
         sha256 = blob_ref.removeprefix("sha256:")
-        cache_path = blob_cache_path(data_dir, sha256)
+        ext = _fetch_blob_ext(ctx, sha256)
+        cache_path = blob_cache_path(data_dir, sha256, ext)
+
+        legacy_path = blob_cache_path(data_dir, sha256)
+        if legacy_path != cache_path and legacy_path.exists():
+            legacy_path.unlink(missing_ok=True)
 
         if cache_path.exists():
             cached_sha256 = compute_sha256_streaming(cache_path)

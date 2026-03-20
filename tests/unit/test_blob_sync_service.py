@@ -759,3 +759,134 @@ def test_prefetch_blobs_skips_no_blob_ref(tmp_path):
     assert result.fetched == 0
     assert result.already_cached == 0
     assert not result.errors
+
+
+# --- blob cache extension tests ---
+
+
+def test_get_file_cached_path_has_extension(tmp_path):
+    from scholartools.services.sync import get_file
+
+    content = b"pdf bytes"
+    sha256 = hashlib.sha256(content).hexdigest()
+    blob_ref = f"sha256:{sha256}"
+    meta = json.dumps({"filename": "paper.pdf"}).encode()
+
+    sync_config = make_sync_config()
+    ctx, _ = make_ctx(
+        tmp_path,
+        records=[{"id": "s2024", "type": "article", "blob_ref": blob_ref}],
+        sync_config=sync_config,
+    )
+
+    def mock_download(config, remote_key, local_path):
+        Path(local_path).parent.mkdir(parents=True, exist_ok=True)
+        if remote_key.endswith(".meta"):
+            Path(local_path).write_bytes(meta)
+        else:
+            Path(local_path).write_bytes(content)
+
+    with patch("scholartools.adapters.s3_sync.download", side_effect=mock_download):
+        result = asyncio.run(get_file(ctx, "s2024"))
+
+    assert result is not None
+    assert result.suffix == ".pdf"
+    assert result.name == f"{sha256}.pdf"
+
+
+def test_get_file_legacy_no_ext_evicted_and_replaced(tmp_path):
+    from scholartools.services.sync import get_file
+
+    content = b"pdf bytes"
+    sha256 = hashlib.sha256(content).hexdigest()
+    blob_ref = f"sha256:{sha256}"
+    meta = json.dumps({"filename": "paper.pdf"}).encode()
+
+    sync_config = make_sync_config()
+    ctx, _ = make_ctx(
+        tmp_path,
+        records=[{"id": "s2024", "type": "article", "blob_ref": blob_ref}],
+        sync_config=sync_config,
+    )
+    cache_dir = tmp_path / "blob_cache"
+    cache_dir.mkdir()
+    legacy = cache_dir / sha256
+    legacy.write_bytes(content)
+
+    def mock_download(config, remote_key, local_path):
+        Path(local_path).parent.mkdir(parents=True, exist_ok=True)
+        if remote_key.endswith(".meta"):
+            Path(local_path).write_bytes(meta)
+        else:
+            Path(local_path).write_bytes(content)
+
+    with patch("scholartools.adapters.s3_sync.download", side_effect=mock_download):
+        result = asyncio.run(get_file(ctx, "s2024"))
+
+    assert not legacy.exists()
+    assert result is not None
+    assert result.suffix == ".pdf"
+
+
+def test_prefetch_blobs_cached_path_has_extension(tmp_path):
+    from scholartools.services.sync import prefetch_blobs
+
+    content = b"fresh pdf"
+    sha256 = hashlib.sha256(content).hexdigest()
+    blob_ref = f"sha256:{sha256}"
+    meta = json.dumps({"filename": "doc.pdf"}).encode()
+
+    sync_config = make_sync_config()
+    ctx, _ = make_ctx(
+        tmp_path,
+        records=[{"id": "s2024", "type": "article", "blob_ref": blob_ref}],
+        sync_config=sync_config,
+    )
+
+    def mock_download(config, remote_key, local_path):
+        Path(local_path).parent.mkdir(parents=True, exist_ok=True)
+        if remote_key.endswith(".meta"):
+            Path(local_path).write_bytes(meta)
+        else:
+            Path(local_path).write_bytes(content)
+
+    with patch("scholartools.adapters.s3_sync.download", side_effect=mock_download):
+        result = asyncio.run(prefetch_blobs(ctx))
+
+    assert result.fetched == 1
+    cached = tmp_path / "blob_cache" / f"{sha256}.pdf"
+    assert cached.exists()
+
+
+def test_prefetch_blobs_legacy_no_ext_evicted_and_replaced(tmp_path):
+    from scholartools.services.sync import prefetch_blobs
+
+    content = b"cached pdf"
+    sha256 = hashlib.sha256(content).hexdigest()
+    blob_ref = f"sha256:{sha256}"
+    meta = json.dumps({"filename": "paper.pdf"}).encode()
+
+    sync_config = make_sync_config()
+    ctx, _ = make_ctx(
+        tmp_path,
+        records=[{"id": "s2024", "type": "article", "blob_ref": blob_ref}],
+        sync_config=sync_config,
+    )
+    cache_dir = tmp_path / "blob_cache"
+    cache_dir.mkdir()
+    legacy = cache_dir / sha256
+    legacy.write_bytes(content)
+
+    def mock_download(config, remote_key, local_path):
+        Path(local_path).parent.mkdir(parents=True, exist_ok=True)
+        if remote_key.endswith(".meta"):
+            Path(local_path).write_bytes(meta)
+        else:
+            Path(local_path).write_bytes(content)
+
+    with patch("scholartools.adapters.s3_sync.download", side_effect=mock_download):
+        result = asyncio.run(prefetch_blobs(ctx))
+
+    assert not legacy.exists()
+    assert result.fetched == 1
+    assert (cache_dir / f"{sha256}.pdf").exists()
