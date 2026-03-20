@@ -430,3 +430,9 @@ class PrefetchResult(BaseModel):
     fetched: int
     already_cached: int
     errors: list[str]
+
+
+class ReindexResult(BaseModel):
+    repaired: int
+    already_ok: int
+    not_found: int

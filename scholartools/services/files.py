@@ -16,6 +16,7 @@ from scholartools.models import (
     LibraryCtx,
     LinkResult,
     MoveResult,
+    ReindexResult,
     UnlinkResult,
 )
 from scholartools.services.list_helpers import paginate
@@ -99,3 +100,36 @@ async def list_files(ctx: LibraryCtx, page: int = 1) -> FilesListResult:
 def _detect_mime(path: str) -> str:
     mime, _ = mimetypes.guess_type(path)
     return mime or "application/octet-stream"
+
+
+async def reindex_files(ctx: LibraryCtx) -> ReindexResult:
+    files_dir = Path(ctx.files_dir)
+    if not files_dir.exists():
+        return ReindexResult(repaired=0, already_ok=0, not_found=0)
+
+    stem_map = {p.stem: p.name for p in files_dir.iterdir() if p.is_file()}
+    records = await ctx.read_all()
+    repaired = 0
+    already_ok = 0
+    not_found = 0
+
+    for r in records:
+        if not r.get("_file"):
+            continue
+        raw_path = r["_file"]["path"]
+        p = Path(raw_path)
+        direct = p if p.is_absolute() else files_dir / raw_path
+        if direct.exists():
+            already_ok += 1
+        else:
+            stem = p.stem
+            if stem in stem_map:
+                r["_file"]["path"] = stem_map[stem]
+                repaired += 1
+            else:
+                not_found += 1
+
+    if repaired:
+        await ctx.write_all(records)
+
+    return ReindexResult(repaired=repaired, already_ok=already_ok, not_found=not_found)

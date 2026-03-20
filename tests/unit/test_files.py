@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 from scholartools.models import LibraryCtx
@@ -6,6 +7,7 @@ from scholartools.services.files import (
     link_file,
     list_files,
     move_file,
+    reindex_files,
     unlink_file,
 )
 
@@ -205,3 +207,72 @@ def test_resolve_file_path_absolute_missing_falls_back(tmp_path):
     legacy = Path("/old/library/files/paper.pdf")
     resolved = _resolve_file_path(ctx, str(legacy))
     assert resolved == files_dir / "paper.pdf"
+
+
+def test_reindex_files_repairs_stale_path(tmp_path):
+    ctx, store, files_dir = make_ctx(
+        tmp_path,
+        [
+            {
+                "id": "x",
+                "type": "book",
+                "_file": {
+                    "path": "/old/path/x.pdf",
+                    "mime_type": "application/pdf",
+                    "size_bytes": 5,
+                    "added_at": "2026-01-01T00:00:00Z",
+                },
+            }
+        ],
+    )
+    (files_dir / "x.pdf").write_bytes(b"hello")
+    result = asyncio.run(reindex_files(ctx))
+    assert result.repaired == 1
+    assert result.already_ok == 0
+    assert result.not_found == 0
+    assert store[0]["_file"]["path"] == "x.pdf"
+
+
+def test_reindex_files_already_ok(tmp_path):
+    ctx, _, files_dir = make_ctx(
+        tmp_path,
+        [
+            {
+                "id": "x",
+                "type": "book",
+                "_file": {
+                    "path": "x.pdf",
+                    "mime_type": "application/pdf",
+                    "size_bytes": 5,
+                    "added_at": "2026-01-01T00:00:00Z",
+                },
+            }
+        ],
+    )
+    (files_dir / "x.pdf").write_bytes(b"hello")
+    result = asyncio.run(reindex_files(ctx))
+    assert result.repaired == 0
+    assert result.already_ok == 1
+    assert result.not_found == 0
+
+
+def test_reindex_files_not_found(tmp_path):
+    ctx, _, _ = make_ctx(
+        tmp_path,
+        [
+            {
+                "id": "x",
+                "type": "book",
+                "_file": {
+                    "path": "/old/path/x.pdf",
+                    "mime_type": "application/pdf",
+                    "size_bytes": 5,
+                    "added_at": "2026-01-01T00:00:00Z",
+                },
+            }
+        ],
+    )
+    result = asyncio.run(reindex_files(ctx))
+    assert result.repaired == 0
+    assert result.already_ok == 0
+    assert result.not_found == 1
