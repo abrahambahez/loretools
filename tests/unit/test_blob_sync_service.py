@@ -1038,3 +1038,106 @@ def test_detach_file_missing_file_on_disk_still_clears(tmp_path):
     result = asyncio.run(detach_file(ctx, "s2024"))
     assert result.ok
     assert records[0].get("_file") is None
+
+
+# --- sync_file tests ---
+
+
+def make_file_record(files_dir, filename="s2024.pdf", content=b"pdf content"):
+    p = files_dir / filename
+    files_dir.mkdir(parents=True, exist_ok=True)
+    p.write_bytes(content)
+    return {
+        "path": filename,
+        "mime_type": "application/pdf",
+        "size_bytes": len(content),
+        "added_at": "2026-01-01T00:00:00+00:00",
+    }
+
+
+def test_sync_file_no_file_attached(tmp_path):
+    from scholartools.services.sync import sync_file
+
+    ctx, _ = make_ctx(tmp_path, records=[{"id": "s2024", "type": "article"}])
+    result = asyncio.run(sync_file(ctx, "s2024"))
+    assert not result.ok
+    assert "attach_file" in result.error
+
+
+def test_sync_file_no_sync_config(tmp_path):
+    from scholartools.services.sync import sync_file
+
+    files_dir = tmp_path / "files"
+    file_rec = make_file_record(files_dir)
+    ctx, _ = make_ctx(
+        tmp_path,
+        records=[{"id": "s2024", "type": "article", "_file": file_rec}],
+    )
+    result = asyncio.run(sync_file(ctx, "s2024"))
+    assert not result.ok
+    assert "sync not configured" in result.error
+
+
+def test_sync_file_unknown_citekey(tmp_path):
+    from scholartools.services.sync import sync_file
+
+    ctx, _ = make_ctx(tmp_path, records=[])
+    result = asyncio.run(sync_file(ctx, "nope"))
+    assert not result.ok
+    assert "not found" in result.error
+
+
+def test_sync_file_happy_path(tmp_path):
+    from scholartools.services.sync import sync_file
+
+    files_dir = tmp_path / "files"
+    file_rec = make_file_record(files_dir)
+    sync_config = make_sync_config()
+    ctx, records = make_ctx(
+        tmp_path,
+        records=[{"id": "s2024", "type": "article", "_file": file_rec}],
+        sync_config=sync_config,
+    )
+
+    with (
+        patch("scholartools.adapters.s3_sync.exists", return_value=False),
+        patch("scholartools.adapters.s3_sync.upload") as mock_upload,
+        patch("scholartools.adapters.s3_sync.upload_bytes"),
+    ):
+        result = asyncio.run(sync_file(ctx, "s2024"))
+
+    assert result.ok
+    assert records[0]["blob_ref"].startswith("sha256:")
+    assert "_field_timestamps" in records[0]
+    assert "blob_ref" in records[0]["_field_timestamps"]
+    mock_upload.assert_called_once()
+    log_files = list((tmp_path / "change_log").glob("*.json"))
+    assert len(log_files) == 1
+    entry = json.loads(log_files[0].read_text())
+    assert entry["op"] == "link_file"
+    assert entry["citekey"] == "s2024"
+
+
+def test_sync_file_s3_failure_does_not_set_blob_ref(tmp_path):
+    from scholartools.services.sync import sync_file
+
+    files_dir = tmp_path / "files"
+    file_rec = make_file_record(files_dir)
+    sync_config = make_sync_config()
+    ctx, records = make_ctx(
+        tmp_path,
+        records=[{"id": "s2024", "type": "article", "_file": file_rec}],
+        sync_config=sync_config,
+    )
+
+    with (
+        patch(
+            "scholartools.adapters.s3_sync.exists",
+            side_effect=OSError("connection refused"),
+        ),
+    ):
+        result = asyncio.run(sync_file(ctx, "s2024"))
+
+    assert not result.ok
+    assert records[0].get("blob_ref") is None
+    assert not (tmp_path / "change_log").exists()

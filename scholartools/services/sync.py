@@ -712,3 +712,76 @@ async def prefetch_blobs(
         fetched += 1
 
     return PrefetchResult(fetched=fetched, already_cached=already_cached, errors=errors)
+
+
+async def sync_file(ctx: LibraryCtx, citekey: str) -> Result:
+    records = await ctx.read_all()
+    record = next((r for r in records if r.get("id") == citekey), None)
+    if record is None:
+        return Result(ok=False, error=f"not found: {citekey}")
+
+    file_rec = record.get("_file")
+    if not file_rec:
+        return Result(ok=False, error="no file attached — call attach_file first")
+
+    if ctx.sync_config is None:
+        return Result(ok=False, error="sync not configured")
+
+    file_path = Path(ctx.files_dir) / file_rec["path"]
+
+    try:
+        sha256 = compute_sha256_streaming(file_path)
+    except OSError as exc:
+        return Result(ok=False, error=f"hash failed: {exc}")
+
+    blob_key = f"blobs/{sha256}"
+    blob_ref = f"sha256:{sha256}"
+
+    try:
+        if not s3_sync.exists(ctx.sync_config, blob_key):
+            s3_sync.upload(ctx.sync_config, file_path, blob_key)
+    except Exception as exc:
+        return Result(ok=False, error=f"blob upload failed: {exc}")
+
+    ts = hlc_service.now(ctx.peer_id)
+    meta = json.dumps(
+        {
+            "citekey": citekey,
+            "filename": file_rec["path"],
+            "uploaded_by": ctx.peer_id,
+            "timestamp_hlc": ts,
+        },
+        ensure_ascii=False,
+    ).encode()
+    try:
+        s3_sync.upload_bytes(ctx.sync_config, meta, f"{blob_key}.meta")
+    except Exception as exc:
+        return Result(ok=False, error=f"meta upload failed: {exc}")
+
+    data_dir = Path(ctx.data_dir)
+    privkey = _load_privkey(ctx)
+    entry_dict = {
+        "op": "link_file",
+        "uid": record.get("uid") or citekey,
+        "uid_confidence": record.get("uid_confidence") or "",
+        "citekey": citekey,
+        "data": {},
+        "blob_ref": blob_ref,
+        "peer_id": ctx.peer_id,
+        "device_id": ctx.device_id,
+        "timestamp_hlc": ts,
+        "signature": "",
+    }
+    if privkey is not None:
+        entry_dict["signature"] = _sign_entry(entry_dict, privkey)
+
+    entry = ChangeLogEntry.model_validate(entry_dict)
+    _write_change_log_entry(data_dir, entry)
+
+    record["blob_ref"] = blob_ref
+    ft = dict(record.get("_field_timestamps", {}))
+    ft["blob_ref"] = ts
+    record["_field_timestamps"] = ft
+    await ctx.write_all(records)
+
+    return Result(ok=True)
