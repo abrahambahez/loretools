@@ -10,8 +10,8 @@ def compute_sha256_streaming(path: Path) -> str:
     return h.hexdigest()
 
 
-def blob_cache_path(data_dir: Path, sha256: str) -> Path:
-    return data_dir / "blob_cache" / sha256
+def blob_cache_path(data_dir: Path, sha256: str, ext: str = "") -> Path:
+    return data_dir / "blob_cache" / f"{sha256}{ext}"
 
 
 def ensure_blob_cache_dir(data_dir: Path) -> None:
