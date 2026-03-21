@@ -110,16 +110,11 @@ def main() -> None:
                 if not ref or not ref.file_record:
                     skipped += 1
                     continue
-                file_path = ref.file_record.path
-                if not Path(file_path).exists():
-                    print(f"  missing file: {row.citekey} → {file_path}")
-                    errors += 1
-                    continue
                 if args.dry_run:
-                    print(f"  [dry-run] link_file {row.citekey} → {file_path}")
+                    print(f"  [dry-run] sync_file {row.citekey}")
                     uploaded += 1
                     continue
-                r = st.link_file(row.citekey, file_path)
+                r = st.sync_file(row.citekey)
                 if r.ok:
                     uploaded += 1
                 else:

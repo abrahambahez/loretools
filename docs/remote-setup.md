@@ -166,9 +166,8 @@ uv run python scripts/migrate_library.py \
 What the script does:
 1. Copies `library.json` from `--from-dir` to the configured `library_dir`
 2. Copies `files/` from `--from-dir` to `library_dir/files/`
-3. Runs `backfill_uid.py` to ensure all records have `uid` set
-4. Calls `create_snapshot()` to upload the full library state to S3
-5. With `--upload-blobs`: calls `link_file(citekey, path)` for every record that has a
+3. Calls `create_snapshot()` to upload the full library state to S3
+4. With `--upload-blobs`: calls `sync_file(citekey)` for every record that has a
    linked local file, uploading each PDF/file to `blobs/{sha256}` in S3
 
 After migration, run `push()` to upload any change log entries generated during the
@@ -203,12 +202,12 @@ import scholartools as st
 # 4. snapshot the current state to S3
 st.create_snapshot()
 
-# 5. upload blobs for all records that have a linked file
+# 5. upload blobs for all records that have a linked local file
 result = st.list_references()
 for row in result.references:
     rec = st.get_reference(row.citekey).reference
     if rec and rec.file_record:
-        r = st.link_file(row.citekey, rec.file_record.path)
+        r = st.sync_file(row.citekey)
         if not r.ok:
             print(f"  {row.citekey}: {r.error}")
 
