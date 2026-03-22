@@ -8,7 +8,7 @@ set -euo pipefail
 echo "── scholartools health check ──"
 
 echo "checking dependencies..."
-uv sync --quiet || { echo "FAIL: uv sync failed"; exit 1; }
+uv sync --all-extras --quiet || { echo "FAIL: uv sync failed"; exit 1; }
 
 echo "running unit tests..."
 uv run pytest tests/unit -q || { echo "FAIL: unit tests failed"; exit 1; }

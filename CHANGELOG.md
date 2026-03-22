@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-03-21
+
+### Changed
+- `push()` and `pull()` renamed to `push_changelog()` and `pull_changelog()` in the public API, service layer, and CLI (`scht sync push-changelog`, `scht sync pull-changelog`) to clarify that only the change log is transferred, not file blobs
+
 ## [0.11.0] - 2026-03-20
 
 ### Added

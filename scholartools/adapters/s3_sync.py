@@ -25,6 +25,7 @@ def _split(config: SyncConfig) -> tuple[str, str]:
     if "/" not in config.bucket:
         return config.bucket, ""
     bucket, subdir = config.bucket.split("/", 1)
+    subdir = subdir.rstrip("/")
     return bucket, f"{subdir}/" if subdir else ""
 
 

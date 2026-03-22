@@ -765,7 +765,7 @@ wheels = [
 
 [[package]]
 name = "scholartools"
-version = "0.9.1"
+version = "0.12.0"
 source = { editable = "." }
 dependencies = [
     { name = "anthropic" },
