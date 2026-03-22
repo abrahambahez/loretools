@@ -94,7 +94,7 @@ participates in the same LWW as any other field.
 5. Write `link_file` change log entry with `blob_ref: f"sha256:{sha256}"`
 6. Update local record's `blob_ref` field + `_field_timestamps`
 
-This is the only place a blob is uploaded. `push()` does not re-upload blobs — the
+This is the only place a blob is uploaded. `push_changelog()` does not re-upload blobs — the
 change log entry is enough for other peers to know the sha256 exists.
 
 ### lazy `get_file` (`services/sync.py` or `services/library.py`)
@@ -142,15 +142,15 @@ class PrefetchResult(BaseModel):
 Local cache file is not deleted — another record on the same peer may still reference the
 same sha256.
 
-### `pull()` changes (non-breaking)
+### `pull_changelog()` changes (non-breaking)
 
-`pull()` already replays all change log ops by type. Two new branches:
+`pull_changelog()` already replays all change log ops by type. Two new branches:
 
 - `link_file`: apply `blob_ref` to local record via LWW (same as any field update); do
   **not** download the file — lazy fetch on `get_file` demand
 - `unlink_file`: clear `blob_ref` via LWW
 
-No blob content is transferred during pull. Pull stays lightweight regardless of how
+No blob content is transferred during pull-changelog. Pull stays lightweight regardless of how
 many PDFs the shared index contains.
 
 ### blob cache layout (`config.py` / `Settings`)
@@ -184,7 +184,7 @@ New functions:
 
 ## design decisions
 
-**Lazy by default.** `pull()` never fetches blob content. Daily sync stays fast for
+**Lazy by default.** `pull_changelog()` never fetches blob content. Daily sync stays fast for
 scholars who work primarily with metadata. Blobs arrive only when a file is opened or
 `prefetch_blobs` is called explicitly.
 

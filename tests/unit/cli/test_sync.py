@@ -13,20 +13,20 @@ def _run(argv):
     args.func(args)
 
 
-def test_sync_push_calls_push():
+def test_sync_push_changelog_calls_push_changelog():
     result = PushResult(entries_pushed=1)
-    with patch("scholartools.push", return_value=result) as mock_push:
+    with patch("scholartools.push_changelog", return_value=result) as mock_push:
         with pytest.raises(SystemExit) as exc_info:
-            _run(["sync", "push"])
+            _run(["sync", "push-changelog"])
         assert exc_info.value.code == 0
         mock_push.assert_called_once_with()
 
 
-def test_sync_pull_calls_pull():
+def test_sync_pull_changelog_calls_pull_changelog():
     result = PullResult(applied_count=2)
-    with patch("scholartools.pull", return_value=result) as mock_pull:
+    with patch("scholartools.pull_changelog", return_value=result) as mock_pull:
         with pytest.raises(SystemExit) as exc_info:
-            _run(["sync", "pull"])
+            _run(["sync", "pull-changelog"])
         assert exc_info.value.code == 0
         mock_pull.assert_called_once_with()
 

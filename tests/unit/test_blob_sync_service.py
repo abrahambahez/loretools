@@ -55,7 +55,7 @@ def write_pdf(tmp_path, name="test.pdf", content=b"pdf content"):
 
 
 def test_pull_link_file_applies_blob_ref(tmp_path):
-    from scholartools.services.sync import pull
+    from scholartools.services.sync import pull_changelog as pull
 
     sha256 = "abc123"
     blob_ref = f"sha256:{sha256}"
@@ -137,7 +137,7 @@ def test_pull_unlink_file_clears_blob_ref(tmp_path):
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
     from scholartools.services import peers as peers_service
-    from scholartools.services.sync import pull
+    from scholartools.services.sync import pull_changelog as pull
 
     ctx, records = make_ctx(
         tmp_path,
@@ -219,7 +219,7 @@ def test_pull_link_file_lww_older_remote_skipped(tmp_path):
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
     from scholartools.services import peers as peers_service
-    from scholartools.services.sync import pull
+    from scholartools.services.sync import pull_changelog as pull
 
     local_ts = "2026-06-01T00:00:02.000Z-0001-peer-a"
     ctx, records = make_ctx(

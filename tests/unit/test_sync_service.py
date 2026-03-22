@@ -13,8 +13,8 @@ from scholartools.services.sync import (
     _save_sync_state,
     _within_60s,
     create_snapshot,
-    pull,
-    push,
+    pull_changelog,
+    push_changelog,
 )
 
 
@@ -96,7 +96,7 @@ def test_load_sync_state_missing(tmp_path):
 
 def test_push_no_sync_config(tmp_path):
     ctx, _ = make_ctx(tmp_path, sync_config=None)
-    result = asyncio.run(push(ctx))
+    result = asyncio.run(push_changelog(ctx))
     assert result.errors
     assert "sync not configured" in result.errors[0]
 
@@ -114,7 +114,7 @@ def test_push_no_data_dir():
         data_dir=None,
         sync_config=make_sync_config(),
     )
-    result = asyncio.run(push(ctx))
+    result = asyncio.run(push_changelog(ctx))
     assert "data_dir not configured" in result.errors[0]
 
 
@@ -139,7 +139,7 @@ def test_push_no_keypair(tmp_path):
         mock_config_path.parent.__truediv__ = MagicMock(
             return_value=MagicMock(__truediv__=MagicMock(return_value=mock_key_path))
         )
-        result = asyncio.run(push(ctx))
+        result = asyncio.run(push_changelog(ctx))
     assert any("keypair" in e for e in result.errors)
 
 
@@ -180,7 +180,7 @@ def test_push_uploads_entries(tmp_path):
         with patch(
             "scholartools.services.sync._load_privkey", return_value=privkey_bytes
         ):
-            result = asyncio.run(push(ctx))
+            result = asyncio.run(push_changelog(ctx))
 
     assert result.entries_pushed == 1
 
@@ -204,7 +204,7 @@ def test_push_updates_fence(tmp_path):
         patch("scholartools.services.sync._load_privkey", return_value=b"\x00" * 32),
         patch("scholartools.adapters.s3_sync.upload"),
     ):
-        asyncio.run(push(ctx))
+        asyncio.run(push_changelog(ctx))
 
     state = _load_sync_state(tmp_path)
     assert state["fence_push_hlc"] == entry.timestamp_hlc
@@ -232,7 +232,7 @@ def test_push_upload_error_isolated(tmp_path):
             "scholartools.adapters.s3_sync.upload", side_effect=Exception("S3 error")
         ),
     ):
-        result = asyncio.run(push(ctx))
+        result = asyncio.run(push_changelog(ctx))
 
     assert result.entries_pushed == 0
     assert len(result.errors) == 3
@@ -243,7 +243,7 @@ def test_push_upload_error_isolated(tmp_path):
 
 def test_pull_no_sync_config(tmp_path):
     ctx, _ = make_ctx(tmp_path, sync_config=None)
-    result = asyncio.run(pull(ctx))
+    result = asyncio.run(pull_changelog(ctx))
     assert "sync not configured" in result.errors[0]
 
 
@@ -286,7 +286,7 @@ def test_pull_applies_entries(tmp_path):
 
         mock_dl.side_effect = fake_dl
 
-        result = asyncio.run(pull(ctx))
+        result = asyncio.run(pull_changelog(ctx))
 
     assert result.applied_count == 1
     assert result.rejected_count == 0
@@ -331,7 +331,7 @@ def test_pull_rejects_bad_signature(tmp_path):
 
         mock_dl.side_effect = fake_dl
 
-        result = asyncio.run(pull(ctx))
+        result = asyncio.run(pull_changelog(ctx))
 
     assert result.rejected_count == 1
     rejected_dir = tmp_path / "rejected"
@@ -384,7 +384,7 @@ def test_pull_lww_skips_older_remote(tmp_path):
 
         mock_dl.side_effect = fake_dl
 
-        asyncio.run(pull(ctx))
+        asyncio.run(pull_changelog(ctx))
 
     assert records[0]["title"] == "Local Title"
 
@@ -433,7 +433,7 @@ def test_pull_conflict_within_60s(tmp_path):
 
         mock_dl.side_effect = fake_dl
 
-        result = asyncio.run(pull(ctx))
+        result = asyncio.run(pull_changelog(ctx))
 
     assert result.conflicted_count == 1
     conflicts = list((tmp_path / "conflicts").iterdir())
@@ -485,7 +485,7 @@ def test_pull_delete_with_local_edit_conflict(tmp_path):
 
         mock_dl.side_effect = fake_dl
 
-        result = asyncio.run(pull(ctx))
+        result = asyncio.run(pull_changelog(ctx))
 
     assert result.conflicted_count == 1
 
@@ -641,14 +641,14 @@ def test_upload_blobs_skip_already_matching_blob_ref(tmp_path):
         patch(
             "scholartools.services.sync.compute_sha256_streaming", return_value=fake_sha
         ),
-        patch("scholartools.adapters.s3_sync.exists") as mock_exists,
+        patch("scholartools.adapters.s3_sync.exists", return_value=True) as mock_exists,
         patch("scholartools.adapters.s3_sync.upload") as mock_upload,
     ):
         result = asyncio.run(upload_blobs(ctx))
 
     assert result.skipped == 1
     assert result.uploaded == 0
-    mock_exists.assert_not_called()
+    mock_exists.assert_called_once()
     mock_upload.assert_not_called()
 
 

@@ -382,3 +382,21 @@ decisions:
   - blob cache eviction of legacy no-extension files happens lazily on next get_file
 broken: none
 next: awaiting user instruction
+
+--- [2026-03-21] session spec-024 ---
+task: rename push/pull to push_changelog/pull_changelog (spec 024)
+completed:
+  - services/sync.py: push → push_changelog, pull → pull_changelog
+  - __init__.py: public wrappers renamed, sync_service call sites updated
+  - cli/sync.py: handlers and subcommand strings renamed
+  - tests/unit/cli/test_sync.py, test_sync_api.py, test_sync_service.py, test_blob_sync_service.py updated
+  - tests/integration/test_distributed_sync.py, test_blob_sync.py updated
+  - README.md, docs/remote-setup.md, docs/feats/009-blob-sync.md updated
+  - 481 unit tests pass
+notes:
+  - test_blob_sync.py (integration) references sync_service.link_file and sync_service.unlink_file
+    which don't exist in the service (actual functions are sync_file and unsync_file). Pre-existing bug
+    outside spec-024 scope; integration tests are skipped by default.
+  - test_sync_service.py was not in the spec files-in-scope list but imported push/pull directly.
+  - test_blob_sync_service.py had inline imports of pull that also needed updating.
+pending: none

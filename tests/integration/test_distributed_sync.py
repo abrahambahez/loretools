@@ -175,7 +175,7 @@ def test_push_pull_libraries_equal(tmp_path):
         patch("scholartools.adapters.s3_sync.upload", side_effect=s3.upload),
         patch("scholartools.services.sync._load_privkey", return_value=priv_a),
     ):
-        push_result = asyncio.run(sync_service.push(ctx_a))
+        push_result = asyncio.run(sync_service.push_changelog(ctx_a))
 
     assert push_result.entries_pushed == 3
     assert not push_result.errors
@@ -184,7 +184,7 @@ def test_push_pull_libraries_equal(tmp_path):
         patch("scholartools.adapters.s3_sync.list_keys", side_effect=s3.list_keys),
         patch("scholartools.adapters.s3_sync.download", side_effect=s3.download),
     ):
-        pull_result = asyncio.run(sync_service.pull(ctx_b))
+        pull_result = asyncio.run(sync_service.pull_changelog(ctx_b))
 
     assert pull_result.applied_count == 3
     assert pull_result.rejected_count == 0
@@ -233,13 +233,13 @@ def test_concurrent_edit_conflict(tmp_path):
         patch("scholartools.adapters.s3_sync.upload", side_effect=s3.upload),
         patch("scholartools.services.sync._load_privkey", return_value=priv_a),
     ):
-        asyncio.run(sync_service.push(ctx_a))
+        asyncio.run(sync_service.push_changelog(ctx_a))
 
     with (
         patch("scholartools.adapters.s3_sync.list_keys", side_effect=s3.list_keys),
         patch("scholartools.adapters.s3_sync.download", side_effect=s3.download),
     ):
-        pull_result = asyncio.run(sync_service.pull(ctx_b))
+        pull_result = asyncio.run(sync_service.pull_changelog(ctx_b))
 
     assert pull_result.conflicted_count >= 1
     # Local value preserved
@@ -338,13 +338,13 @@ def test_soft_delete_local_edit_conflict(tmp_path):
         patch("scholartools.adapters.s3_sync.upload", side_effect=s3.upload),
         patch("scholartools.services.sync._load_privkey", return_value=priv_a),
     ):
-        asyncio.run(sync_service.push(ctx_a))
+        asyncio.run(sync_service.push_changelog(ctx_a))
 
     with (
         patch("scholartools.adapters.s3_sync.list_keys", side_effect=s3.list_keys),
         patch("scholartools.adapters.s3_sync.download", side_effect=s3.download),
     ):
-        pull_result = asyncio.run(sync_service.pull(ctx_b))
+        pull_result = asyncio.run(sync_service.pull_changelog(ctx_b))
 
     assert pull_result.conflicted_count == 1
     # Local record preserved

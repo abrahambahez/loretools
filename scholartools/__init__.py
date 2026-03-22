@@ -328,12 +328,12 @@ def peer_register_self() -> Result:
     return _run(peers_service.peer_register_self(_get_ctx()))
 
 
-def push() -> PushResult:
-    return _run(sync_service.push(_get_ctx()))
+def push_changelog() -> PushResult:
+    return _run(sync_service.push_changelog(_get_ctx()))
 
 
-def pull() -> PullResult:
-    return _run(sync_service.pull(_get_ctx()))
+def pull_changelog() -> PullResult:
+    return _run(sync_service.pull_changelog(_get_ctx()))
 
 
 def create_snapshot() -> None:

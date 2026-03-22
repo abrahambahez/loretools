@@ -146,8 +146,8 @@ scht staging merge
 scht staging merge --omit draft2024
 
 # sync
-scht sync push
-scht sync pull
+scht sync push-changelog
+scht sync pull-changelog
 scht sync snapshot
 scht sync conflicts
 scht sync resolve <uid> title "Corrected Title"
@@ -238,10 +238,10 @@ To enable sync, add `peer` and `sync` blocks to `config.json` (see [config](#con
 
 ```python
 # push local change log entries to remote backend
-scholartools.push()
+scholartools.push_changelog()
 
 # pull and replay remote entries (LWW per field, HLC causality)
-scholartools.pull()
+scholartools.pull_changelog()
 
 # upload a snapshot for peer bootstrapping
 scholartools.create_snapshot()

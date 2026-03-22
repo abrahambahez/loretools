@@ -7,17 +7,17 @@ from scholartools.cli._fmt import exit_result
 from scholartools.models import Result
 
 
-def _push(args: argparse.Namespace) -> None:
+def _push_changelog(args: argparse.Namespace) -> None:
     try:
-        result = scholartools.push()
+        result = scholartools.push_changelog()
     except Exception as e:
         exit_result(Result(ok=False, error=str(e)), plain=False)
     exit_result(result, args.plain)
 
 
-def _pull(args: argparse.Namespace) -> None:
+def _pull_changelog(args: argparse.Namespace) -> None:
     try:
-        result = scholartools.pull()
+        result = scholartools.pull_changelog()
     except Exception as e:
         exit_result(Result(ok=False, error=str(e)), plain=False)
     exit_result(result, args.plain)
@@ -95,8 +95,8 @@ def _upload_blobs(args: argparse.Namespace) -> None:
 def register(sub: argparse.ArgumentParser) -> None:
     cmds = sub.add_subparsers(dest="sync_cmd")
 
-    cmds.add_parser("push").set_defaults(func=_push)
-    cmds.add_parser("pull").set_defaults(func=_pull)
+    cmds.add_parser("push-changelog").set_defaults(func=_push_changelog)
+    cmds.add_parser("pull-changelog").set_defaults(func=_pull_changelog)
     cmds.add_parser("snapshot").set_defaults(func=_snapshot)
     cmds.add_parser("list-conflicts").set_defaults(func=_list_conflicts)
 

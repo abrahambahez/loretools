@@ -99,7 +99,7 @@ def _write_change_log_entry(data_dir: Path, entry: ChangeLogEntry) -> None:
     )
 
 
-async def push(ctx: LibraryCtx) -> PushResult:
+async def push_changelog(ctx: LibraryCtx) -> PushResult:
     if not ctx.data_dir:
         return PushResult(errors=["data_dir not configured"])
     if not hasattr(ctx, "sync_config") or ctx.sync_config is None:
@@ -145,7 +145,7 @@ async def push(ctx: LibraryCtx) -> PushResult:
     return PushResult(entries_pushed=pushed, errors=errors)
 
 
-async def pull(ctx: LibraryCtx) -> PullResult:
+async def pull_changelog(ctx: LibraryCtx) -> PullResult:
     if not ctx.data_dir:
         return PullResult(errors=["data_dir not configured"])
     if not hasattr(ctx, "sync_config") or ctx.sync_config is None:
@@ -724,11 +724,13 @@ async def upload_blobs(ctx: LibraryCtx) -> UploadBlobsResult:
             continue
 
         blob_ref = f"sha256:{sha256}"
-        if record.get("blob_ref") == blob_ref:
+        blob_key = f"blobs/{sha256}"
+        if record.get("blob_ref") == blob_ref and s3_sync.exists(
+            ctx.sync_config, blob_key
+        ):
             skipped += 1
             continue
 
-        blob_key = f"blobs/{sha256}"
         try:
             if not s3_sync.exists(ctx.sync_config, blob_key):
                 s3_sync.upload(ctx.sync_config, file_path, blob_key)

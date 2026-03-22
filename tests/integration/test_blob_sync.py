@@ -209,7 +209,7 @@ def test_pull_receives_blob_ref_no_download(tmp_path):
         patch("scholartools.adapters.s3_sync.list_keys", side_effect=s3.list_keys),
         patch("scholartools.adapters.s3_sync.download", side_effect=tracking_download),
     ):
-        asyncio.run(sync_service.pull(ctx_b))
+        asyncio.run(sync_service.pull_changelog(ctx_b))
 
     assert records_b[0].get("blob_ref") == f"sha256:{sha256}"
     blob_downloads = [k for k in download_called if k.startswith("blobs/")]
@@ -376,7 +376,7 @@ def test_pull_after_unlink_clears_blob_ref(tmp_path):
         patch("scholartools.adapters.s3_sync.list_keys", side_effect=s3.list_keys),
         patch("scholartools.adapters.s3_sync.download", side_effect=s3.download),
     ):
-        asyncio.run(sync_service.pull(ctx_b))
+        asyncio.run(sync_service.pull_changelog(ctx_b))
 
     assert records_b[0].get("blob_ref") is None
 
@@ -475,6 +475,6 @@ def test_lww_conflict_newer_wins(tmp_path):
         patch("scholartools.adapters.s3_sync.list_keys", side_effect=s3.list_keys),
         patch("scholartools.adapters.s3_sync.download", side_effect=s3.download),
     ):
-        asyncio.run(sync_service.pull(ctx_c))
+        asyncio.run(sync_service.pull_changelog(ctx_c))
 
     assert records_c[0].get("blob_ref") == f"sha256:{sha256_b}"

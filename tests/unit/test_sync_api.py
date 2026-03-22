@@ -44,27 +44,27 @@ def reset_ctx(tmp_path, monkeypatch):
     scholartools.reset()
 
 
-def test_push_returns_push_result():
+def test_push_changelog_returns_push_result():
     import scholartools
 
     with patch(
-        "scholartools.sync_service.push",
+        "scholartools.sync_service.push_changelog",
         new=AsyncMock(return_value=PushResult(entries_pushed=2)),
     ):
-        result = scholartools.push()
+        result = scholartools.push_changelog()
 
     assert isinstance(result, PushResult)
     assert result.entries_pushed == 2
 
 
-def test_pull_returns_pull_result():
+def test_pull_changelog_returns_pull_result():
     import scholartools
 
     with patch(
-        "scholartools.sync_service.pull",
+        "scholartools.sync_service.pull_changelog",
         new=AsyncMock(return_value=PullResult(applied_count=3)),
     ):
-        result = scholartools.pull()
+        result = scholartools.pull_changelog()
 
     assert isinstance(result, PullResult)
     assert result.applied_count == 3

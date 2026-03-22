@@ -12,7 +12,7 @@ enter the bucket. The bucket stores public-key-verifiable records only.
 This guide covers:
 1. [AWS prerequisites](#1-aws-prerequisites)
 2. [config.json](#2-configjson)
-3. [Identity bootstrap](#3-identity-bootstrap) ← **required before any push/pull**
+3. [Identity bootstrap](#3-identity-bootstrap) ← **required before any push-changelog/pull-changelog**
 4. [Fresh setup](#4-fresh-setup-new-library)
 5. [Migration from an existing library](#5-migration-from-an-existing-library)
 6. [Verify remote state](#6-verify-remote-state)
@@ -112,7 +112,7 @@ Each researcher has one keypair at `~/.config/scholartools/keys/PEER_ID/DEVICE_I
 The first researcher self-registers as admin; subsequent researchers generate a keypair
 and share their public key for the admin to register.
 
-**Required before any push or link_file call.** Also add the `peer` block to
+**Required before any push-changelog or link_file call.** Also add the `peer` block to
 `config.json` (the script prints it for you).
 
 ### First researcher (admin)
@@ -141,12 +141,12 @@ Add the `peer` block to `~/.config/scholartools/config.json`:
 After steps 1–3:
 
 ```bash
-scht sync push     # empty but no errors = S3 is reachable
+scht sync push-changelog     # empty but no errors = S3 is reachable
 scht sync snapshot
 ```
 
 The library is empty. Start adding references normally — every write generates a change
-log entry. Run `scht sync push` to upload them to S3.
+log entry. Run `scht sync push-changelog` to upload them to S3.
 
 ---
 
@@ -168,10 +168,10 @@ What the script does:
 4. With `--upload-blobs`: calls `sync_file(citekey)` for every record that has a
    linked local file, uploading each PDF/file to `blobs/{sha256}` in S3
 
-After migration, run push to upload any change log entries generated during the copy:
+After migration, run push-changelog to upload any change log entries generated during the copy:
 
 ```bash
-scht sync push
+scht sync push-changelog
 ```
 
 ### manual migration (step by step)
@@ -199,7 +199,7 @@ scht sync upload-blobs
 scht sync snapshot
 
 # 5. push change log
-scht sync push
+scht sync push-changelog
 ```
 
 ---
@@ -235,7 +235,7 @@ On the **new researcher's machine**:
 
    ```bash
    echo '{"peer_id":"alice","device_id":"laptop","public_key":"<key from step 2>"}' | scht peers register
-   scht sync push
+   scht sync push-changelog
    ```
 
 4. New researcher: add the `peer` block to their `config.json`:
@@ -279,13 +279,13 @@ On the **new device**:
    ```bash
    # on first device — after copying the new device's public key
    echo '{"peer_id":"sabhz","device_id":"desktop","public_key":"<key>"}' | scht peers add-device sabhz
-   scht sync push
+   scht sync push-changelog
    ```
 
 4. Restore from the latest snapshot on the new device:
 
    ```bash
-   scht sync pull
+   scht sync pull-changelog
    ```
 
 5. Download blobs on demand via `scht files get <citekey>` or prefetch all:
