@@ -100,6 +100,9 @@ Notes:
   `files/`, `staging.json`, `peers/`) are computed under it automatically.
 - The `sync` block activates the composite storage adapter that writes a change log
   entry on every library write.
+- `bucket` accepts an optional subdir prefix: `"MY-BUCKET/scholartools"` scopes all
+  objects under `scholartools/` inside the bucket. Useful when sharing a bucket across
+  multiple projects or libraries.
 
 ---
 
@@ -115,13 +118,14 @@ and share their public key for the admin to register.
 ### First researcher (admin)
 
 ```bash
-uv run python scripts/bootstrap_identity.py --peer-id sabhz --device-id laptop --role admin
+scht peers init sabhz laptop
+scht peers register-self
 ```
 
-This generates the keypair, registers the peer as admin in the local peer directory,
-and prints the `peer` block to add to `config.json`.
+`peers init` generates the keypair and prints JSON with the `public_key`.
+`peers register-self` registers this peer as admin in the local peer directory.
 
-Add the printed block to `~/.config/scholartools/config.json`:
+Add the `peer` block to `~/.config/scholartools/config.json`:
 
 ```json
 {
@@ -136,19 +140,13 @@ Add the printed block to `~/.config/scholartools/config.json`:
 
 After steps 1–3:
 
-```python
-import scholartools as st
-
-# verify config loaded and sync reachable
-result = st.push()
-print(result)
-# PushResult(entries_pushed=0, errors=[])   ← empty but no errors = S3 is reachable
-
-st.create_snapshot()
+```bash
+scht sync push     # empty but no errors = S3 is reachable
+scht sync snapshot
 ```
 
 The library is empty. Start adding references normally — every write generates a change
-log entry. Call `st.push()` to upload them to S3.
+log entry. Run `scht sync push` to upload them to S3.
 
 ---
 
@@ -170,13 +168,10 @@ What the script does:
 4. With `--upload-blobs`: calls `sync_file(citekey)` for every record that has a
    linked local file, uploading each PDF/file to `blobs/{sha256}` in S3
 
-After migration, run `push()` to upload any change log entries generated during the
-copy:
+After migration, run push to upload any change log entries generated during the copy:
 
-```python
-import scholartools as st
-result = st.push()
-print(result)
+```bash
+scht sync push
 ```
 
 ### manual migration (step by step)
@@ -190,29 +185,17 @@ cp -r /old/library/dir/files /new/library/dir/files
 cp /old/library/dir/staging.json /new/library/dir/staging.json   # if exists
 cp -r /old/library/dir/staging /new/library/dir/staging           # if exists
 
-# 2. reload scholartools so it sees the new data
-```
+# 2. backfill uids
+uv run python scripts/backfill_uid.py
 
-```python
-import scholartools as st
+# 3. snapshot the current state to S3
+scht sync snapshot
 
-# 3. backfill uids
-# (run from shell: uv run python scripts/backfill_uid.py)
+# 4. upload blobs for each record that has a linked local file
+scht sync sync-file <citekey>   # repeat for each citekey with a linked file
 
-# 4. snapshot the current state to S3
-st.create_snapshot()
-
-# 5. upload blobs for all records that have a linked local file
-result = st.list_references()
-for row in result.references:
-    rec = st.get_reference(row.citekey).reference
-    if rec and rec.file_record:
-        r = st.sync_file(row.citekey)
-        if not r.ok:
-            print(f"  {row.citekey}: {r.error}")
-
-# 6. push change log
-st.push()
+# 5. push change log
+scht sync push
 ```
 
 ---
@@ -221,19 +204,10 @@ st.push()
 
 Check that the bucket has the expected structure:
 
-```python
-from scholartools.adapters import s3_sync
-from scholartools.config import load_settings
-
-cfg = load_settings().sync
-
-changes = s3_sync.list_keys(cfg, "changes/")
-snapshots = s3_sync.list_keys(cfg, "snapshots/")
-blobs = [k for k in s3_sync.list_keys(cfg, "blobs/") if not k.endswith(".meta")]
-
-print(f"changes:   {len(changes)}")
-print(f"snapshots: {len(snapshots)}")
-print(f"blobs:     {len(blobs)}")
+```bash
+aws s3 ls s3://MY-BUCKET/changes/   --recursive | wc -l
+aws s3 ls s3://MY-BUCKET/snapshots/ --recursive | wc -l
+aws s3 ls s3://MY-BUCKET/blobs/     --recursive | grep -v '\.meta$' | wc -l
 ```
 
 ---
@@ -248,21 +222,16 @@ On the **new researcher's machine**:
 2. Generate a keypair:
 
    ```bash
-   uv run python scripts/bootstrap_identity.py --peer-id alice --device-id laptop
+   scht peers init alice laptop
    ```
 
-   The script prints the public key. Share it with the admin.
+   The output JSON contains `public_key`. Share it with the admin.
 
 3. **Admin-side**: register the new researcher:
 
-   ```python
-   from scholartools import PeerIdentity
-   st.peer_register(PeerIdentity(
-       peer_id="alice",
-       device_id="laptop",
-       public_key="<public key from step 2>",
-   ))
-   st.push()
+   ```bash
+   echo '{"peer_id":"alice","device_id":"laptop","public_key":"<key from step 2>"}' | scht peers register
+   scht sync push
    ```
 
 4. New researcher: add the `peer` block to their `config.json`:
@@ -292,7 +261,7 @@ On the **new device**:
    different `device_id`:
 
    ```bash
-   uv run python scripts/bootstrap_identity.py --peer-id sabhz --device-id desktop
+   scht peers init sabhz desktop
    ```
 
 3. Copy the peer directory from the first device so pull verification works:
@@ -303,47 +272,22 @@ On the **new device**:
 
    Or register the new device via the first machine:
 
-   ```python
+   ```bash
    # on first device — after copying the new device's public key
-   from scholartools import PeerIdentity
-   st.peer_add_device("sabhz", PeerIdentity(
-       peer_id="sabhz",
-       device_id="desktop",
-       public_key="<public_key from step 3b on new device>",
-   ))
-   st.push()
+   echo '{"peer_id":"sabhz","device_id":"desktop","public_key":"<key>"}' | scht peers add-device sabhz
+   scht sync push
    ```
 
 4. Restore from the latest snapshot on the new device:
 
-   ```python
-   from scholartools.adapters import s3_sync
-   from scholartools.config import load_settings
-   import json, shutil
-
-   cfg = load_settings().sync
-   snapshots = sorted(s3_sync.list_keys(cfg, "snapshots/"))
-   latest = snapshots[-1]
-
-   import tempfile
-   from pathlib import Path
-   with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
-       tmp = Path(f.name)
-   s3_sync.download(cfg, latest, tmp)
-   data = json.loads(tmp.read_text())
-   tmp.unlink()
-
-   from scholartools.config import load_settings
-   lib_file = load_settings().local.library_file
-   lib_file.write_text(json.dumps(data["library"], ensure_ascii=False))
-   print(f"restored {len(data['library'])} records from {latest}")
+   ```bash
+   scht sync pull
    ```
 
-5. Download blobs on demand via `st.get_file(citekey)` or prefetch all:
+5. Download blobs on demand via `scht files get <citekey>` or prefetch all:
 
-   ```python
-   result = st.prefetch_blobs()
-   print(result)
+   ```bash
+   scht files prefetch
    ```
 
 ---
