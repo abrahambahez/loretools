@@ -400,3 +400,19 @@ notes:
   - test_sync_service.py was not in the spec files-in-scope list but imported push/pull directly.
   - test_blob_sync_service.py had inline imports of pull that also needed updating.
 pending: none
+
+--- [2026-03-23] session spec-025 ---
+completed:
+  - feat 025 skills-zip-distribution: tasks 01-05 implemented
+  - task-01: package-skills job added to build-release.yml (fetch-depth: 0, detect PREV tag, SKILLS_CHANGED gate, zip per lang, upload zips + install scripts)
+  - task-02: .build/install-skills.sh (--lang/--uninstall flags, GitHub API latest release, curl download, unzip to ~/.claude/skills/, CLAUDE_SKILLS_DIR override)
+  - task-03: .build/install-skills.ps1 (-Lang/-Uninstall params, Invoke-RestMethod, Expand-Archive to %APPDATA%\Claude\skills\, CLAUDE_SKILLS_DIR override)
+  - task-04: no workflow conflicts — package-skills uploads distinct asset names (scholartools-skills-*) vs build job (scht-* + install.sh/.ps1)
+  - task-05: CLAUDE.md changelog discipline already present from previous session
+  - task-06: smoke test — pending manual CI verification on next tag push
+pending: task-06 (smoke test) — manual, not automated
+decisions:
+  - zip command: cd skills/$lang && zip -r .../zip */SKILL.md — produces dirs at archive root
+  - PREV fallback: git describe --tags --abbrev=0 HEAD^ || echo "" — empty = first tag = package unconditionally
+broken: none
+next: run smoke test on next release tag; flip passes: true after verification

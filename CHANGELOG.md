@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Landing page (`site/`) with hero, research workflow, envisioned features, and vision sections
+- `package-skills` CI job: publishes per-language skill zips (`scholartools-skills-en/es-vX.Y.Z.zip`) and `install-skills.sh` / `install-skills.ps1` as release assets when any file under `skills/` changed since the previous tag
+- `.build/install-skills.sh` — installs or uninstalls scholartools skills into `~/.claude/skills/` on macOS/Linux; supports `--lang <en|es>` and `--uninstall`
+- `.build/install-skills.ps1` — same for Windows (`%APPDATA%\Claude\skills\`); supports `-Lang` and `-Uninstall`
+
+### Skills
+- `scholartools-references`: updated to reflect file management commands (attach/detach/sync-file/unsync-file/reindex) replacing the removed link/unlink workflow
+- `scholartools-sync-peers`: updated to use renamed CLI commands `push-changelog` / `pull-changelog`
 
 ## [0.12.0] - 2026-03-21
 

@@ -72,3 +72,48 @@ jobs:
           files: |
             .build/install.sh
             .build/install.ps1
+
+  package-skills:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+          echo "SCHT_VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Detect skill changes
+        id: skills_check
+        run: |
+          PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV" ]; then
+            echo "SKILLS_CHANGED=true" >> $GITHUB_ENV
+          elif git diff --quiet "$PREV"..HEAD -- skills/; then
+            echo "SKILLS_CHANGED=false" >> $GITHUB_ENV
+          else
+            echo "SKILLS_CHANGED=true" >> $GITHUB_ENV
+          fi
+
+      - name: Package skill zips
+        if: env.SKILLS_CHANGED == 'true'
+        run: |
+          for lang in en es; do
+            cd skills/$lang
+            zip -r ../../scholartools-skills-$lang-${{ env.SCHT_VERSION }}.zip */SKILL.md
+            cd ../..
+          done
+
+      - name: Upload skill zips and install scripts
+        if: env.SKILLS_CHANGED == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            scholartools-skills-en-${{ env.SCHT_VERSION }}.zip
+            scholartools-skills-es-${{ env.SCHT_VERSION }}.zip
+            .build/install-skills.sh
+            .build/install-skills.ps1

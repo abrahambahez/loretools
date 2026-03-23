@@ -1,6 +1,6 @@
 ---
 name: scholartools-sync-peers
-description: scholartools distributed sync and peer management — step-by-step setup guide for S3-backed sync, adding devices and collaborators, daily sync workflow, conflict resolution, and peer lifecycle management. Use this whenever the user asks about syncing their scholartools library across devices, setting up a new device or collaborator, registering or revoking peers, handling sync conflicts, or any task involving the S3-backed change log. Guide the user through the full journey even if they only mention one step.
+description: scholartools distributed sync, peer management, and blob operations — step-by-step setup guide for S3-backed sync, adding devices and collaborators, daily sync workflow, conflict resolution, peer lifecycle management, and fetching or prefetching file blobs from S3. Use this whenever the user asks about syncing their scholartools library across devices, setting up a new device or collaborator, registering or revoking peers, handling sync conflicts, accessing a file that may not be cached locally, or bulk-fetching blobs before processing. Guide the user through the full journey even if they only mention one step.
 ---
 
 Sync works by writing a cryptographically signed change log to an S3-compatible bucket. Every device reads each other's changes and verifies signatures — no central server, no trust required.
@@ -116,6 +116,21 @@ scht sync restore <citekey>
 
 ---
 
+## Blob management
+
+File blobs (PDFs, EPUBs) are stored in S3 separately from the change log. Use these commands when working with files on a synced library.
+
+```sh
+scht files get <citekey>
+# Returns file bytes. Fetches from S3 if not cached locally.
+
+scht files prefetch [--citekeys key1,key2,...]
+# Downloads blobs from S3 for the given citekeys (all if omitted).
+# Run before bulk processing to avoid repeated S3 round-trips.
+```
+
+---
+
 ## 6. Add a second device (same researcher)
 
 Use this to sync `alice`'s library to a new machine (e.g. `"desktop"`).
@@ -215,4 +230,8 @@ scht sync snapshot
 scht sync list-conflicts
 scht sync resolve-conflict <uid> <field> <value>
 scht sync restore <citekey>
+
+# Blobs
+scht files get <citekey>
+scht files prefetch [--citekeys key1,key2,...]
 ```

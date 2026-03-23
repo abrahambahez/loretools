@@ -21,6 +21,11 @@
 ## CI/CD
 - the build-release workflow triggers ONLY on `v*` tags — pushing to main does NOT trigger it
 - to release: `git tag vX.Y.Z[-rcN] && git push origin vX.Y.Z[-rcN]`
+- skill zips (`scholartools-skills-en/es-vX.Y.Z.zip`) are published automatically when any file under `skills/` changed since the previous tag
+
+## changelog discipline
+- every CHANGELOG.md entry must follow "Keep a Changelog" with semantic versioning
+- if any file under `skills/` changed in a release, the CHANGELOG entry MUST include a `### Skills` subsection with one sentence per changed skill describing what was updated — this is the signal users need to know whether to re-run `install-skills.sh`
 
 ## workflow
 This project uses RPI-SDD workflow.

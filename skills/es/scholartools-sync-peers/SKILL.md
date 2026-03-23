@@ -1,6 +1,6 @@
 ---
 name: scholartools-sync-peers
-description: sincronización distribuida y gestión de peers en scholartools — guía paso a paso para configurar sync respaldado en S3, agregar dispositivos y colaboradores, flujo de sincronización diaria, resolución de conflictos y ciclo de vida de peers. Usa esto cuando el usuario pregunte sobre sincronizar su biblioteca entre dispositivos, configurar un nuevo dispositivo o colaborador, registrar o revocar peers, manejar conflictos de sincronización, o cualquier tarea relacionada con el registro de cambios en S3. Guía al usuario por todo el recorrido aunque solo mencione un paso.
+description: sincronización distribuida, gestión de peers y operaciones de blobs en scholartools — guía paso a paso para configurar sync respaldado en S3, agregar dispositivos y colaboradores, flujo de sincronización diaria, resolución de conflictos, ciclo de vida de peers, y descarga de blobs de archivos desde S3. Usa esto cuando el usuario pregunte sobre sincronizar su biblioteca entre dispositivos, configurar un nuevo dispositivo o colaborador, registrar o revocar peers, manejar conflictos de sincronización, acceder a un archivo que puede no estar en caché local, o precargar blobs antes de procesar. Guía al usuario por todo el recorrido aunque solo mencione un paso.
 ---
 
 La sincronización funciona escribiendo un registro de cambios firmado criptográficamente en un bucket compatible con S3. Cada dispositivo lee los cambios de los demás y verifica las firmas — sin servidor central, sin necesidad de confianza ciega.
@@ -116,6 +116,21 @@ scht sync restore <citekey>
 
 ---
 
+## Gestión de blobs
+
+Los blobs de archivos (PDFs, EPUBs) se almacenan en S3 separados del registro de cambios. Usa estos comandos al trabajar con archivos en una biblioteca sincronizada.
+
+```sh
+scht files get <citekey>
+# Devuelve los bytes del archivo. Lo descarga de S3 si no está en caché local.
+
+scht files prefetch [--citekeys clave1,clave2,...]
+# Descarga blobs desde S3 para los citekeys dados (todos si se omite).
+# Ejecuta antes de procesar en masa para evitar múltiples viajes a S3.
+```
+
+---
+
 ## 6. Agregar un segundo dispositivo (mismo investigador)
 
 Usa esto cuando quieras sincronizar la biblioteca de `alice` a una nueva máquina (p.ej. `"desktop"`).
@@ -215,4 +230,8 @@ scht sync snapshot
 scht sync list-conflicts
 scht sync resolve-conflict <uid> <field> <valor>
 scht sync restore <citekey>
+
+# Blobs
+scht files get <citekey>
+scht files prefetch [--citekeys clave1,clave2,...]
 ```

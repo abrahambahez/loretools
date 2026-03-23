@@ -1,6 +1,6 @@
 ---
 name: scholartools-references
-description: scholartools reference management — discover references from external APIs, fetch by DOI/arXiv/ISBN, extract metadata from local PDFs, stage candidates, merge into the library, and perform full CRUD on library records. Use this for any scholartools task involving finding references, adding them to the library, filtering or searching the library, updating or deleting records, or the full staging→merge workflow. If the user is doing anything research-related with scholartools that isn't purely about files or sync, use this skill.
+description: scholartools reference management — discover references from external APIs, fetch by DOI/arXiv/ISBN, extract metadata from local PDFs, stage candidates, merge into the library, perform full CRUD on library records, and manage files attached to references (link, unlink, move, list). Use this for any scholartools task involving finding references, adding them to the library, filtering or searching the library, updating or deleting records, the full staging→merge workflow, or attaching/removing PDFs and EPUBs. If the user is doing anything research-related with scholartools that isn't purely about sync, use this skill.
 ---
 
 ## Concepts
@@ -59,9 +59,32 @@ scht refs filter [--query "<text>"] [--author "<surname>"] [--year YYYY] \
 # --staging: filter staged records instead of library
 ```
 
+## Files
+
+Files are linked to **library** references (not staged ones). Each reference holds at most one file.
+
+```sh
+scht files link <citekey> <path>
+# Copies <path> into the archive and links it to the reference.
+
+scht files unlink <citekey>
+# Removes the archive copy and clears the file link.
+
+scht files move <citekey> <dest_name>
+# Renames the archived file. dest_name is filename only, no path.
+
+scht files list [--page N]
+```
+
+To attach a file at intake: `scht staging stage '<json>' --file <path>` — `merge` moves it to the archive.
+
 ## Key model fields
 
 **ReferenceRow** (list/filter results): `citekey, title, authors, year, doi, uid, has_file, has_warnings`
 
 **Reference** (full record): `id` (=citekey), `type` (CSL), `title`, `author: [{family, given}]`,
 `issued: {date-parts: [[YYYY]]}`, `DOI`, `URL`, `uid`, `uid_confidence` ("authoritative"|"semantic")
+
+**FileRow** (files list results): `citekey, path, mime_type, size_bytes`
+
+**FileRecord** (on Reference as `_file`): `path, mime_type, size_bytes, added_at`

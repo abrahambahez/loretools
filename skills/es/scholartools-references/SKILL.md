@@ -1,6 +1,6 @@
 ---
 name: scholartools-references
-description: gestión de referencias en scholartools — descubrir referencias en APIs externas, obtener metadatos por DOI/arXiv/ISBN, extraer metadatos de PDFs locales, poner referencias en staging, fusionarlas con la biblioteca y realizar CRUD completo sobre los registros. Usa esto para cualquier tarea con scholartools que implique encontrar referencias, agregarlas a la biblioteca, filtrar o buscar, actualizar o eliminar registros, o el flujo staging→merge. Si el usuario hace algo con scholartools relacionado con referencias que no sea exclusivamente archivos o sincronización, usa esta skill.
+description: gestión de referencias en scholartools — descubrir referencias en APIs externas, obtener metadatos por DOI/arXiv/ISBN, extraer metadatos de PDFs locales, poner referencias en staging, fusionarlas con la biblioteca, realizar CRUD completo sobre los registros y gestionar archivos vinculados a referencias (vincular, desvincular, mover, listar). Usa esto para cualquier tarea con scholartools que implique encontrar referencias, agregarlas a la biblioteca, filtrar o buscar, actualizar o eliminar registros, el flujo staging→merge, o adjuntar/eliminar PDFs y EPUBs. Si el usuario hace algo con scholartools relacionado con referencias que no sea exclusivamente sincronización, usa esta skill.
 ---
 
 ## Conceptos
@@ -59,9 +59,32 @@ scht refs filter [--query "<texto>"] [--author "<apellido>"] [--year AAAA] \
 # --staging: filtra registros en staging en lugar de la biblioteca
 ```
 
+## Archivos
+
+Los archivos se vinculan a referencias de la **biblioteca** (no a las que están en staging). Cada referencia puede tener como máximo un archivo.
+
+```sh
+scht files link <citekey> <ruta>
+# Copia <ruta> al archivo y lo vincula a la referencia.
+
+scht files unlink <citekey>
+# Elimina la copia del archivo y limpia el vínculo en la referencia.
+
+scht files move <citekey> <nombre_destino>
+# Renombra el archivo almacenado. nombre_destino es solo el nombre de archivo, sin ruta.
+
+scht files list [--page N]
+```
+
+Para adjuntar un archivo al ingresar una referencia: `scht staging stage '<json>' --file <ruta>` — `merge` lo mueve al archivo definitivo.
+
 ## Campos clave de los modelos
 
 **ReferenceRow** (resultados de list/filter): `citekey, title, authors, year, doi, uid, has_file, has_warnings`
 
 **Reference** (registro completo): `id` (=citekey), `type` (CSL), `title`, `author: [{family, given}]`,
 `issued: {date-parts: [[AAAA]]}`, `DOI`, `URL`, `uid`, `uid_confidence` ("authoritative"|"semantic")
+
+**FileRow** (resultados de files list): `citekey, path, mime_type, size_bytes`
+
+**FileRecord** (en Reference como `_file`): `path, mime_type, size_bytes, added_at`
