@@ -54,25 +54,17 @@ jobs:
 
       - name: Zip bundle (Unix)
         if: runner.os != 'Windows'
-        run: cd dist && zip -r ../scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip scht/
+        run: cd dist && zip ../scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip scht
 
       - name: Zip bundle (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: Compress-Archive -Path dist\scht\* -DestinationPath scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip
+        run: Compress-Archive -Path dist\scht.exe -DestinationPath scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip
 
       - name: Upload zip
         uses: softprops/action-gh-release@v2
         with:
           files: scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip
-
-      - name: Upload install scripts (Linux job only)
-        if: matrix.platform == 'linux-x86_64'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            .build/install.sh
-            .build/install.ps1
 
   package-skills:
     runs-on: ubuntu-latest

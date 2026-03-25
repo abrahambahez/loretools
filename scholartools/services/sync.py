@@ -7,7 +7,7 @@ from pathlib import Path
 
 from scholartools.adapters import conflicts_store, s3_sync
 from scholartools.adapters.peer_directory import load_peer_directory
-from scholartools.config import CONFIG_PATH
+from scholartools.config import _config_dir
 from scholartools.models import (
     ChangeLogEntry,
     ConflictRecord,
@@ -46,7 +46,7 @@ def _save_sync_state(data_dir: Path, state: dict) -> None:
 
 
 def _load_privkey(ctx: LibraryCtx) -> bytes | None:
-    key_path = CONFIG_PATH.parent / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
+    key_path = _config_dir() / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
     return key_path.read_bytes() if key_path.exists() else None
 
 

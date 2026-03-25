@@ -357,7 +357,7 @@ def resolve_conflict(uid: str, field: str, winning_value) -> Result:
     from pathlib import Path
 
     from scholartools.adapters import conflicts_store, s3_sync
-    from scholartools.config import CONFIG_PATH
+    from scholartools.config import _config_dir
     from scholartools.services import peers as _peers
 
     ctx = _get_ctx()
@@ -370,7 +370,7 @@ def resolve_conflict(uid: str, field: str, winning_value) -> Result:
 
     ts = hlc_now(ctx.peer_id)
 
-    key_path = CONFIG_PATH.parent / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
+    key_path = _config_dir() / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
     if not key_path.exists():
         return Result(ok=False, error="local device keypair not found")
     privkey = key_path.read_bytes()

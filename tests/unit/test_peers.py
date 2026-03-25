@@ -87,16 +87,14 @@ def test_verify_fails_wrong_key():
 
 @pytest.mark.asyncio
 async def test_peer_init_creates_key(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     result = await peer_init("alice", "laptop", ctx)
     assert result.error is None
     assert result.identity is not None
     assert result.identity.peer_id == "alice"
     assert result.identity.device_id == "laptop"
-    key_path = tmp_path / "keys" / "alice" / "laptop.key"
+    key_path = tmp_path / ".scholartools" / "keys" / "alice" / "laptop.key"
     assert key_path.exists()
     assert oct(key_path.stat().st_mode)[-3:] == "600"
     assert len(key_path.read_bytes()) == 32
@@ -104,9 +102,7 @@ async def test_peer_init_creates_key(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_peer_init_rejects_duplicate(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("alice", "laptop", ctx)
     result = await peer_init("alice", "laptop", ctx)
@@ -145,9 +141,7 @@ def test_device_identity_old_peer_role_treated_as_non_admin():
 
 @pytest.mark.asyncio
 async def test_check_admin_role_missing_keypair(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     peers_dir = Path(ctx.peers_dir)
     peers_dir.mkdir(parents=True)
@@ -158,9 +152,7 @@ async def test_check_admin_role_missing_keypair(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_check_admin_role_missing_peer_record(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     peers_dir = Path(ctx.peers_dir)
@@ -172,9 +164,7 @@ async def test_check_admin_role_missing_peer_record(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_check_admin_role_missing_device_in_record(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     peers_dir = Path(ctx.peers_dir)
@@ -200,9 +190,7 @@ async def test_check_admin_role_missing_device_in_record(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_check_admin_role_non_admin_role(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     peers_dir = Path(ctx.peers_dir)
@@ -228,9 +216,7 @@ async def test_check_admin_role_non_admin_role(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_check_admin_role_old_peer_role_rejected(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     peers_dir = Path(ctx.peers_dir)
@@ -256,9 +242,7 @@ async def test_check_admin_role_old_peer_role_rejected(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_check_admin_role_ok(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     await peer_register_self(ctx)
@@ -271,9 +255,7 @@ async def test_check_admin_role_ok(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_peer_register_no_keypair(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     from scholartools.models import PeerIdentity
 
@@ -285,9 +267,7 @@ async def test_peer_register_no_keypair(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_peer_register_blocked_when_not_admin(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     # No peer_register_self — caller not in directory
@@ -301,9 +281,7 @@ async def test_peer_register_blocked_when_not_admin(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_peer_register_registers_contributor(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     await peer_register_self(ctx)
@@ -321,9 +299,7 @@ async def test_peer_register_registers_contributor(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_peer_register_self_on_empty_dir(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     result = await peer_register_self(ctx)
@@ -336,9 +312,7 @@ async def test_peer_register_self_on_empty_dir(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_peer_register_self_fails_on_nonempty_dir(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     await peer_register_self(ctx)
@@ -349,9 +323,7 @@ async def test_peer_register_self_fails_on_nonempty_dir(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_peer_register_self_fails_missing_keypair(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     result = await peer_register_self(ctx)
     assert not result.ok
@@ -457,9 +429,7 @@ def test_verify_entry_missing_fields():
 
 @pytest.mark.asyncio
 async def test_peer_revoke_device(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     await peer_register_self(ctx)
@@ -481,9 +451,7 @@ async def test_peer_revoke_device(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_peer_revoke_all_devices(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     ctx = _make_ctx(tmp_path)
     await peer_init("_admin", "_admin", ctx)
     await peer_register_self(ctx)
@@ -503,9 +471,7 @@ async def test_peer_revoke_all_devices(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_peer_add_device_blocked_when_not_admin(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     admin_ctx = _make_ctx(tmp_path, "admin", "dev")
     alice_ctx = _make_ctx(tmp_path, "alice", "laptop")
     await peer_init("admin", "dev", admin_ctx)
@@ -519,9 +485,7 @@ async def test_peer_add_device_blocked_when_not_admin(monkeypatch, tmp_path):
 
 @pytest.mark.asyncio
 async def test_peer_revoke_blocked_when_not_admin(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     admin_ctx = _make_ctx(tmp_path, "admin", "dev")
     alice_ctx = _make_ctx(tmp_path, "alice", "laptop")
     await peer_init("admin", "dev", admin_ctx)

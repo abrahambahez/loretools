@@ -4,29 +4,13 @@ Reference management library built for AI agents. Local-first, no GUI, no human 
 
 ## install
 
-macOS / Linux:
+**Primary: Claude Co-Work (recommended for researchers)**
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/abrahambahez/scholartools/main/install.sh | bash
-```
+See **[docs/getting-started.md](docs/getting-started.md)** for the full Co-Work setup guide. The short version: download a release zip from the [Releases page](https://github.com/abrahambahez/scholartools/releases), upload it to your Co-Work session with the `scholartools-manager` skill, and the agent handles the rest.
 
-Windows (elevated PowerShell):
+**Secondary: direct binary download (technical users)**
 
-```powershell
-irm https://raw.githubusercontent.com/abrahambahez/scholartools/main/install.ps1 | iex
-```
-
-Re-running the script updates the binary in place.
-
-To uninstall:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/abrahambahez/scholartools/main/install.sh) --uninstall
-```
-
-```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/abrahambahez/scholartools/main/install.ps1))) -Uninstall
-```
+Download the binary for your platform from the [Releases page](https://github.com/abrahambahez/scholartools/releases), unzip it, and place `scht` in your collection directory. Run it from that directory — no PATH installation required.
 
 ### install skills
 
@@ -60,16 +44,17 @@ bash <(curl -fsSL https://raw.githubusercontent.com/abrahambahez/scholartools/ma
 
 ## config
 
-Config is loaded from `~/.config/scholartools/config.json` (Windows: `C:\Users\<user>\.config\scholartools\config.json`). Created automatically with defaults on first use.
+Config is loaded from `.scholartools/config.json` inside the **collection directory** (the directory where you run `scht`). Created automatically with defaults on first run.
 
 ```jsonc
 {
   "backend": "local",
 
   // Where library.json, files/, and staging/ are stored.
-  // All paths are derived from this — it's the only path you ever need to set.
+  // Defaults to the collection directory (CWD). Change only if you want data
+  // stored somewhere other than the collection folder itself.
   "local": {
-    "library_dir": "~/.local/share/scholartools"
+    "library_dir": "/path/to/collection"
   },
 
   "apis": {

@@ -1,7 +1,7 @@
 import asyncio
 import json
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 from scholartools.models import (
     ChangeLogEntry,
@@ -133,13 +133,7 @@ def test_push_no_keypair(tmp_path):
     )
     write_change_log_entry(tmp_path, entry)
 
-    with patch("scholartools.config.CONFIG_PATH") as mock_config_path:
-        mock_key_path = MagicMock()
-        mock_key_path.exists.return_value = False
-        mock_config_path.parent.__truediv__ = MagicMock(
-            return_value=MagicMock(__truediv__=MagicMock(return_value=mock_key_path))
-        )
-        result = asyncio.run(push_changelog(ctx))
+    result = asyncio.run(push_changelog(ctx))
     assert any("keypair" in e for e in result.errors)
 
 
@@ -162,25 +156,10 @@ def test_push_uploads_entries(tmp_path):
     privkey_bytes = b"\x00" * 32
 
     with (
-        patch("scholartools.services.sync.CONFIG_PATH") as mcp,
+        patch("scholartools.services.sync._load_privkey", return_value=privkey_bytes),
         patch("scholartools.adapters.s3_sync.upload"),
     ):
-        key_path = MagicMock()
-        key_path.exists.return_value = True
-        key_path.read_bytes.return_value = privkey_bytes
-        mcp.parent.__truediv__ = MagicMock(
-            return_value=MagicMock(
-                __truediv__=MagicMock(
-                    return_value=MagicMock(__truediv__=MagicMock(return_value=key_path))
-                )
-            )
-        )
-
-        # patch _load_privkey directly
-        with patch(
-            "scholartools.services.sync._load_privkey", return_value=privkey_bytes
-        ):
-            result = asyncio.run(push_changelog(ctx))
+        result = asyncio.run(push_changelog(ctx))
 
     assert result.entries_pushed == 1
 

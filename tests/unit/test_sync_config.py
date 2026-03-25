@@ -39,8 +39,10 @@ def test_ctx_uses_local_adapter_without_sync(tmp_path, monkeypatch):
     import scholartools
     from scholartools.models import Settings
 
-    config_path = tmp_path / "config.json"
-    config_path.write_text(
+    monkeypatch.chdir(tmp_path)
+    config_dir = tmp_path / ".scholartools"
+    config_dir.mkdir()
+    (config_dir / "config.json").write_text(
         Settings().model_dump_json(
             indent=2,
             exclude={
@@ -54,7 +56,6 @@ def test_ctx_uses_local_adapter_without_sync(tmp_path, monkeypatch):
             },
         )
     )
-    monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
     scholartools.reset()
 
     ctx = scholartools._build_ctx()
@@ -87,9 +88,10 @@ def test_ctx_uses_sync_adapter_with_sync_block(tmp_path, monkeypatch):
     }
     data["peer"] = {"peer_id": "peer-a", "device_id": "dev-1"}
 
-    config_path = tmp_path / "config.json"
-    config_path.write_text(json.dumps(data))
-    monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
+    monkeypatch.chdir(tmp_path)
+    config_dir = tmp_path / ".scholartools"
+    config_dir.mkdir()
+    (config_dir / "config.json").write_text(json.dumps(data))
     scholartools.reset()
 
     ctx = scholartools._build_ctx()

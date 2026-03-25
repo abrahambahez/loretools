@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-03-24
+
+### Changed
+- Config resolution is now CWD-relative: `scht` loads `.scholartools/config.json` from the current working directory instead of `~/.config/scholartools/config.json`; the file is auto-created on first run if missing
+- `LocalSettings.library_dir` defaults to `Path.cwd()` (the collection directory) instead of `~/.local/share/scholartools`
+- PyInstaller build now produces a single `scht` executable file (onefile mode) instead of a directory bundle
+- Release zips contain a single `scht` binary, not a `scht/` directory tree
+- README install section rewritten: Claude Co-Work is the primary setup path (links to `docs/getting-started.md`); direct binary download is the secondary path for technical users
+- README config section updated to document `.scholartools/config.json` and CWD default for `local.library_dir`
+
+### Added
+- `docs/getting-started.md` — step-by-step Co-Work setup guide for non-technical researchers: download release zip, upload to Co-Work, prompt manager skill, verify collection, subsequent-session flow, collection layout, and config reference
+
+### Removed
+- `install.sh` and `install.ps1` — global install scripts removed; use direct binary download instead
+- CI step that uploaded `install.sh` and `install.ps1` as release assets
+
+### Skills
+- `scholartools-manager` (new): guides the agent through binary installation into a collection, config creation, and session-start verification; replaces `scholartools-config`
+- `scholartools-config` removed: superseded by `scholartools-manager`
+
 ## [0.12.1] - 2026-03-23
 
 ### Added

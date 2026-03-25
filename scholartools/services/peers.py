@@ -11,7 +11,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 )
 
 from scholartools.adapters.peer_directory import load_peer_directory
-from scholartools.config import CONFIG_PATH
+from scholartools.config import _config_dir
 from scholartools.models import (
     DeviceIdentity,
     LibraryCtx,
@@ -50,12 +50,12 @@ def _verify(payload: bytes, signature: str, public_key_bytes: bytes) -> bool:
 
 
 def _load_caller_key(ctx: LibraryCtx) -> bytes | None:
-    key_path = CONFIG_PATH.parent / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
+    key_path = _config_dir() / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
     return key_path.read_bytes() if key_path.exists() else None
 
 
 def _check_admin_role(ctx: LibraryCtx, peers_dir: Path) -> Result:
-    key_path = CONFIG_PATH.parent / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
+    key_path = _config_dir() / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
     if not key_path.exists():
         return Result(ok=False, error="local device keypair not found")
     record_path = peers_dir / ctx.peer_id
@@ -77,7 +77,7 @@ def _check_admin_role(ctx: LibraryCtx, peers_dir: Path) -> Result:
 
 
 async def peer_init(peer_id: str, device_id: str, ctx: LibraryCtx) -> PeerInitResult:
-    key_path = CONFIG_PATH.parent / "keys" / peer_id / f"{device_id}.key"
+    key_path = _config_dir() / "keys" / peer_id / f"{device_id}.key"
     if key_path.exists():
         return PeerInitResult(error=f"key already exists for {peer_id}/{device_id}")
     private_key = Ed25519PrivateKey.generate()
@@ -218,7 +218,7 @@ async def peer_register_self(ctx: LibraryCtx) -> Result:
                 " use peer_register() with an existing admin"
             ),
         )
-    key_path = CONFIG_PATH.parent / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
+    key_path = _config_dir() / "keys" / ctx.peer_id / f"{ctx.device_id}.key"
     if not key_path.exists():
         return Result(ok=False, error="local device keypair not found")
     private_bytes = key_path.read_bytes()

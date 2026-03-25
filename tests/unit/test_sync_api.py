@@ -36,9 +36,10 @@ def reset_ctx(tmp_path, monkeypatch):
         "secret_key": "s",
     }
     data["peer"] = {"peer_id": "peer-a", "device_id": "dev-1"}
-    config_path = tmp_path / "config.json"
-    config_path.write_text(json.dumps(data))
-    monkeypatch.setattr("scholartools.config.CONFIG_PATH", config_path)
+    monkeypatch.chdir(tmp_path)
+    config_dir = tmp_path / ".scholartools"
+    config_dir.mkdir()
+    (config_dir / "config.json").write_text(json.dumps(data))
     scholartools.reset()
     yield
     scholartools.reset()

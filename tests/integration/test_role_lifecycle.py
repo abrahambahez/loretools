@@ -28,9 +28,7 @@ def _make_ctx(tmp_path: Path, peer_id: str, device_id: str, peers_dir: Path):
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_role_lifecycle(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
 
     shared_peers = tmp_path / "shared_peers"
 

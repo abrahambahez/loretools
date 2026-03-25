@@ -232,9 +232,7 @@ class FilesListResult(BaseModel):
 
 class LocalSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    library_dir: Path = Field(
-        default_factory=lambda: Path.home() / ".local/share/scholartools"
-    )
+    library_dir: Path = Field(default_factory=Path.cwd)
 
     @computed_field
     @property

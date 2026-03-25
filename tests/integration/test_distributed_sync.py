@@ -374,16 +374,7 @@ def test_resolve_conflict_end_to_end(tmp_path):
 
     assert len(read_conflicts(data_dir_a)) == 1
 
-    key_dir = tmp_path / "keys" / "peer-a"
-    key_dir.mkdir(parents=True)
-    (key_dir / "dev-1.key").write_bytes(priv_a)
-
-    config_mock = tmp_path / "config.json"
-
-    with (
-        patch("scholartools.adapters.s3_sync.upload", side_effect=s3.upload),
-        patch("scholartools.config.CONFIG_PATH", config_mock),
-    ):
+    with patch("scholartools.adapters.s3_sync.upload", side_effect=s3.upload):
         # Manually reproduce resolve_conflict logic
         # (since we can't easily use public API here)
         import json as _json

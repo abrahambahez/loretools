@@ -43,13 +43,12 @@ a = Analysis(
 
 pyz = PYZ(a.pure)
 
-# Windows: name="scht.exe" — handled automatically by PyInstaller on Windows
-# macOS: codesign manually after build or via CI with APPLE_SIGNING_IDENTITY env
 exe = EXE(
     pyz,
     a.scripts,
-    [],
-    exclude_binaries=True,
+    a.binaries,
+    a.datas,
+    exclude_binaries=False,
     name="scht",
     debug=False,
     bootloader_ignore_signals=False,
@@ -61,14 +60,4 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-)
-
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name="scht",
 )

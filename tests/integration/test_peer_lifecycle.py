@@ -20,9 +20,7 @@ from scholartools.services.peers import (
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_full_peer_lifecycle(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        "scholartools.services.peers.CONFIG_PATH", tmp_path / "config.json"
-    )
+    monkeypatch.chdir(tmp_path)
     from unittest.mock import MagicMock
 
     from scholartools.models import LibraryCtx
