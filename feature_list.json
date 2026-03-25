@@ -144,5 +144,12 @@
     "title": "Skills zip distribution — per-language skill zips with install scripts, change-gated CI release",
     "spec": "specs/025-skills-zip-distribution.md",
     "passes": false
+  },
+  {
+    "id": "portable-root-architecture",
+    "title": "Portable root architecture — collection-scoped CWD config, onefile binary, scholartools-manager skill",
+    "spec": "specs/026-portable-root-architecture.md",
+    "passes": true,
+    "notes": "All 9 tasks complete. 481 tests passing. CWD-relative .scholartools/config.json, LocalSettings.library_dir defaults to CWD, onefile PyInstaller build, scholartools-manager replaces scholartools-config, docs/getting-started.md added, install.sh/install.ps1 removed. v0.13.0."
   }
 ]

@@ -416,3 +416,25 @@ decisions:
   - PREV fallback: git describe --tags --abbrev=0 HEAD^ || echo "" — empty = first tag = package unconditionally
 broken: none
 next: run smoke test on next release tag; flip passes: true after verification
+
+--- [2026-03-24] session spec-026 ---
+completed:
+  - feat 026 portable-root-architecture: all 9 tasks implemented and reviewed (PASS)
+  - task-01: config.py — removed CONFIG_PATH, added _config_dir(), load_settings() resolves to CWD/.scholartools/config.json, auto-creates on missing, FileNotFoundError if unwritable
+  - task-02: models.py — LocalSettings.library_dir default changed to Path.cwd()
+  - task-03: tests isolated — all test files updated to use monkeypatch.chdir(tmp_path) instead of CONFIG_PATH patching; peers.py/sync.py/__init__.py updated to use _config_dir()
+  - task-04: .build/pyinstaller.spec converted to onefile mode (exclude_binaries=False, no COLLECT block)
+  - task-05: build-release.yml updated to zip single scht file, removed install.sh/install.ps1 upload step
+  - task-06: skills/en|es/scholartools-manager/SKILL.md created; skills/en|es/scholartools-config/ deleted
+  - task-07: docs/getting-started.md — Co-Work setup guide for non-technical researchers
+  - task-08: README.md — Co-Work as primary install, direct binary as secondary; config docs updated
+  - task-09: install.sh and install.ps1 deleted; CHANGELOG [0.13.0] added; pyproject.toml bumped to 0.13.0; feature_list.json updated
+  - 481 unit tests passing; no .scholartools/ created in repo root during test runs
+pending: none
+decisions:
+  - _config_dir() function in config.py (not CONFIG_PATH constant) — allows runtime resolution of CWD
+  - peers.py/sync.py/__init__.py use from scholartools.config import _config_dir, call _config_dir() at runtime
+  - tests use monkeypatch.chdir(tmp_path) — cleaner than patching a module attribute; key paths now relative to tmp_path/.scholartools/
+  - test_distributed_sync.py resolve_conflict test: removed unnecessary CONFIG_PATH patch (test manually reproduces logic, never calls _load_privkey)
+broken: none
+next: awaiting user instruction
