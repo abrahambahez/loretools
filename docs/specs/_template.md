@@ -1,5 +1,5 @@
 # spec: [feature name]
-# Copy this file to docs/specs/[feature-name].md
+# Copy this file to specs/[feature-name].md
 # Read from docs/feats/[feature-name].md before writing this spec
 
 ## findings

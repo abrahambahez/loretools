@@ -123,7 +123,7 @@ Wire per-researcher identity (`peer_id`, `device_id`) through config into `Libra
   - `@pytest.mark.integration`; local tmp dir as shared backend
 
 - [ ] task-12: `feature_list.json` — blocks: none
-  - Append `{"id": "role-logic", "title": "Role logic — per-peer identity in config, admin/contributor roles, peer_register_self bootstrap", "spec": "docs/specs/010-role-logic.md", "passes": false}`
+  - Append `{"id": "role-logic", "title": "Role logic — per-peer identity in config, admin/contributor roles, peer_register_self bootstrap", "spec": "specs/010-role-logic.md", "passes": false}`
 
 - [ ] task-13: full suite green + ruff clean — blocks: task-11
   - `uv run pytest` — no regressions on 399+ existing tests

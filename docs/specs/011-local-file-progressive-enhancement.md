@@ -74,7 +74,7 @@ Restore the local-first guarantee by implementing progressive enhancement: local
   - `uv run ruff check .` — zero new errors
 
 - [ ] task-08: `feature_list.json` — blocks: none
-  - Append `{"id": "local-file-progressive-enhancement", "title": "Local-first file ops — progressive enhancement stacking blob sync on local copy", "spec": "docs/specs/011-local-file-progressive-enhancement.md", "passes": false}`
+  - Append `{"id": "local-file-progressive-enhancement", "title": "Local-first file ops — progressive enhancement stacking blob sync on local copy", "spec": "specs/011-local-file-progressive-enhancement.md", "passes": false}`
 
 ## risks
 
