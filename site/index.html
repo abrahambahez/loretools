@@ -38,14 +38,14 @@
               <span id="version-badge">[Beta]</span>
             </span>
             <h1 class="text-6xl md:text-8xl font-serif leading-[0.9] mb-8">
-              <span class="italic">Research tookit </span> for <span class="text-oxblood">human + AI agent</span>
+              <span class="italic">Research toolkit </span> for <span class="text-oxblood">human + AI agent</span>
               workflows
             </h1>
             <p class="text-xl font-medium leading-tight mb-12 max-w-2xl">
-              A Python library +skills, prompts and more artifacts that gives AI agents a reliable, deterministic
-              interface to search, fetch, store, and
-              manage academic references. Think Zotero rebuilt as a machine-native primitive: no GUI, no human
-              workflows — clean functions an agent can call with confidence.
+              A Python library that gives AI agents a reliable, deterministic interface to build and maintain a
+              research library. Two layers: a reference store for epistemic objects, and a knowledge layer of
+              synthesis notes, concept pages, and reading paths derived from them. Local-first, no GUI, no human
+              workflows.
             </p>
 
             <!-- Differentiators -->
@@ -55,7 +55,7 @@
                 <span class="spec-tech">[agent-native-functions]</span>
               </div>
               <div class="spec-row">
-                <span class="spec-human">Increase Reference Quality</span>
+                <span class="spec-human">Increase reference quality</span>
                 <span class="spec-tech">[CSL-JSON · two-stage-model]</span>
               </div>
               <div class="spec-row">
@@ -63,12 +63,12 @@
                 <span class="spec-tech">[staging → library]</span>
               </div>
               <div class="spec-row">
-                <span class="spec-human">Share a library with a research community</span>
-                <span class="spec-tech">[Ed25519 · LWW-sync]</span>
+                <span class="spec-human">Turn a library into living understanding</span>
+                <span class="spec-tech">[wiki · synthesis-notes · concept-pages]</span>
               </div>
               <div class="spec-row">
                 <span class="spec-human">Work offline, own your library</span>
-                <span class="spec-tech">[local-first · small AI compatible]</span>
+                <span class="spec-tech">[local-first · portable · no-GUI]</span>
               </div>
             </div>
 
@@ -89,7 +89,7 @@
         </div>
       </section>
 
-      <!-- Install CTA -->
+      <!-- Get Started -->
       <section id="get-started"
         class="px-6 py-20 md:px-12 lg:px-24 border-b-2 border-structural-black bg-oxblood text-parchment">
         <div class="max-w-4xl mx-auto">
@@ -97,108 +97,51 @@
             Get started
           </h2>
           <p class="text-lg mb-16 opacity-90 max-w-2xl">
-            Two paths, one binary. Choose based on how you work with Claude.
+            No terminal required. Download the binary, upload it to your Co-Work session, and paste the setup prompt — your agent does the rest.
           </p>
 
-          <!-- Path 1: Claude Desktop -->
-          <div style="margin-bottom: 4rem;">
-            <h3 style="font-family: var(--font-serif); font-style: italic; text-transform: none; font-weight: 500; font-size: var(--fs-md); margin-block: 0 0.4em;">Claude Desktop</h3>
-            <p class="text-sm opacity-70" style="margin-bottom: 2rem;">For researchers using Claude.ai Projects — no terminal needed. Your agent handles setup.</p>
+          <div style="display: flex; flex-direction: column; gap: 2rem; margin-bottom: 3rem;">
 
-            <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem;">
-              <div style="display: flex; gap: 1.25rem;">
-                <span style="font-size: 0.65rem; opacity: 0.35; padding-top: 0.25rem; min-width: 1.25rem; font-family: var(--font-mono);">01</span>
-                <div>
-                  <p class="text-sm" style="margin-bottom: 0.75rem;">Download the CLI and the manager skill</p>
-                  <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <a id="dl-cli-desktop" href="#" download class="brutalist-button inline-flex items-center gap-2">
-                      <i data-lucide="download" class="w-3 h-3"></i>
-                      <span id="dl-cli-label">lore CLI</span>
-                    </a>
-                    <a id="dl-manager" href="#" download class="brutalist-button inline-flex items-center gap-2">
-                      <i data-lucide="download" class="w-3 h-3"></i>
-                      Manager skill
-                    </a>
-                  </div>
-                </div>
+            <div style="display: flex; gap: 1.25rem;">
+              <span style="font-size: 0.65rem; opacity: 0.35; padding-top: 0.25rem; min-width: 1.25rem; font-family: var(--font-mono);">01</span>
+              <div>
+                <p class="text-sm" style="margin-bottom: 0.75rem;">Download the binary for your platform</p>
+                <a id="dl-cli" href="https://github.com/abrahambahez/loretools/releases/latest" download class="brutalist-button inline-flex items-center gap-2">
+                  <i data-lucide="download" class="w-3 h-3"></i>
+                  <span id="dl-cli-label">lore CLI</span>
+                </a>
               </div>
-              <div style="display: flex; gap: 1.25rem;">
-                <span style="font-size: 0.65rem; opacity: 0.35; padding-top: 0.25rem; min-width: 1.25rem; font-family: var(--font-mono);">02</span>
-                <p class="text-sm" style="margin: 0;">Upload both files to your Co-Work session and install the skill.</p>
-              </div>
-              <div style="display: flex; gap: 1.25rem;">
-                <span style="font-size: 0.65rem; opacity: 0.35; padding-top: 0.25rem; min-width: 1.25rem; font-family: var(--font-mono);">03</span>
-                <div>
-                  <p class="text-sm" style="margin-bottom: 0.5rem;">Ask the agent:</p>
-                  <code style="display: block; background: rgba(0,0,0,0.35); padding: 0.75rem 1rem; font-size: 0.8rem; border: 1px solid rgba(252,249,240,0.2);">"Set up loretools in my collection folder"</code>
+            </div>
+
+            <div style="display: flex; gap: 1.25rem;">
+              <span style="font-size: 0.65rem; opacity: 0.35; padding-top: 0.25rem; min-width: 1.25rem; font-family: var(--font-mono);">02</span>
+              <p class="text-sm" style="margin: 0;">Place the binary in your collection folder, then upload it to your Claude Co-Work session.</p>
+            </div>
+
+            <div style="display: flex; gap: 1.25rem;">
+              <span style="font-size: 0.65rem; opacity: 0.35; padding-top: 0.25rem; min-width: 1.25rem; font-family: var(--font-mono);">03</span>
+              <div style="flex: 1;">
+                <p class="text-sm" style="margin-bottom: 0.5rem;">Copy and paste this prompt into your Co-Work session</p>
+                <div class="relative">
+                  <pre id="init-prompt-block" style="margin: 0; max-height: 240px; overflow-y: auto; border-color: rgba(252,249,240,0.2); font-size: 0.72rem; line-height: 1.6; white-space: pre-wrap;"></pre>
+                  <button onclick="copyInitPrompt(this)"
+                    style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(252,249,240,0.1); color: var(--c-parchment); border: 1px solid rgba(252,249,240,0.25); padding: 0.2rem 0.6rem; font-size: 0.65rem; font-family: var(--font-mono); cursor: pointer; text-transform: uppercase;">
+                    Copy
+                  </button>
                 </div>
               </div>
             </div>
 
-            <a href="https://github.com/abrahambahez/loretools/blob/main/docs/getting-started.md"
-              class="text-parchment text-lg font-serif italic">
-              Full setup guide →
-            </a>
           </div>
 
-          <!-- divider -->
-          <div style="border-top: 1px solid rgba(252,249,240,0.2); margin-bottom: 4rem;"></div>
-
-          <!-- Path 2: Claude Code -->
-          <div>
-            <h3 style="font-family: var(--font-serif); font-style: italic; text-transform: none; font-weight: 500; font-size: var(--fs-md); margin-block: 0 0.4em;">Claude Code</h3>
-            <p class="text-sm opacity-70" style="margin-bottom: 2rem;">For technical users — manual setup from your collection directory.</p>
-
-            <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem;">
-              <div style="display: flex; gap: 1.25rem;">
-                <span style="font-size: 0.65rem; opacity: 0.35; padding-top: 0.25rem; min-width: 1.25rem; font-family: var(--font-mono);">01</span>
-                <div>
-                  <p class="text-sm" style="margin-bottom: 0.75rem;">Download the CLI</p>
-                  <a id="dl-cli-code" href="#" download class="brutalist-button inline-flex items-center gap-2">
-                    <i data-lucide="download" class="w-3 h-3"></i>
-                    <span class="dl-cli-label-ref">lore CLI</span>
-                  </a>
-                </div>
-              </div>
-              <div style="display: flex; gap: 1.25rem;">
-                <span style="font-size: 0.65rem; opacity: 0.35; padding-top: 0.25rem; min-width: 1.25rem; font-family: var(--font-mono);">02</span>
-                <div style="flex: 1;">
-                  <p class="text-sm" style="margin-bottom: 0.5rem;">Unzip and make executable</p>
-                  <div class="relative">
-                    <pre style="margin: 0; border-color: rgba(252,249,240,0.2);"><code id="cmd-unzip">unzip lore-*.zip && chmod +x lore</code></pre>
-                    <button onclick="copyCode('cmd-unzip', this)"
-                      style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(252,249,240,0.1); color: var(--c-parchment); border: 1px solid rgba(252,249,240,0.25); padding: 0.2rem 0.6rem; font-size: 0.65rem; font-family: var(--font-mono); cursor: pointer; text-transform: uppercase;">
-                      Copy
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div style="display: flex; gap: 1.25rem;">
-                <span style="font-size: 0.65rem; opacity: 0.35; padding-top: 0.25rem; min-width: 1.25rem; font-family: var(--font-mono);">03</span>
-                <div style="flex: 1;">
-                  <p class="text-sm" style="margin-bottom: 0.5rem;">Run from your collection folder</p>
-                  <div class="relative">
-                    <pre style="margin: 0; border-color: rgba(252,249,240,0.2);"><code id="cmd-run">./lore refs list</code></pre>
-                    <button onclick="copyCode('cmd-run', this)"
-                      style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(252,249,240,0.1); color: var(--c-parchment); border: 1px solid rgba(252,249,240,0.25); padding: 0.2rem 0.6rem; font-size: 0.65rem; font-family: var(--font-mono); cursor: pointer; text-transform: uppercase;">
-                      Copy
-                    </button>
-                  </div>
-                  <p style="font-size: 0.7rem; opacity: 0.45; margin: 0.4rem 0 0;">Creates <code style="background: none; border: none; padding: 0; font-size: inherit;">.lore/config.json</code> on first run.</p>
-                </div>
-              </div>
-            </div>
-
-            <a href="https://github.com/abrahambahez/loretools#cli"
-              class="text-parchment text-lg font-serif italic">
-              CLI reference →
-            </a>
-          </div>
-
+          <a href="https://github.com/abrahambahez/loretools/blob/main/docs/getting-started.md"
+            class="text-parchment text-lg font-serif italic">
+            Full setup guide →
+          </a>
         </div>
       </section>
 
-      <!-- What exists today -->
+      <!-- Research workflow -->
       <section class="px-6 py-20 md:px-12 lg:px-24 border-b-2 border-structural-black bg-parchment">
         <div class="max-w-6xl mx-auto">
           <p class="text-xs font-bold uppercase opacity-50 mb-12">Research workflow</p>
@@ -206,15 +149,17 @@
 
             <div class="brutalist-grid-item journey-card">
               <span class="journey-num">01</span>
-              <h3 class="text-2xl font-bold mb-4 uppercase">Discover</h3>
+              <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1rem;">
+                <h3 class="text-2xl font-bold uppercase" style="margin: 0;">Discover</h3>
+                <span style="font-size: 0.6rem; font-family: var(--font-mono); opacity: 0.45; border: 1px solid currentColor; padding: 0.1rem 0.35rem;">[plugin]</span>
+              </div>
               <div class="journey-layer">
                 <span class="layer-label layer-label--human">human</span>
                 <span class="layer-content layer-content--human">"Find recent papers on transformer attention"</span>
               </div>
               <div class="journey-layer">
                 <span class="layer-label layer-label--agent">agent</span>
-                <span class="layer-content layer-content--agent">Searching Semantic Scholar, arXiv, and 4 more
-                  sources…</span>
+                <span class="layer-content layer-content--agent">Searching Semantic Scholar, arXiv, and more sources…</span>
               </div>
               <div class="journey-layer layer--cli">
                 <span class="layer-label layer-label--cli">cli</span>
@@ -224,7 +169,10 @@
 
             <div class="brutalist-grid-item journey-card">
               <span class="journey-num">02</span>
-              <h3 class="text-2xl font-bold mb-4 uppercase">Fetch & Extract</h3>
+              <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1rem;">
+                <h3 class="text-2xl font-bold uppercase" style="margin: 0;">Fetch &amp; Extract</h3>
+                <span style="font-size: 0.6rem; font-family: var(--font-mono); opacity: 0.45; border: 1px solid currentColor; padding: 0.1rem 0.35rem;">[plugin]</span>
+              </div>
               <div class="journey-layer">
                 <span class="layer-label layer-label--human">human</span>
                 <span class="layer-content layer-content--human">"Get the full record for this DOI"</span>
@@ -254,7 +202,7 @@
               </div>
               <div class="journey-layer layer--cli">
                 <span class="layer-label layer-label--cli">cli</span>
-                <code class="layer-content layer-content--cli">lore staging list</code>
+                <code class="layer-content layer-content--cli">lore staging list-staged</code>
               </div>
             </div>
 
@@ -294,24 +242,6 @@
               </div>
             </div>
 
-            <div class="brutalist-grid-item journey-card">
-              <span class="journey-num">06</span>
-              <h3 class="text-2xl font-bold mb-4 uppercase">Sync</h3>
-              <div class="journey-layer">
-                <span class="layer-label layer-label--human">human</span>
-                <span class="layer-content layer-content--human">"Sync my library with the team"</span>
-              </div>
-              <div class="journey-layer">
-                <span class="layer-label layer-label--agent">agent</span>
-                <span class="layer-content layer-content--agent">Library synced. Your team sees the same records
-                  now.</span>
-              </div>
-              <div class="journey-layer layer--cli">
-                <span class="layer-label layer-label--cli">cli</span>
-                <code class="layer-content layer-content--cli">lore sync push-changelog</code>
-              </div>
-            </div>
-
           </div>
         </div>
       </section>
@@ -326,8 +256,16 @@
               <span class="envisioned-tech">[embeddings · vector-index · local-llm]</span>
             </div>
             <div class="envisioned-row">
+              <span class="envisioned-human">Build understanding from your library, not just metadata</span>
+              <span class="envisioned-tech">[wiki · synthesis-notes · reading-paths]</span>
+            </div>
+            <div class="envisioned-row">
               <span class="envisioned-human">See how ideas connect and where the gaps are</span>
-              <span class="envisioned-tech">[graph-traversal · influence-chains · gap-detection]</span>
+              <span class="envisioned-tech">[citation-graph · influence-chains · gap-detection]</span>
+            </div>
+            <div class="envisioned-row">
+              <span class="envisioned-human">Cite sources outside Western academic conventions</span>
+              <span class="envisioned-tech">[authority-types · epistemological-pluralism · community-adapters]</span>
             </div>
             <div class="envisioned-row">
               <span class="envisioned-human">Share context, not just references</span>
@@ -345,11 +283,14 @@
       <section class="px-6 py-20 md:px-12 lg:px-24 border-t-2 border-structural-black bg-oxblood text-parchment">
         <div class="max-w-4xl mx-auto text-center">
           <h2 class="text-5xl md:text-7xl font-serif mb-8">
-            Beyond the reference
+            Reference infrastructure<br><span class="italic">is not neutral</span>
           </h2>
           <p class="text-xl md:text-2xl opacity-90">
-            We envision a transition from isolated reference metadata to shared epistemic objects that enable deeper
-            conversations.
+            Every reference manager encodes a theory of what counts as knowledge. The current infrastructure was built
+            for Western academic publishing: DOI-backed, journal-indexed, peer-reviewed. Everything else has to
+            translate — or be excluded. loretools is built on a different premise: a reference is a boundary object
+            with an authority type and an epistemological framework. The library's job is to preserve that structure,
+            not flatten it.
           </p>
         </div>
       </section>
@@ -387,7 +328,6 @@
           <span>loretools is released under the <a
               href="https://github.com/abrahambahez/loretools/blob/main/LICENSE.md"
               class="underline hover:text-oxblood">GNU GPL</a>.</span>
-          <!-- <span id="version-colophon">—</span> -->
           <span>built for the radical archivist.</span>
         </div>
       </footer>
@@ -408,6 +348,94 @@
 
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
+    const INIT_PROMPT = `Set up loretools in this collection folder. The binary has been uploaded to this session.
+
+**Step 1 — Install the binary**
+
+\`\`\`bash
+chmod +x lore
+./lore --version
+\`\`\`
+
+**Step 2 — Initialize the collection**
+
+\`\`\`bash
+./lore refs list
+\`\`\`
+
+This creates \`.lore/config.json\` with default settings. The command should return \`{"ok": true, "references": []}\`.
+
+**Step 3 — Write CLAUDE.md**
+
+Create a file named \`CLAUDE.md\` in this folder with the following content exactly:
+
+\`\`\`
+# loretools collection
+
+This folder is a loretools collection. \`lore\` is the CLI binary — always run it as \`./lore\` from this directory. Never install it to PATH.
+
+## Session start
+
+Run these automatically at the start of every session before the researcher asks anything:
+
+./lore --version
+./lore refs list
+
+If \`lore\` is not found, the collection folder is not mounted. Ask the researcher to verify the folder is connected to this session.
+
+## Collection layout
+
+<collection>/
+  lore                    # binary — run as ./lore
+  .lore/config.json       # settings (auto-created on first run)
+  library.json            # production reference library
+  files/                  # archived PDFs and documents
+  staging.json            # staged references
+  staging/                # staged files
+
+## Core workflow
+
+# Extract metadata from a PDF
+./lore extract <path/to/file.pdf>
+
+# Stage a reference (JSON from extract or manual)
+./lore staging stage '<json>' [--file <path>]
+
+# Review staged references
+./lore staging list-staged
+
+# Merge staged into library
+./lore staging merge
+
+# Search the library
+./lore refs filter --query "<text>" [--author "<surname>"] [--year YYYY]
+
+# Get a full record
+./lore refs get <citekey>
+
+## Skills
+
+If the researcher asks for a complex workflow (bulk operations, file management, disambiguation), load the \`loretools-references\` skill — it has complete CLI reference, all flags, and model field details.
+\`\`\`
+
+**Step 4 — Verify**
+
+\`\`\`bash
+./lore refs list
+./lore staging list-staged
+\`\`\`
+
+Both should return \`{"ok": true, ...}\`. Tell me when setup is complete or if any step fails.`;
+
+    document.getElementById('init-prompt-block').textContent = INIT_PROMPT;
+
+    function copyInitPrompt(btn) {
+      navigator.clipboard.writeText(INIT_PROMPT).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+
     async function loadVersion() {
       try {
         const release = await fetch('https://api.github.com/repos/abrahambahez/loretools/releases/latest').then(r => r.json());
@@ -425,30 +453,13 @@
         const platformLabel = isMac ? 'macOS (arm64)' : 'Linux / WSL';
 
         const cliAsset = release.assets.find(a => a.name.includes(platform) && a.name.startsWith('lore-'));
-        const managerAsset = release.assets.find(a => a.name.includes('loretools-manager-en'));
-
         if (cliAsset) {
-          const url = cliAsset.browser_download_url;
-          const label = `lore ${platformLabel}`;
-          document.getElementById('dl-cli-desktop').href = url;
-          document.getElementById('dl-cli-label').textContent = label;
-          document.getElementById('dl-cli-code').href = url;
-          document.querySelector('#dl-cli-code .dl-cli-label-ref').textContent = label;
-        }
-        if (managerAsset) {
-          document.getElementById('dl-manager').href = managerAsset.browser_download_url;
+          document.getElementById('dl-cli').href = cliAsset.browser_download_url;
+          document.getElementById('dl-cli-label').textContent = `lore ${platformLabel}`;
         }
       } catch (_) { }
     }
     loadVersion();
-
-    function copyCode(id, btn) {
-      const text = document.getElementById(id).textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy', 2000);
-      });
-    }
   </script>
 </body>
 
