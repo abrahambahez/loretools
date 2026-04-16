@@ -171,7 +171,7 @@ returns:
 
 **Trigger**: "attach this PDF to reference X", "list all files in my library", "detach the file from Y"
 
-Manages the file archive for committed library records. Operates on `~/.loretools/files/`. Does not touch staging files — those are managed implicitly by `ingest_file` and `staging`.
+Manages the file archive for committed library records. Operates on `~/.lore/files/`. Does not touch staging files — those are managed implicitly by `ingest_file` and `staging`.
 
 ```
 params:

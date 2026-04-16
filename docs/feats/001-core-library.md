@@ -46,7 +46,7 @@ Out — proposed for future plugins:
 - **Pagination**: all list operations return 10 records per page, sorted by citekey ascending. Page size is not configurable.
 - **FileRecord placement**: embedded in the `Reference` object as `_file`. Single `library.json`, no separate index.
 - **Atomic writes**: write to `.library.tmp.json`, rename to `library.json`. No lock file — single-agent assumption.
-- **CWD-relative library**: config and library paths are resolved relative to the current working directory (`.loretools/config.json`), not a fixed home-dir path. This allows per-project libraries.
+- **CWD-relative library**: config and library paths are resolved relative to the current working directory (`.lore/config.json`), not a fixed home-dir path. This allows per-project libraries.
 
 ## data model
 
@@ -115,7 +115,7 @@ class FileRow(BaseModel):
 
 ## config
 
-Config file path: `.loretools/config.json` (CWD-relative). Auto-created with defaults on first run.
+Config file path: `.lore/config.json` (CWD-relative). Auto-created with defaults on first run.
 
 ```json
 {

@@ -27,13 +27,13 @@ Staging and reading are interleaved: new references surface during reading and r
 
 Both stores use the same `Reference` model — no schema changes. Status is implicit from location: records in `staging.json` are staged; records in `library.json` are production. Files follow the same rule.
 
-**Staging store** (`~/.loretools/staging.json`)
+**Staging store** (`~/.lore/staging.json`)
 - Same `Reference` schema as the library — citekey assigned at stage time
-- Files live in `~/.loretools/staging/`
+- Files live in `~/.lore/staging/`
 
-**Library store** (`~/.loretools/library.json`)
+**Library store** (`~/.lore/library.json`)
 - Current production store — unchanged
-- Files live in `~/.loretools/files/`
+- Files live in `~/.lore/files/`
 
 Same adapter, different path — no separate adapter needed.
 
@@ -44,7 +44,7 @@ Same adapter, different path — no separate adapter needed.
 1. **Normalization** — translate fields from other conventions (BibTeX, RIS, etc.) to CSL-JSON; strip non-CSL fields
 2. **Duplicate detection** — check against library by normalized title or ISBN (see below)
 3. **Schema validation** — required CSL-JSON fields present and typed correctly
-4. **File archival** — if a staging file exists, rename it to `{citekey}.{ext}` and copy to `~/.loretools/files/`; original staging file deleted after promotion
+4. **File archival** — if a staging file exists, rename it to `{citekey}.{ext}` and copy to `~/.lore/files/`; original staging file deleted after promotion
 5. **Promotion** — write to library, remove from staging
 
 Errors are transient — returned in the `MergeResult` but never persisted. A record that fails any step is not promoted and stays in staging. The agent surfaces errors and the human must fix or delete the record. No stored error state, no `qa_errors` field on `Reference`.
