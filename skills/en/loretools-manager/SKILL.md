@@ -3,7 +3,7 @@ name: loretools-manager
 description: loretools collection manager — first-time setup in Claude Co-Work, binary installation, config creation, and session-start verification. Use this when the user wants to set up loretools for the first time, install the binary into a collection directory, create or update config.json, verify that a collection is operational, or when any loretools command fails because the binary or config is missing.
 ---
 
-A **collection** is a directory that contains `lore`, `.loretools/config.json`, and the researcher's library data. `lore` always operates relative to the current working directory (CWD) — no global config, no PATH installation needed.
+A **collection** is a directory that contains `lore`, `.lore/config.json`, and the researcher's library data. `lore` always operates relative to the current working directory (CWD) — no global config, no PATH installation needed.
 
 ## First-time setup (Claude Co-Work)
 
@@ -24,17 +24,17 @@ Verify it works:
 
 **Step 2 — Create config**
 
-Run `lore` once from the collection directory to auto-create `.loretools/config.json` with defaults:
+Run `lore` once from the collection directory to auto-create `.lore/config.json` with defaults:
 
 ```bash
 ./lore refs list
 ```
 
-This creates `.loretools/config.json` with `library_dir` set to the collection directory (CWD). No further path configuration is needed unless the user wants a non-default layout.
+This creates `.lore/config.json` with `library_dir` set to the collection directory (CWD). No further path configuration is needed unless the user wants a non-default layout.
 
 **Step 3 — Apply user preferences**
 
-If the user provides API keys or wants to customize config, edit `.loretools/config.json`. Common fields:
+If the user provides API keys or wants to customize config, edit `.lore/config.json`. Common fields:
 
 ```json
 {
@@ -64,7 +64,7 @@ Both should return `{"ok": true, ...}`. The collection is ready.
 ```
 <collection>/
   lore                          # binary
-  .loretools/
+  .lore/
     config.json                 # config (CWD-relative, auto-created)
     keys/                       # Ed25519 keypairs (sync only)
   library.json                  # production library (created on first add/merge)

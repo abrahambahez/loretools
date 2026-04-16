@@ -9,7 +9,7 @@ Esta guía es para investigadores que usan **Claude Co-Work** (Proyectos de Clau
 Una **colección** es una única carpeta que contiene todo lo que loretools necesita:
 
 - `lore` — el binario que ejecuta el agente
-- `.loretools/config.json` — tus preferencias y configuración
+- `.lore/config.json` — tus preferencias y configuración
 - `library.json` — tu biblioteca de referencias
 - `files/` — archivos PDF y documentos vinculados a referencias
 - `staging/` — referencias en espera de revisión y fusión
@@ -54,7 +54,7 @@ Una vez instalada la skill, di:
 
 El agente:
 1. Descomprimirá `lore` y lo hará ejecutable
-2. Lo ejecutará una vez para crear automáticamente `.loretools/config.json`
+2. Lo ejecutará una vez para crear automáticamente `.lore/config.json`
 3. Verificará que la colección esté operativa
 
 ### 7. Verifica que todo funciona
@@ -89,7 +89,7 @@ Tras la configuración, tu carpeta de colección tiene este aspecto:
 ```
 <tu-colección>/
   lore                          # el binario de loretools
-  .loretools/
+  .lore/
     config.json                 # configuración (creada automáticamente en el primer uso)
     keys/                       # pares de claves Ed25519 (solo si usas sincronización)
   library.json                  # tu biblioteca de referencias
@@ -104,7 +104,7 @@ El agente siempre ejecuta `lore` desde esta carpeta, por lo que todas las rutas 
 
 ## Referencia de configuración
 
-`.loretools/config.json` se crea automáticamente con valores predeterminados sensatos. Solo necesitas editarlo si quieres cambiar algo.
+`.lore/config.json` se crea automáticamente con valores predeterminados sensatos. Solo necesitas editarlo si quieres cambiar algo.
 
 | Campo | Predeterminado | Qué controla |
 |-------|----------------|--------------|
@@ -137,7 +137,7 @@ Asegúrate de que el zip fue descomprimido y que el archivo resultante se llama 
 El binario necesita permiso de ejecución. Dile al agente: "Haz lore ejecutable con chmod +x."
 
 **Configuración no encontrada o incompleta**
-Ejecuta `./lore refs list` una vez — esto crea automáticamente `.loretools/config.json` si no existe.
+Ejecuta `./lore refs list` una vez — esto crea automáticamente `.lore/config.json` si no existe.
 
 **Las operaciones de biblioteca fallan en el primer uso**
 `library.json` y `staging.json` se crean automáticamente en la primera escritura (primer `merge` o `add`). Es normal obtener resultados vacíos antes de eso.

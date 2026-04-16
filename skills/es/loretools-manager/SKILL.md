@@ -3,7 +3,7 @@ name: loretools-manager
 description: gestor de colecciones de loretools — configuración inicial en Claude Co-Work, instalación del binario, creación de config y verificación al inicio de sesión. Usa esto cuando el usuario quiera configurar loretools por primera vez, instalar el binario en un directorio de colección, crear o actualizar config.json, verificar que una colección esté operativa, o cuando algún comando falle porque falta el binario o la configuración.
 ---
 
-Una **colección** es un directorio que contiene `lore`, `.loretools/config.json` y los datos de la biblioteca del investigador. `lore` siempre opera relativo al directorio de trabajo actual (CWD) — sin configuración global, sin instalación en PATH.
+Una **colección** es un directorio que contiene `lore`, `.lore/config.json` y los datos de la biblioteca del investigador. `lore` siempre opera relativo al directorio de trabajo actual (CWD) — sin configuración global, sin instalación en PATH.
 
 ## Configuración inicial (Claude Co-Work)
 
@@ -24,17 +24,17 @@ Verificar que funciona:
 
 **Paso 2 — Crear la configuración**
 
-Ejecutar `lore` una vez desde el directorio de la colección para crear automáticamente `.loretools/config.json` con valores por defecto:
+Ejecutar `lore` una vez desde el directorio de la colección para crear automáticamente `.lore/config.json` con valores por defecto:
 
 ```bash
 ./lore refs list
 ```
 
-Esto crea `.loretools/config.json` con `library_dir` apuntando al directorio de la colección (CWD). No se requiere ninguna otra configuración de rutas salvo que el usuario quiera un layout distinto.
+Esto crea `.lore/config.json` con `library_dir` apuntando al directorio de la colección (CWD). No se requiere ninguna otra configuración de rutas salvo que el usuario quiera un layout distinto.
 
 **Paso 3 — Aplicar preferencias del usuario**
 
-Si el usuario proporciona claves de API o quiere personalizar la configuración, editar `.loretools/config.json`. Campos comunes:
+Si el usuario proporciona claves de API o quiere personalizar la configuración, editar `.lore/config.json`. Campos comunes:
 
 ```json
 {
@@ -64,7 +64,7 @@ Ambos deben devolver `{"ok": true, ...}`. La colección está lista.
 ```
 <colección>/
   lore                          # binario
-  .loretools/
+  .lore/
     config.json                 # configuración (relativa al CWD, se crea automáticamente)
     keys/                       # pares de claves Ed25519 (solo sincronización)
   library.json                  # biblioteca de producción (creada al primer add/merge)

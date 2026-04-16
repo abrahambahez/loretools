@@ -44,7 +44,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/abrahambahez/loretools/main/
 
 ## config
 
-Config is loaded from `.loretools/config.json` inside the **collection directory** (the directory where you run `lore`). Created automatically with defaults on first run.
+Config is loaded from `.lore/config.json` inside the **collection directory** (the directory where you run `lore`). Created automatically with defaults on first run.
 
 ```jsonc
 {

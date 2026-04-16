@@ -18,7 +18,7 @@ _LOCAL_COMPUTED = {
 
 
 def _config_dir() -> Path:
-    return Path.cwd() / ".loretools"
+    return Path.cwd() / ".lore"
 
 
 def load_settings() -> Settings:

@@ -9,7 +9,7 @@ This guide is for researchers using **Claude Co-Work** (Claude's Projects with f
 A **collection** is a single folder that contains everything loretools needs:
 
 - `lore` — the binary the agent runs
-- `.loretools/config.json` — your preferences and settings
+- `.lore/config.json` — your preferences and settings
 - `library.json` — your reference library
 - `files/` — PDF and document files linked to references
 - `staging/` — references waiting to be reviewed and merged
@@ -54,7 +54,7 @@ Once the skill is installed, say:
 
 The agent will:
 1. Unzip `lore` and make it executable
-2. Run it once to auto-create `.loretools/config.json`
+2. Run it once to auto-create `.lore/config.json`
 3. Verify the collection is operational
 
 ### 7. Verify everything works
@@ -89,7 +89,7 @@ After setup your collection folder looks like this:
 ```
 <your-collection>/
   lore                          # the loretools binary
-  .loretools/
+  .lore/
     config.json                 # settings (auto-created on first run)
     keys/                       # Ed25519 keypairs (only if using sync)
   library.json                  # your reference library
@@ -104,7 +104,7 @@ The agent always runs `lore` from this folder, so all paths resolve correctly wi
 
 ## Config reference
 
-`.loretools/config.json` is created automatically with sensible defaults. You only need to edit it if you want to change something.
+`.lore/config.json` is created automatically with sensible defaults. You only need to edit it if you want to change something.
 
 | Field | Default | What it controls |
 |-------|---------|-----------------|
@@ -137,7 +137,7 @@ Make sure the zip was unzipped and the resulting file is named `lore` (not `scht
 The binary needs execute permission. Ask the agent: "Make lore executable with chmod +x."
 
 **Config not found or incomplete**
-Run `./lore refs list` once — this auto-creates `.loretools/config.json` if it's missing.
+Run `./lore refs list` once — this auto-creates `.lore/config.json` if it's missing.
 
 **Library operations fail on first use**
 `library.json` and `staging.json` are created automatically on first write (first `merge` or `add`). Empty list results before that are normal.
