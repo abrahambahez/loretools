@@ -123,7 +123,7 @@
     "title": "CLI for loretools public API — lore command-line tool",
     "spec": "docs/specs/012-cli.md",
     "passes": true,
-    "notes": "480 tests passing. Full lore CLI covering refs, files, staging, discover, fetch, extract, sync, peers subcommand groups. All commands output JSON envelopes. lore entry point registered."
+    "notes": "254 unit tests passing. CLI covers refs, files, staging, extract subcommand groups. All commands output JSON envelopes. lore entry point registered. Help text rewritten as agent-facing tool descriptions (spec 028); register(sub) signature stable as future plugin contract."
   },
   {
     "id": "mcp-server",
