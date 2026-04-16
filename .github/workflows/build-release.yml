@@ -37,14 +37,14 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           VERSION=$(grep '^version' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
-          echo "SCHT_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "LORE_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Extract version (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $version = (Select-String -Path pyproject.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
-          echo "SCHT_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "LORE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Install PyInstaller
         run: uv pip install pyinstaller
@@ -54,17 +54,17 @@ jobs:
 
       - name: Zip bundle (Unix)
         if: runner.os != 'Windows'
-        run: cd dist && zip ../scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip scht
+        run: cd dist && zip ../lore-${{ env.LORE_VERSION }}-${{ matrix.platform }}.zip lore
 
       - name: Zip bundle (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: Compress-Archive -Path dist\scht.exe -DestinationPath scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip
+        run: Compress-Archive -Path dist\lore.exe -DestinationPath lore-${{ env.LORE_VERSION }}-${{ matrix.platform }}.zip
 
       - name: Upload zip
         uses: softprops/action-gh-release@v2
         with:
-          files: scht-${{ env.SCHT_VERSION }}-${{ matrix.platform }}.zip
+          files: lore-${{ env.LORE_VERSION }}-${{ matrix.platform }}.zip
 
   package-skills:
     runs-on: ubuntu-latest
@@ -78,7 +78,7 @@ jobs:
       - name: Extract version
         run: |
           VERSION=$(grep '^version' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
-          echo "SCHT_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "LORE_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Detect skill changes
         id: skills_check
@@ -99,7 +99,7 @@ jobs:
             for skill_dir in skills/$lang/*/; do
               skill_name=$(basename "$skill_dir")
               cd skills/$lang
-              zip -r ../../scholartools-$skill_name-$lang-${{ env.SCHT_VERSION }}.zip $skill_name/
+              zip -r ../../loretools-$skill_name-$lang-${{ env.LORE_VERSION }}.zip $skill_name/
               cd ../..
             done
           done
@@ -108,4 +108,4 @@ jobs:
         if: env.SKILLS_CHANGED == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          files: scholartools-*-${{ env.SCHT_VERSION }}.zip
+          files: loretools-*-${{ env.LORE_VERSION }}.zip

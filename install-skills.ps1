@@ -5,17 +5,17 @@ param(
 )
 
 $SkillsDir = if ($env:CLAUDE_SKILLS_DIR) { $env:CLAUDE_SKILLS_DIR } else { [Environment]::GetFolderPath('MyDocuments') }
-$Repo = "abrahambahez/scholartools"
+$Repo = "abrahambahez/loretools"
 
 if ($Uninstall) {
-    Get-ChildItem -Path $SkillsDir -Filter "scholartools-*-$Lang-*.zip" -ErrorAction SilentlyContinue |
+    Get-ChildItem -Path $SkillsDir -Filter "loretools-*-$Lang-*.zip" -ErrorAction SilentlyContinue |
         Remove-Item -Force
-    Write-Host "Uninstalled scholartools skills from $SkillsDir"
+    Write-Host "Uninstalled loretools skills from $SkillsDir"
     exit 0
 }
 
 $Release = Invoke-RestMethod "https://api.github.com/repos/$Repo/releases/latest"
-$Assets = $Release.assets | Where-Object { $_.name -like "scholartools-*-$Lang-*.zip" }
+$Assets = $Release.assets | Where-Object { $_.name -like "loretools-*-$Lang-*.zip" }
 
 if (-not $Assets) {
     Write-Error "No skills assets found for language '$Lang'"

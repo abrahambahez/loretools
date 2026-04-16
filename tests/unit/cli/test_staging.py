@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 import pytest
 
-from scholartools.cli import _build_parser
-from scholartools.models import (
+from loretools.cli import _build_parser
+from loretools.models import (
     DeleteStagedResult,
     ListStagedResult,
     MergeResult,
@@ -21,7 +21,7 @@ def _run(argv):
 
 def test_stage_calls_stage_reference():
     result = StageResult(citekey="x2024")
-    with patch("scholartools.stage_reference", return_value=result) as mock:
+    with patch("loretools.stage_reference", return_value=result) as mock:
         with pytest.raises(SystemExit) as exc_info:
             _run(["staging", "stage", '{"title":"X"}'])
         assert exc_info.value.code == 0
@@ -30,7 +30,7 @@ def test_stage_calls_stage_reference():
 
 def test_stage_with_file_calls_stage_reference_with_file_path():
     result = StageResult(citekey="x2024")
-    with patch("scholartools.stage_reference", return_value=result) as mock:
+    with patch("loretools.stage_reference", return_value=result) as mock:
         with pytest.raises(SystemExit) as exc_info:
             _run(["staging", "stage", '{"title":"X"}', "--file", "/path/to/file"])
         assert exc_info.value.code == 0
@@ -49,7 +49,7 @@ def test_stage_invalid_json_outputs_error(capsys):
 
 def test_list_staged_calls_list_staged():
     result = ListStagedResult(references=[], total=0, page=1, pages=1)
-    with patch("scholartools.list_staged", return_value=result) as mock:
+    with patch("loretools.list_staged", return_value=result) as mock:
         with pytest.raises(SystemExit) as exc_info:
             _run(["staging", "list-staged"])
         assert exc_info.value.code == 0
@@ -61,7 +61,7 @@ def test_list_staged_plain_produces_table(capsys):
         citekey="abc2020", title="Some Title", authors="Doe, J.", year=2020
     )
     result = ListStagedResult(references=[row], total=1, page=1, pages=1)
-    with patch("scholartools.list_staged", return_value=result):
+    with patch("loretools.list_staged", return_value=result):
         with pytest.raises(SystemExit) as exc_info:
             _run(["--plain", "staging", "list-staged"])
         assert exc_info.value.code == 0
@@ -77,7 +77,7 @@ def test_list_staged_plain_produces_table(capsys):
 
 def test_delete_staged_calls_delete_staged():
     result = DeleteStagedResult(deleted=True)
-    with patch("scholartools.delete_staged", return_value=result) as mock:
+    with patch("loretools.delete_staged", return_value=result) as mock:
         with pytest.raises(SystemExit) as exc_info:
             _run(["staging", "delete-staged", "foo"])
         assert exc_info.value.code == 0
@@ -86,7 +86,7 @@ def test_delete_staged_calls_delete_staged():
 
 def test_merge_calls_merge_defaults():
     result = MergeResult(promoted=[], errors={}, skipped=[])
-    with patch("scholartools.merge", return_value=result) as mock:
+    with patch("loretools.merge", return_value=result) as mock:
         with pytest.raises(SystemExit) as exc_info:
             _run(["staging", "merge"])
         assert exc_info.value.code == 0
@@ -95,7 +95,7 @@ def test_merge_calls_merge_defaults():
 
 def test_merge_with_omit_and_allow_semantic():
     result = MergeResult(promoted=["k1", "k2"], errors={}, skipped=[])
-    with patch("scholartools.merge", return_value=result) as mock:
+    with patch("loretools.merge", return_value=result) as mock:
         with pytest.raises(SystemExit) as exc_info:
             _run(["staging", "merge", "--omit", "k1,k2", "--allow-semantic"])
         assert exc_info.value.code == 0

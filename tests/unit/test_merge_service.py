@@ -1,5 +1,5 @@
-from scholartools.models import LibraryCtx
-from scholartools.services.merge import merge
+from loretools.models import LibraryCtx
+from loretools.services.merge import merge
 
 
 def make_ctx(staged: list[dict] | None = None, library: list[dict] | None = None):

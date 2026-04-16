@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
-from scholartools.models import LibraryCtx, Reference
-from scholartools.services.staging import delete_staged, list_staged, stage_reference
+from loretools.models import LibraryCtx, Reference
+from loretools.services.staging import delete_staged, list_staged, stage_reference
 
 
 def make_ctx(initial: list[dict] | None = None):

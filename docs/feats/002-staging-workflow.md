@@ -27,13 +27,13 @@ Staging and reading are interleaved: new references surface during reading and r
 
 Both stores use the same `Reference` model — no schema changes. Status is implicit from location: records in `staging.json` are staged; records in `library.json` are production. Files follow the same rule.
 
-**Staging store** (`~/.scholartools/staging.json`)
+**Staging store** (`~/.loretools/staging.json`)
 - Same `Reference` schema as the library — citekey assigned at stage time
-- Files live in `~/.scholartools/staging/`
+- Files live in `~/.loretools/staging/`
 
-**Library store** (`~/.scholartools/library.json`)
+**Library store** (`~/.loretools/library.json`)
 - Current production store — unchanged
-- Files live in `~/.scholartools/files/`
+- Files live in `~/.loretools/files/`
 
 Same adapter, different path — no separate adapter needed.
 
@@ -44,7 +44,7 @@ Same adapter, different path — no separate adapter needed.
 1. **Normalization** — translate fields from other conventions (BibTeX, RIS, etc.) to CSL-JSON; strip non-CSL fields
 2. **Duplicate detection** — check against library by normalized title or ISBN (see below)
 3. **Schema validation** — required CSL-JSON fields present and typed correctly
-4. **File archival** — if a staging file exists, rename it to `{citekey}.{ext}` and copy to `~/.scholartools/files/`; original staging file deleted after promotion
+4. **File archival** — if a staging file exists, rename it to `{citekey}.{ext}` and copy to `~/.loretools/files/`; original staging file deleted after promotion
 5. **Promotion** — write to library, remove from staging
 
 Errors are transient — returned in the `MergeResult` but never persisted. A record that fails any step is not promoted and stays in staging. The agent surfaces errors and the human must fix or delete the record. No stored error state, no `qa_errors` field on `Reference`.
@@ -64,4 +64,4 @@ UIDs are assigned once at `stage_reference()` time and never recomputed.
 
 - `merge()` is bulk by default; `omit` is the exception — matches the organic multi-record nature of staging
 - `list_staged(page=1)` returns `ReferenceRow` projections, sorted by citekey ascending, 10 per page — same contract as `list_references`. Use `get_reference` for the full staged record.
-- PDF-to-text conversion: out of scope — the reading skills layer calls scholartools only for staging/merge
+- PDF-to-text conversion: out of scope — the reading skills layer calls loretools only for staging/merge

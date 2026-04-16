@@ -10,12 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.13.0] - 2026-03-24
 
 ### Changed
-- Config resolution is now CWD-relative: `scht` loads `.scholartools/config.json` from the current working directory instead of `~/.config/scholartools/config.json`; the file is auto-created on first run if missing
-- `LocalSettings.library_dir` defaults to `Path.cwd()` (the collection directory) instead of `~/.local/share/scholartools`
-- PyInstaller build now produces a single `scht` executable file (onefile mode) instead of a directory bundle
-- Release zips contain a single `scht` binary, not a `scht/` directory tree
+- Config resolution is now CWD-relative: `lore` loads `.loretools/config.json` from the current working directory instead of `~/.config/loretools/config.json`; the file is auto-created on first run if missing
+- `LocalSettings.library_dir` defaults to `Path.cwd()` (the collection directory) instead of `~/.local/share/loretools`
+- PyInstaller build now produces a single `lore` executable file (onefile mode) instead of a directory bundle
+- Release zips contain a single `lore` binary, not a `scht/` directory tree
 - README install section rewritten: Claude Co-Work is the primary setup path (links to `docs/getting-started.md`); direct binary download is the secondary path for technical users
-- README config section updated to document `.scholartools/config.json` and CWD default for `local.library_dir`
+- README config section updated to document `.loretools/config.json` and CWD default for `local.library_dir`
 
 ### Added
 - `docs/getting-started.md` — step-by-step Co-Work setup guide for non-technical researchers: download release zip, upload to Co-Work, prompt manager skill, verify collection, subsequent-session flow, collection layout, and config reference
@@ -25,25 +25,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI step that uploaded `install.sh` and `install.ps1` as release assets
 
 ### Skills
-- `scholartools-manager` (new): guides the agent through binary installation into a collection, config creation, and session-start verification; replaces `scholartools-config`
-- `scholartools-config` removed: superseded by `scholartools-manager`
+- `loretools-manager` (new): guides the agent through binary installation into a collection, config creation, and session-start verification; replaces `loretools-config`
+- `loretools-config` removed: superseded by `loretools-manager`
 
 ## [0.12.1] - 2026-03-23
 
 ### Added
 - Landing page (`site/`) with hero, research workflow, envisioned features, and vision sections
-- `package-skills` CI job: publishes per-language skill zips (`scholartools-skills-en/es-vX.Y.Z.zip`) and `install-skills.sh` / `install-skills.ps1` as release assets when any file under `skills/` changed since the previous tag
-- `.build/install-skills.sh` — installs or uninstalls scholartools skills into `~/.claude/skills/` on macOS/Linux; supports `--lang <en|es>` and `--uninstall`
+- `package-skills` CI job: publishes per-language skill zips (`loretools-skills-en/es-vX.Y.Z.zip`) and `install-skills.sh` / `install-skills.ps1` as release assets when any file under `skills/` changed since the previous tag
+- `.build/install-skills.sh` — installs or uninstalls loretools skills into `~/.claude/skills/` on macOS/Linux; supports `--lang <en|es>` and `--uninstall`
 - `.build/install-skills.ps1` — same for Windows (`%APPDATA%\Claude\skills\`); supports `-Lang` and `-Uninstall`
 
 ### Skills
-- `scholartools-references`: updated to reflect file management commands (attach/detach/sync-file/unsync-file/reindex) replacing the removed link/unlink workflow
-- `scholartools-sync-peers`: updated to use renamed CLI commands `push-changelog` / `pull-changelog`
+- `loretools-references`: updated to reflect file management commands (attach/detach/sync-file/unsync-file/reindex) replacing the removed link/unlink workflow
+- `loretools-sync-peers`: updated to use renamed CLI commands `push-changelog` / `pull-changelog`
 
 ## [0.12.0] - 2026-03-21
 
 ### Changed
-- `push()` and `pull()` renamed to `push_changelog()` and `pull_changelog()` in the public API, service layer, and CLI (`scht sync push-changelog`, `scht sync pull-changelog`) to clarify that only the change log is transferred, not file blobs
+- `push()` and `pull()` renamed to `push_changelog()` and `pull_changelog()` in the public API, service layer, and CLI (`lore sync push-changelog`, `lore sync pull-changelog`) to clarify that only the change log is transferred, not file blobs
 
 ## [0.11.0] - 2026-03-20
 
@@ -53,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sync_file(citekey)` — uploads attached file to S3, writes `link_file` change log entry, sets `blob_ref`
 - `unsync_file(citekey)` — clears `blob_ref` and writes `unlink_file` change log entry; leaves local file intact
 - `reindex_files()` → `ReindexResult(repaired, already_ok, not_found)` — repairs stale absolute `_file.path` values after a library folder move
-- CLI commands `scht files attach`, `scht files detach`, `scht files reindex`, `scht sync sync-file`, `scht sync unsync-file`
+- CLI commands `lore files attach`, `lore files detach`, `lore files reindex`, `lore sync sync-file`, `lore sync unsync-file`
 - Blob cache files now include the original extension (`{sha256}.pdf`) — fetched from `.meta` sidecar on download; legacy no-extension cache files are evicted and re-downloaded on next access
 
 ### Changed
@@ -67,14 +67,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - PyInstaller standalone distribution bundles for macOS arm64, Linux x86_64, and Windows x86_64 — triggered by `v*` tags via GitHub Actions matrix build
 - `install.sh` and `install.ps1` standalone install scripts published as separate release assets — download the correct platform zip, set PATH, and create an initial `config.json` via interactive prompts
-- `scht --version` reports the version string stamped from `pyproject.toml` at build time
+- `lore --version` reports the version string stamped from `pyproject.toml` at build time
 - Agent skill reference cards in `skills/en/` and `skills/es/` (config, references, sync-peers, files)
 
 ### Changed
 - README config section expanded to a fully annotated `config.json` covering all blocks (local, apis, llm, citekey, peer, sync) with inline comments on optional fields and defaults
 
 ### Removed
-- MCP server (`scht-mcp`), `mcp` optional dependency group, `.mcpb` bundle artifacts, and `docs/manuals/claude-desktop-setup.md` — MCP integration produced a brittle test surface with no viable researcher workflow; the CLI (`scht`) remains the primary interface
+- MCP server (`scht-mcp`), `mcp` optional dependency group, `.mcpb` bundle artifacts, and `docs/manuals/claude-desktop-setup.md` — MCP integration produced a brittle test surface with no viable researcher workflow; the CLI (`lore`) remains the primary interface
 
 ## [0.9.1] - 2026-03-19
 
@@ -90,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - MCP server (`scht-mcp`) — 7 tools exposing the full research workflow to Claude Desktop and any MCP-compatible client: `discover`, `fetch`, `ingest_file`, `staging`, `library`, `manage_reference`, `files`
 - `mcp>=1.0` optional dependency group; `scht-mcp` entry point registered in `pyproject.toml`
-- `.mcpb` bundle support — `manifest.json` and `.mcpbignore` for `mcpb pack . dist/scholartools.mcpb`
+- `.mcpb` bundle support — `manifest.json` and `.mcpbignore` for `mcpb pack . dist/loretools.mcpb`
 - `docs/manuals/claude-desktop-setup.md` — user-facing install guide and opinionated workflow manual covering all five research phases
 
 ## [0.8.4] - 2026-03-16
@@ -110,10 +110,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.0] - 2026-03-16
 
 ### Added
-- `scht` CLI — full command-line interface covering every public API function:
+- `lore` CLI — full command-line interface covering every public API function:
   `refs`, `files`, `staging`, `discover`, `fetch`, `extract`, `sync`, `peers` subcommand groups
 - All commands output JSON envelopes `{"ok": bool, "data": ..., "error": ...}` for agent consumption
-- `scht` entry point registered in `pyproject.toml`
+- `lore` entry point registered in `pyproject.toml`
 
 ## [0.7.1] - 2026-03-16
 
@@ -144,7 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Peer identity and device management: `peer_init`, `peer_register`, `peer_add_device`, `peer_revoke_device`, `peer_revoke`
-- Ed25519 keypair generation via `cryptography>=42.0`; private keys stored at `~/.config/scholartools/keys/{peer_id}/{device_id}.key` (mode 0600)
+- Ed25519 keypair generation via `cryptography>=42.0`; private keys stored at `~/.config/loretools/keys/{peer_id}/{device_id}.key` (mode 0600)
 - `verify_entry` — synchronous signature verification against the peer directory
 - `make_pull_verifier` — factory returning a pull-time verifier that writes rejected entries to `rejected/`
 - Distributed sync phase 1: `push`, `pull`, `create_snapshot`, `list_conflicts`, `resolve_conflict`, `restore_reference`
@@ -210,7 +210,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `filter_references` — local library search with five optional predicates: `query` (title substring), `author` (family/literal substring), `year` (exact), `ref_type` (exact CSL type), `has_file` (bool); `staging=True` routes to staging store
-- `scholartools-test` CLI command — launches interactive Python shell with all public functions pre-imported
+- `loretools-test` CLI command — launches interactive Python shell with all public functions pre-imported
 
 ### Changed
 - `search_references` renamed to `discover_references` to clarify it queries external APIs, not the local library
@@ -226,11 +226,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Behavioral tests for API key env var wiring into `LibraryCtx`
 
 ### Changed
-- Config simplified to single global path (`~/.config/scholartools/config.json`)
+- Config simplified to single global path (`~/.config/loretools/config.json`)
 - API keys moved out of config file — env-only (`ANTHROPIC_API_KEY`, `GBOOKS_API_KEY`)
 - Config validation now rejects incomplete files with actionable error message
 - Services without required keys are disabled gracefully rather than erroring
-- Source directory flattened from `src/scholartools/` to `scholartools/`
+- Source directory flattened from `src/loretools/` to `loretools/`
 - Models consolidated into `models.py`
 
 ## [0.1.0] - 2026-03-09
@@ -243,17 +243,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PDF extraction via pdfplumber with Claude vision fallback
 - Local JSON backend
 
-[Unreleased]: https://github.com/abrahambahez/scholartools/compare/v0.7.1...HEAD
-[0.7.1]: https://github.com/abrahambahez/scholartools/compare/v0.7.0...v0.7.1
-[0.7.0]: https://github.com/abrahambahez/scholartools/compare/v0.6.1...v0.7.0
-[0.6.1]: https://github.com/abrahambahez/scholartools/compare/v0.6.0...v0.6.1
-[0.6.0]: https://github.com/abrahambahez/scholartools/compare/v0.5.2...v0.6.0
-[0.5.2]: https://github.com/abrahambahez/scholartools/compare/v0.5.1...v0.5.2
-[0.5.1]: https://github.com/abrahambahez/scholartools/compare/v0.5.0...v0.5.1
-[0.5.0]: https://github.com/abrahambahez/scholartools/compare/v0.4.1...v0.5.0
-[0.4.1]: https://github.com/abrahambahez/scholartools/compare/v0.4.0...v0.4.1
-[0.4.0]: https://github.com/abrahambahez/scholartools/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/abrahambahez/scholartools/compare/v0.2.1...v0.3.0
-[0.2.1]: https://github.com/abrahambahez/scholartools/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/abrahambahez/scholartools/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/abrahambahez/scholartools/releases/tag/v0.1.0
+[Unreleased]: https://github.com/abrahambahez/loretools/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/abrahambahez/loretools/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/abrahambahez/loretools/compare/v0.6.1...v0.7.0
+[0.6.1]: https://github.com/abrahambahez/loretools/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/abrahambahez/loretools/compare/v0.5.2...v0.6.0
+[0.5.2]: https://github.com/abrahambahez/loretools/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/abrahambahez/loretools/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/abrahambahez/loretools/compare/v0.4.1...v0.5.0
+[0.4.1]: https://github.com/abrahambahez/loretools/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/abrahambahez/loretools/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/abrahambahez/loretools/compare/v0.2.1...v0.3.0
+[0.2.1]: https://github.com/abrahambahez/loretools/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/abrahambahez/loretools/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/abrahambahez/loretools/releases/tag/v0.1.0

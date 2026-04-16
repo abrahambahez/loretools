@@ -1,4 +1,4 @@
-"""Bootstrap a peer identity for scholartools sync.
+"""Bootstrap a peer identity for loretools sync.
 
 Usage:
     # First researcher (admin):
@@ -16,7 +16,7 @@ sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent.parent))
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Bootstrap scholartools peer identity")
+    parser = argparse.ArgumentParser(description="Bootstrap loretools peer identity")
     parser.add_argument(
         "--peer-id", required=True, help="Your stable researcher handle"
     )
@@ -29,7 +29,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    import scholartools as st
+    import loretools as st
 
     result = st.peer_init(args.peer_id, args.device_id)
     if result.error and "already exists" not in result.error:
@@ -54,7 +54,7 @@ def main() -> None:
 
         from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-        from scholartools.config import CONFIG_PATH
+        from loretools.config import CONFIG_PATH
 
         key_path = CONFIG_PATH.parent / "keys" / args.peer_id / f"{args.device_id}.key"
         priv = Ed25519PrivateKey.from_private_bytes(key_path.read_bytes())

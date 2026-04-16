@@ -1,4 +1,4 @@
-from scholartools.services.citekeys import generate, resolve_collision
+from loretools.services.citekeys import generate, resolve_collision
 
 
 def _ref(family=None, year=None, authors=None):
@@ -91,7 +91,7 @@ def test_resolve_collision_exhausts_letters():
 
 # --- CitekeySettings config tests ---
 
-from scholartools.models import CitekeySettings  # noqa: E402
+from loretools.models import CitekeySettings  # noqa: E402
 
 
 def _settings(**kwargs) -> CitekeySettings:

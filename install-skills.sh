@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="abrahambahez/scholartools"
+REPO="abrahambahez/loretools"
 LANG="en"
 UNINSTALL=false
 
@@ -17,13 +17,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 if $UNINSTALL; then
-  rm -f "$SKILLS_DIR"/scholartools-*-"$LANG"-*.zip
-  echo "Uninstalled scholartools skills from $SKILLS_DIR"
+  rm -f "$SKILLS_DIR"/loretools-*-"$LANG"-*.zip
+  echo "Uninstalled loretools skills from $SKILLS_DIR"
   exit 0
 fi
 
 RELEASE=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest")
-ASSET_URLS=$(echo "$RELEASE" | grep -o '"browser_download_url": "[^"]*scholartools-[^"]*-'"$LANG"'-[^"]*\.zip"' | grep -o 'https://[^"]*')
+ASSET_URLS=$(echo "$RELEASE" | grep -o '"browser_download_url": "[^"]*loretools-[^"]*-'"$LANG"'-[^"]*\.zip"' | grep -o 'https://[^"]*')
 
 if [ -z "$ASSET_URLS" ]; then
   echo "Error: no skills assets found for language '$LANG'" >&2

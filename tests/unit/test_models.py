@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from scholartools.models import (
+from loretools.models import (
     AddResult,
     Author,
     DateField,

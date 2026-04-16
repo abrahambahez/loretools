@@ -120,10 +120,10 @@
   },
   {
     "id": "cli",
-    "title": "CLI for scholartools public API — scht command-line tool",
+    "title": "CLI for loretools public API — lore command-line tool",
     "spec": "docs/specs/012-cli.md",
     "passes": true,
-    "notes": "480 tests passing. Full scht CLI covering refs, files, staging, discover, fetch, extract, sync, peers subcommand groups. All commands output JSON envelopes. scht entry point registered."
+    "notes": "480 tests passing. Full lore CLI covering refs, files, staging, discover, fetch, extract, sync, peers subcommand groups. All commands output JSON envelopes. lore entry point registered."
   },
   {
     "id": "mcp-server",
@@ -147,9 +147,9 @@
   },
   {
     "id": "portable-root-architecture",
-    "title": "Portable root architecture — collection-scoped CWD config, onefile binary, scholartools-manager skill",
+    "title": "Portable root architecture — collection-scoped CWD config, onefile binary, loretools-manager skill",
     "spec": "specs/026-portable-root-architecture.md",
     "passes": true,
-    "notes": "All 9 tasks complete. 481 tests passing. CWD-relative .scholartools/config.json, LocalSettings.library_dir defaults to CWD, onefile PyInstaller build, scholartools-manager replaces scholartools-config, docs/getting-started.md added, install.sh/install.ps1 removed. v0.13.0."
+    "notes": "All 9 tasks complete. 481 tests passing. CWD-relative .loretools/config.json, LocalSettings.library_dir defaults to CWD, onefile PyInstaller build, loretools-manager replaces loretools-config, docs/getting-started.md added, install.sh/install.ps1 removed. v0.13.0."
   }
 ]

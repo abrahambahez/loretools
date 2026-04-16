@@ -1,5 +1,5 @@
-from scholartools.models import LibraryCtx
-from scholartools.services.store import (
+from loretools.models import LibraryCtx
+from loretools.services.store import (
     add_reference,
     delete_reference,
     get_reference,

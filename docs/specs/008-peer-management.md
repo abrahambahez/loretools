@@ -10,7 +10,7 @@ pull-time verified against the peer directory before merge logic runs.
 
 Key design decisions:
 - Identity is `(peer_id, device_id)`; keys are Ed25519, one keypair per device.
-- Private keys stored at `~/.config/scholartools/keys/{peer_id}/{device_id}.key` (mode 0600) — user-scoped, machine-local, outside any library `data_dir`.
+- Private keys stored at `~/.config/loretools/keys/{peer_id}/{device_id}.key` (mode 0600) — user-scoped, machine-local, outside any library `data_dir`.
 - Admin peer is the sole writer to `peers/` in shared storage.
 - All admin functions verify the local keypair matches the `_admin` record before writing.
 - Pull loads the peers directory, filters revoked devices, builds an in-memory map, and
@@ -38,7 +38,7 @@ to be complete.
 
 - WHEN `peer_init(peer_id, device_id)` is called, the system MUST generate a new Ed25519
   keypair, store the private key at
-  `~/.config/scholartools/keys/{peer_id}/{device_id}.key` (mode 0600), and return a
+  `~/.config/loretools/keys/{peer_id}/{device_id}.key` (mode 0600), and return a
   `PeerIdentity` model containing the base64url-encoded public key. The key path is
   derived from `CONFIG_PATH.parent / "keys"`, never from `data_dir`.
 - WHEN `peer_init` is called for a `(peer_id, device_id)` pair that already has a local

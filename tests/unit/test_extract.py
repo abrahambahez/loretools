@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 import pytest
 
-from scholartools.models import LibraryCtx
-from scholartools.services.extract import _confidence, extract_from_file
+from loretools.models import LibraryCtx
+from loretools.services.extract import _confidence, extract_from_file
 
 
 def make_ctx(files_dir="data/files"):
@@ -66,7 +66,7 @@ async def test_extract_uses_pdfplumber_when_confident(tmp_path):
     fake = tmp_path / "fake.pdf"
     fake.write_bytes(b"")
     with patch(
-        "scholartools.services.extract._extract_with_pdfplumber",
+        "loretools.services.extract._extract_with_pdfplumber",
         return_value=(good_fields, 1.0),
     ):
         ctx = make_ctx()
@@ -84,7 +84,7 @@ async def test_extract_no_fields_returns_agent_nudge(tmp_path):
     fake = tmp_path / "fake.pdf"
     fake.write_bytes(b"")
     with patch(
-        "scholartools.services.extract._extract_with_pdfplumber",
+        "loretools.services.extract._extract_with_pdfplumber",
         return_value=({}, 0.0),
     ):
         ctx = make_ctx()
@@ -100,7 +100,7 @@ async def test_extract_partial_fields_returns_result(tmp_path):
     fake = tmp_path / "fake.pdf"
     fake.write_bytes(b"")
     with patch(
-        "scholartools.services.extract._extract_with_pdfplumber",
+        "loretools.services.extract._extract_with_pdfplumber",
         return_value=(partial_fields, 1 / 3),
     ):
         ctx = make_ctx()

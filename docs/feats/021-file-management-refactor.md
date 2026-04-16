@@ -68,12 +68,12 @@ class ReindexResult(BaseModel):
 
 | Command | API function |
 |---|---|
-| `scht files attach <citekey> <path>` | `attach_file` |
-| `scht files detach <citekey>` | `detach_file` |
-| `scht files get <citekey>` | `get_file` |
-| `scht files move <citekey> <dest>` | `move_file` |
-| `scht files list [--page N]` | `list_files` |
-| `scht files reindex` | `reindex_files` |
+| `lore files attach <citekey> <path>` | `attach_file` |
+| `lore files detach <citekey>` | `detach_file` |
+| `lore files get <citekey>` | `get_file` |
+| `lore files move <citekey> <dest>` | `move_file` |
+| `lore files list [--page N]` | `list_files` |
+| `lore files reindex` | `reindex_files` |
 
 ## proposed: S3 sync layer (future `loretools-sync` plugin)
 

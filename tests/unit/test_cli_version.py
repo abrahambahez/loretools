@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 
 def _get_version_from_parser():
-    from scholartools.cli import _build_parser
+    from loretools.cli import _build_parser
 
     parser = _build_parser()
     for action in parser._actions:
@@ -19,7 +19,7 @@ def test_version_from_metadata():
 
 
 def test_version_fallback_to_env(monkeypatch):
-    monkeypatch.setenv("SCHT_VERSION", "1.2.3")
+    monkeypatch.setenv("LORE_VERSION", "1.2.3")
     with patch(
         "importlib.metadata.version",
         side_effect=importlib.metadata.PackageNotFoundError,
@@ -29,7 +29,7 @@ def test_version_fallback_to_env(monkeypatch):
 
 
 def test_version_fallback_unknown(monkeypatch):
-    monkeypatch.delenv("SCHT_VERSION", raising=False)
+    monkeypatch.delenv("LORE_VERSION", raising=False)
     with patch(
         "importlib.metadata.version",
         side_effect=importlib.metadata.PackageNotFoundError,

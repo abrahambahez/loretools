@@ -5,9 +5,9 @@ status: current
 
 ## problem
 
-Researchers using scholartools with Claude Desktop need to install the workflow skills
-(`scholartools-config`, `scholartools-references`, `scholartools-files`,
-`scholartools-sync-peers`) by manually copying SKILL.md files into their Claude config.
+Researchers using loretools with Claude Desktop need to install the workflow skills
+(`loretools-config`, `loretools-references`, `loretools-files`,
+`loretools-sync-peers`) by manually copying SKILL.md files into their Claude config.
 There is no versioned artifact they can download or that the install script can fetch
 automatically.
 
@@ -16,14 +16,14 @@ automatically.
 Package skills as per-language zip files and publish them as GitHub Release assets whenever
 any skill file changes between version tags.
 
-**Format:** One zip per language (`scholartools-skills-en-vX.Y.Z.zip`,
-`scholartools-skills-es-vX.Y.Z.zip`). Each zip contains flat skill directories at the root:
+**Format:** One zip per language (`loretools-skills-en-vX.Y.Z.zip`,
+`loretools-skills-es-vX.Y.Z.zip`). Each zip contains flat skill directories at the root:
 
 ```
-scholartools-skills-en-vX.Y.Z.zip
-  scholartools-config/SKILL.md
-  scholartools-references/SKILL.md
-  scholartools-sync-peers/SKILL.md
+loretools-skills-en-vX.Y.Z.zip
+  loretools-config/SKILL.md
+  loretools-references/SKILL.md
+  loretools-sync-peers/SKILL.md
 ```
 
 This matches the Claude Desktop skill installation layout (each skill is a directory
@@ -47,12 +47,12 @@ assets alongside the skill zips — but only on releases that include skill zips
 **Behaviour:**
 1. Prompt the researcher to choose a language (default: `en`)
 2. Fetch the latest GitHub release JSON and find the matching skills asset
-   (`scholartools-skills-<lang>-<version>.zip`)
+   (`loretools-skills-<lang>-<version>.zip`)
 3. Download and extract into the Claude Desktop skills directory:
    - macOS / Linux: `~/.claude/skills/`
    - Windows: `%APPDATA%\Claude\skills\`
 4. Print the list of installed skill directories
-5. Accept `--uninstall` flag: remove all `scholartools-*` directories from the skills dir
+5. Accept `--uninstall` flag: remove all `loretools-*` directories from the skills dir
 
 **Idempotency:** Re-running on the same version overwrites existing skill dirs silently.
 

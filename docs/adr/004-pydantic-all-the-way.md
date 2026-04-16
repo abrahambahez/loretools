@@ -4,12 +4,12 @@
 Accepted
 
 ## context
-In strict DDD, domain entities are plain Python objects with no serialization concern. A separate layer of DTOs or serialization models handles I/O. This separation is valuable in large systems where the domain model and its wire representation diverge significantly. scholartools's core entity — the `Reference` — maps directly to CSL-JSON, a well-defined open standard. The divergence between domain model and serialization format is minimal.
+In strict DDD, domain entities are plain Python objects with no serialization concern. A separate layer of DTOs or serialization models handles I/O. This separation is valuable in large systems where the domain model and its wire representation diverge significantly. loretools's core entity — the `Reference` — maps directly to CSL-JSON, a well-defined open standard. The divergence between domain model and serialization format is minimal.
 
 ## decision
 Use Pydantic v2 models for everything: domain entities (`Reference`, `FileRecord`), result types (`SearchResult`, `ExtractResult`, etc.), configuration (`Settings`), and API response shapes. No plain Python dataclasses or separate DTO layer.
 
-All models live in `src/scholartools/models.py`. No inline model definitions elsewhere in the codebase.
+All models live in `src/loretools/models.py`. No inline model definitions elsewhere in the codebase.
 
 ## alternatives considered
 

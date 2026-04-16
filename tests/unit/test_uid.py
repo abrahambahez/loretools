@@ -1,5 +1,5 @@
-from scholartools.models import Author, DateField, Reference
-from scholartools.services.uid import _normalize_isbn, _normalize_text, compute_uid
+from loretools.models import Author, DateField, Reference
+from loretools.services.uid import _normalize_isbn, _normalize_text, compute_uid
 
 
 def make_ref(**kwargs) -> Reference:

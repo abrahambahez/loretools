@@ -1,4 +1,4 @@
-from scholartools.adapters.local import make_filestore, make_storage
+from loretools.adapters.local import make_filestore, make_storage
 
 # --- storage ---
 

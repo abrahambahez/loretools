@@ -1,5 +1,5 @@
-from scholartools.models import Reference
-from scholartools.services.duplicates import is_duplicate, normalize_title
+from loretools.models import Reference
+from loretools.services.duplicates import is_duplicate, normalize_title
 
 
 def ref(id: str, title: str | None = None, uid: str | None = None) -> Reference:

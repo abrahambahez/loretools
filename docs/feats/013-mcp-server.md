@@ -7,7 +7,7 @@ status: deprecated
 
 ## what this is
 
-An MCP (Model Context Protocol) server that exposes the scholartools library to Claude Desktop and any MCP-compatible client. The design goal is the minimum number of tools an agent needs to execute the full research workflow without ambiguity — 7 tools, organized by workflow phase rather than function name.
+An MCP (Model Context Protocol) server that exposes the loretools library to Claude Desktop and any MCP-compatible client. The design goal is the minimum number of tools an agent needs to execute the full research workflow without ambiguity — 7 tools, organized by workflow phase rather than function name.
 
 The CLI structure (one command per function) is wrong for MCP. CLI optimizes for human typing; MCP optimizes for agent selection confidence. The agent must choose the right tool from a list of names + descriptions alone — so tools are organized around cognitive tasks, not implementation units.
 
@@ -171,7 +171,7 @@ returns:
 
 **Trigger**: "attach this PDF to reference X", "list all files in my library", "detach the file from Y"
 
-Manages the file archive for committed library records. Operates on `~/.scholartools/files/`. Does not touch staging files — those are managed implicitly by `ingest_file` and `staging`.
+Manages the file archive for committed library records. Operates on `~/.loretools/files/`. Does not touch staging files — those are managed implicitly by `ingest_file` and `staging`.
 
 ```
 params:
@@ -202,10 +202,10 @@ returns:
 
 In:
 - `mcp>=1.0` added as an optional dependency: `mcp = ["mcp>=1.0"]` — server packaged using Anthropic's MCP Python SDK (`FastMCP`)
-- MCP server module at `scholartools/mcp_server.py`
+- MCP server module at `loretools/mcp_server.py`
 - stdio transport (Claude Desktop default)
 - All 7 tools above with trigger-condition descriptions
-- `pyproject.toml` entry point: `scht-mcp` → `scholartools.mcp_server:main`
+- `pyproject.toml` entry point: `scht-mcp` → `loretools.mcp_server:main`
 - Claude Desktop config snippet in `docs/manuals/claude-desktop-setup.md`
 
 Out (deferred):
@@ -240,7 +240,7 @@ Example for `discover`:
 ## package structure
 
 ```
-scholartools/
+loretools/
   mcp_server.py     ← new: MCP server entry point, tool definitions, stdio loop
 docs/
   manuals/
@@ -256,9 +256,9 @@ The server ships as a `uv`-runnable script. Users add one block to `claude_deskt
 ```json
 {
   "mcpServers": {
-    "scholartools": {
+    "loretools": {
       "command": "uvx",
-      "args": ["--from", "scholartools", "scht-mcp"]
+      "args": ["--from", "loretools", "scht-mcp"]
     }
   }
 }
@@ -269,9 +269,9 @@ Or, for a local development install:
 ```json
 {
   "mcpServers": {
-    "scholartools": {
+    "loretools": {
       "command": "uv",
-      "args": ["run", "--project", "/path/to/scholartools", "scht-mcp"]
+      "args": ["run", "--project", "/path/to/loretools", "scht-mcp"]
     }
   }
 }

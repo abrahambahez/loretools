@@ -3,7 +3,7 @@
 ## objective
 
 Simplify configuration by establishing a single authoritative config file at
-`~/.config/scholartools/config.json` for all behavior settings, and moving all
+`~/.config/loretools/config.json` for all behavior settings, and moving all
 API keys exclusively to environment variables. The config file is mandatory — if
 absent on first load, the library creates it with defaults. Introduce a single
 `library_dir` setting that owns all library-related paths — preparing for
@@ -11,18 +11,18 @@ absent on first load, the library creates it with defaults. Introduce a single
 
 ## current state
 
-- Config lookup chain: `SCHOLARTOOLS_CONFIG` env var → `.scholartools/config.json` → `~/.config/scholartools/config.json`
+- Config lookup chain: `SCHOLARTOOLS_CONFIG` env var → `.loretools/config.json` → `~/.config/loretools/config.json`
 - `api_key` lives inside `SourceConfig`; `anthropic_api_key` inside `LlmSettings` — both can be stored in the config file
 - Separate `library_path` (file) and `files_dir` settings — no unified library root
 - Ad-hoc env var overrides: `SCHOLARTOOLS_LIBRARY_PATH`, `SCHOLARTOOLS_FILES_DIR`
 
 ## target state
 
-- Single config location: `~/.config/scholartools/config.json` — mandatory, created with defaults on first run
-- No `SCHOLARTOOLS_CONFIG`, no local `.scholartools/config.json` lookup
+- Single config location: `~/.config/loretools/config.json` — mandatory, created with defaults on first run
+- No `SCHOLARTOOLS_CONFIG`, no local `.loretools/config.json` lookup
 - API keys strictly from env vars: `ANTHROPIC_API_KEY`, `GBOOKS_API_KEY`
 - `api_key` and `anthropic_api_key` removed from all Pydantic models
-- `library_path` + `files_dir` replaced by a single `library_dir` (default: `~/.local/share/scholartools`)
+- `library_path` + `files_dir` replaced by a single `library_dir` (default: `~/.local/share/loretools`)
 - All library files derived from `library_dir`:
   - `{library_dir}/library.json` — main library
   - `{library_dir}/files/` — archived PDFs/ebooks
@@ -33,7 +33,7 @@ absent on first load, the library creates it with defaults. Introduce a single
 ## directory layout (post-refactor)
 
 ```
-{library_dir}/          # configurable, defaults to ~/.local/share/scholartools
+{library_dir}/          # configurable, defaults to ~/.local/share/loretools
   library.json
   files/
   staging.json          # future
@@ -42,10 +42,10 @@ absent on first load, the library creates it with defaults. Introduce a single
 
 ## acceptance criteria
 
-- WHEN no config file exists, MUST create `~/.config/scholartools/config.json` with default values (creating parent dirs as needed), then load it.
-- WHEN `~/.config/scholartools/config.json` exists, MUST read and validate it — no merging with defaults for missing fields; the file is the source of truth.
+- WHEN no config file exists, MUST create `~/.config/loretools/config.json` with default values (creating parent dirs as needed), then load it.
+- WHEN `~/.config/loretools/config.json` exists, MUST read and validate it — no merging with defaults for missing fields; the file is the source of truth.
 - WHEN `library_dir` is set in config, MUST use it as root for all derived paths.
-- WHEN `library_dir` is absent from config, MUST default to `~/.local/share/scholartools`.
+- WHEN `library_dir` is absent from config, MUST default to `~/.local/share/loretools`.
 - WHEN `ANTHROPIC_API_KEY` env var is set, MUST use it for LLM extraction.
 - WHEN `GBOOKS_API_KEY` env var is set, MUST use it for Google Books API.
 - WHEN neither key env var is set, MUST disable the respective service without error.
@@ -60,10 +60,10 @@ absent on first load, the library creates it with defaults. Introduce a single
   - Remove `anthropic_api_key` from `LlmSettings`; add `extra="forbid"`
   - Replace `LocalSettings.library_path` + `LocalSettings.files_dir` with `library_dir: Path`
   - Add derived properties `library.json`, `files_dir` computed from `library_dir`
-  - Default `library_dir` to `~/.local/share/scholartools`
+  - Default `library_dir` to `~/.local/share/loretools`
 
 - [ ] task-02: simplify load_settings() and remove _find_config()
-  - Config path is a constant: `~/.config/scholartools/config.json`
+  - Config path is a constant: `~/.config/loretools/config.json`
   - If absent, write defaults to disk, then load
   - Remove all env var overrides except `ANTHROPIC_API_KEY` and `GBOOKS_API_KEY`
   - Read API keys from env at load time, pass to callers — do not store on models

@@ -2,10 +2,10 @@
 
 ## findings
 
-- `scholartools/mcp_server.py` — FastMCP stdio server, 7 tools wrapping the public API
+- `loretools/mcp_server.py` — FastMCP stdio server, 7 tools wrapping the public API
 - `tests/unit/test_mcp_server.py` — 34 unit tests (mock-heavy, fragile)
 - `tests/integration/test_mcp_tools.py` — 17 integration tests
-- `dist/scholartools.mcpb` — bundled artifact
+- `dist/loretools.mcpb` — bundled artifact
 - `.mcpbignore` — bundle exclude list
 - `docs/manuals/claude-desktop-setup.md` — user-facing setup guide
 - `docs/feats/013-mcp-server.md` — already marked deprecated (v0.2)
@@ -14,7 +14,7 @@
 
 ## objective
 
-Remove all MCP server code, tests, artifacts, and documentation from the repository. The MCP integration produced a brittle test surface that was not viable for researchers, and the maintenance cost outweighed the benefit. The CLI (`scht`) remains the primary interface. Future agent integration will be reconsidered with a cleaner model.
+Remove all MCP server code, tests, artifacts, and documentation from the repository. The MCP integration produced a brittle test surface that was not viable for researchers, and the maintenance cost outweighed the benefit. The CLI (`lore`) remains the primary interface. Future agent integration will be reconsidered with a cleaner model.
 
 ## acceptance criteria (EARS format)
 
@@ -27,9 +27,9 @@ Remove all MCP server code, tests, artifacts, and documentation from the reposit
 
 ## tasks
 
-- [ ] task-01: delete `scholartools/mcp_server.py`, `tests/unit/test_mcp_server.py`, `tests/integration/test_mcp_tools.py` (blocks: none)
+- [ ] task-01: delete `loretools/mcp_server.py`, `tests/unit/test_mcp_server.py`, `tests/integration/test_mcp_tools.py` (blocks: none)
 - [ ] task-02: remove `scht-mcp` script entry and `mcp` optional dependency group from `pyproject.toml` (blocks: task-01)
-- [ ] task-03: delete `dist/scholartools.mcpb`, `.mcpbignore`, `manifest.json` (blocks: none)
+- [ ] task-03: delete `dist/loretools.mcpb`, `.mcpbignore`, `manifest.json` (blocks: none)
 - [ ] task-04: remove or replace `docs/manuals/claude-desktop-setup.md` with a one-line deprecation notice (blocks: none)
 - [ ] task-05: run `uv run pytest` and `uv run ruff check .` to verify clean state; update `feature_list.json` entry for `mcp-server` to `passes: false` with removal note (blocks: task-01, task-02, task-03, task-04)
 

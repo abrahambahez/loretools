@@ -4,10 +4,10 @@
 Accepted
 
 ## context
-scholartools services fan out across multiple external APIs simultaneously (Crossref, Semantic Scholar, OpenAlex). Services are async-first. A synchronous-only HTTP client would require threads or process pools to achieve parallelism, adding complexity and overhead. The HTTP client is also used in adapters for cloud backends (DynamoDB, MongoDB, GCS SDKs handle their own transport, but direct REST adapters need it).
+loretools services fan out across multiple external APIs simultaneously (Crossref, Semantic Scholar, OpenAlex). Services are async-first. A synchronous-only HTTP client would require threads or process pools to achieve parallelism, adding complexity and overhead. The HTTP client is also used in adapters for cloud backends (DynamoDB, MongoDB, GCS SDKs handle their own transport, but direct REST adapters need it).
 
 ## decision
-Use `httpx` as the sole HTTP client across the project. httpx is async-native (via `httpx.AsyncClient`) and also provides a sync interface (`httpx.Client`) that is API-compatible with `requests`. All API clients in `src/scholartools/apis/` use `httpx.AsyncClient`. The sync public API wraps the async services with `asyncio.run()` — httpx plays well with this pattern.
+Use `httpx` as the sole HTTP client across the project. httpx is async-native (via `httpx.AsyncClient`) and also provides a sync interface (`httpx.Client`) that is API-compatible with `requests`. All API clients in `src/loretools/apis/` use `httpx.AsyncClient`. The sync public API wraps the async services with `asyncio.run()` — httpx plays well with this pattern.
 
 ## alternatives considered
 

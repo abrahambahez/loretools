@@ -69,7 +69,7 @@ local value is preserved.
 
 ```json
 {
-  "sync": { "endpoint": "https://minio.example.org", "bucket": "scholartools", "access_key": "...", "secret_key": "..." },
+  "sync": { "endpoint": "https://minio.example.org", "bucket": "loretools", "access_key": "...", "secret_key": "..." },
   "peer": { "peer_id": "sabhz", "device_id": "laptop" }
 }
 ```

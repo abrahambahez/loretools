@@ -1,11 +1,10 @@
-# scholartools
+# loretools
 
 ## stack
 - language: Python 3.12+
 - architecture: Hexagonal (Ports & Adapters) — see docs/tech.md
-- data validation: Pydantic v2 — all models in src/scholartools/models.py
-- pdf extraction: pdfplumber (primary) + Anthropic SDK vision (fallback)
-- http client: httpx (async-first)
+- data validation: Pydantic v2 — all models in loretools/models.py
+- pdf extraction: pdfplumber (primary); LLM fallback returns agent_extraction_needed=True
 - testing: pytest
 - package manager: uv
 
@@ -21,7 +20,7 @@
 ## CI/CD
 - the build-release workflow triggers ONLY on `v*` tags — pushing to main does NOT trigger it
 - to release: `git tag vX.Y.Z[-rcN] && git push origin vX.Y.Z[-rcN]`
-- skill zips (`scholartools-{skill-name}-{lang}-vX.Y.Z.zip`, one per skill) are published automatically when any file under `skills/` changed since the previous tag; install scripts download them to the user's Documents folder
+- skill zips (`loretools-{skill-name}-{lang}-vX.Y.Z.zip`, one per skill) are published automatically when any file under `skills/` changed since the previous tag; install scripts download them to the user's Documents folder
 
 ## changelog discipline
 - every CHANGELOG.md entry must follow "Keep a Changelog" with semantic versioning
@@ -55,15 +54,14 @@ Use "ultrathink" for architecture decisions.
 
 ## conventions
 - functional Python style throughout — modules of functions, not classes with methods
-- all public agent-facing functions are re-exported from src/scholartools/__init__.py — never tell users to import from submodules
-- all Pydantic models live in src/scholartools/models.py — no inline model definitions elsewhere
+- all public agent-facing functions are re-exported from loretools/__init__.py — never tell users to import from submodules
+- all Pydantic models live in loretools/models.py — no inline model definitions elsewhere
 - services are modules of `async def` functions that take `ctx: LibraryCtx` as a parameter
 - public functions in __init__.py are sync wrappers via asyncio.run() — agents never see ctx
 - every public function returns a Result model — never raises at the public boundary
 - adapters are modules of plain functions matching port Protocol signatures — no adapter classes
 - all config and paths come from the Settings model loaded via config.py — no hardcoded paths
-- all HTTP calls go through httpx in apis/ — never instantiate httpx outside those modules
-- all LLM calls go through src/scholartools/apis/ — never instantiate Anthropic() outside that layer
+- core has zero network/auth imports — httpx, anthropic, minio, cryptography belong in plugins
 - integration tests are marked with `@pytest.mark.integration` and skipped by default
 
 ## do not
@@ -88,4 +86,4 @@ Use "ultrathink" for architecture decisions.
 - feature_list.json: cross-session feature state — read every session start
 - claude-progress.txt: append-only session log — read every session start
 - docs/specs/: active acceptance criteria and task DAGs — numbered like ADRs and feats: 001-core-library.md, 002-fastapi-server.md, etc. Pass the full numbered name to /spec (e.g. /spec 003-mcp-server)
-- skills/: user-facing workflow skills shipped to researchers alongside scholartools.mcpb — DO NOT confuse with .claude/skills/ (dev workflow, not shipped)
+- skills/: user-facing workflow skills shipped to researchers — DO NOT confuse with .claude/skills/ (dev workflow, not shipped)

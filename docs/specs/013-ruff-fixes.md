@@ -18,7 +18,7 @@ Zero ruff errors. Each fix addresses the root cause of the error.
 
 ## fixes by category
 
-### F401 — `scholartools/__init__.py` (9 imports)
+### F401 — `loretools/__init__.py` (9 imports)
 `DeviceIdentity`, `FileRow`, `LinkResult`, `PeerRecord`, `PeerSettings`, `ReferenceRow`, `SyncConfig`, `UnlinkResult`, `VerifyEntryResult` are intentional public re-exports. Ruff cannot infer intent without explicit syntax.
 **Fix:** append `as X` to each import (`LinkResult as LinkResult`, etc.) — PEP 484 explicit re-export convention.
 
@@ -36,7 +36,7 @@ Long error message strings, docstrings, and comments across `__init__.py`, `conf
 
 ### F821 — `compute_uid` undefined in `services/merge.py:105`
 `compute_uid` is called but no import is present. The function lives in `services/uid.py` (introduced in feature #006-deduplication). The import was dropped at some point.
-**Fix:** add `from scholartools.services.uid import compute_uid` to `merge.py`.
+**Fix:** add `from loretools.services.uid import compute_uid` to `merge.py`.
 
 ### E741 — ambiguous variable name `l` in `services/extract.py:56`
 A loop or assignment uses `l` as a variable name.

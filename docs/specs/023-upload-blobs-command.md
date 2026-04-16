@@ -2,14 +2,14 @@
 
 ## objective
 
-Add `scht sync upload-blobs` — a bulk blob upload command for initial migration.
+Add `lore sync upload-blobs` — a bulk blob upload command for initial migration.
 Uploads all locally-attached files to S3, sets `blob_ref` on each record, and writes
 `library.json` once. Writes zero change log entries; callers must follow with
-`scht sync snapshot` to publish the state.
+`lore sync snapshot` to publish the state.
 
 ## context
 
-`scht sync sync-file` writes one change log entry per file. On a library with hundreds
+`lore sync sync-file` writes one change log entry per file. On a library with hundreds
 of records this produces hundreds of small JSON files in `change_log/`, degrading
 filesystem performance and making no semantic sense (a bulk initial upload is one
 operation, not N). The snapshot already captures `blob_ref` state, so change log
@@ -52,14 +52,14 @@ entries add no value for this use case.
 - [ ] task-03: `__init__.py` — expose `upload_blobs()` sync wrapper (blocks: task-01, task-02)
 
 - [ ] task-04: `cli/sync.py` — add `upload-blobs` subcommand (blocks: task-03)
-  - Call `scholartools.upload_blobs()`
+  - Call `loretools.upload_blobs()`
   - `--plain` prints `uploaded: N  skipped: N  failed: N`
   - JSON output via `exit_result`
 
 - [ ] task-05: `docs/remote-setup.md` — update migration sections (blocks: task-04)
-  - Replace `scht sync sync-file <citekey>  # repeat for each` in the manual
-    migration section with `scht sync upload-blobs`
-  - Add a note that `upload-blobs` must be followed by `scht sync snapshot`
+  - Replace `lore sync sync-file <citekey>  # repeat for each` in the manual
+    migration section with `lore sync upload-blobs`
+  - Add a note that `upload-blobs` must be followed by `lore sync snapshot`
 
 - [ ] task-06: unit tests (blocks: task-01, task-02)
   - Mock S3 and file I/O; assert `library.json` written once

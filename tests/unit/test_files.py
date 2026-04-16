@@ -1,8 +1,8 @@
 import asyncio
 from pathlib import Path
 
-from scholartools.models import LibraryCtx
-from scholartools.services.files import (
+from loretools.models import LibraryCtx
+from loretools.services.files import (
     _resolve_file_path,
     list_files,
     move_file,

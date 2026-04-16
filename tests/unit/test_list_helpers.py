@@ -1,5 +1,5 @@
-from scholartools.models import Author
-from scholartools.services.list_helpers import (
+from loretools.models import Author
+from loretools.services.list_helpers import (
     format_authors,
     paginate,
     to_reference_row,

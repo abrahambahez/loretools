@@ -49,8 +49,8 @@ before any merge logic runs.
 ### keypair format
 
 Keys are stored as raw 32-byte Ed25519 keys, base64url-encoded (no padding), under
-`~/.config/scholartools/keys/{peer_id}/{device_id}.key` (private) and
-`~/.config/scholartools/keys/{peer_id}/{device_id}.pub` (public). The private key file
+`~/.config/loretools/keys/{peer_id}/{device_id}.key` (private) and
+`~/.config/loretools/keys/{peer_id}/{device_id}.pub` (public). The private key file
 is created with mode `0600`.
 
 ### canonical payload for signing

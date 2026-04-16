@@ -4,7 +4,7 @@
 Accepted
 
 ## context
-scholartools must extract bibliographic metadata from PDFs and ebooks provided by the human. PDFs come in two fundamentally different forms: text-based (selectable text embedded in the file) and image-based (scanned pages, no embedded text). A single extraction strategy cannot handle both reliably. The tool must also avoid heavyweight dependencies like Tesseract for OCR.
+loretools must extract bibliographic metadata from PDFs and ebooks provided by the human. PDFs come in two fundamentally different forms: text-based (selectable text embedded in the file) and image-based (scanned pages, no embedded text). A single extraction strategy cannot handle both reliably. The tool must also avoid heavyweight dependencies like Tesseract for OCR.
 
 ## decision
 Use a two-stage extraction pipeline:

@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from scholartools.config import load_settings, reset_settings
-from scholartools.models import LocalSettings
+from loretools.config import load_settings, reset_settings
+from loretools.models import LocalSettings
 
 
 @pytest.fixture(autouse=True)
@@ -18,7 +18,7 @@ def test_defaults_when_no_config_creates_file(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     s = load_settings()
     assert s.backend == "local"
-    config_path = tmp_path / ".scholartools" / "config.json"
+    config_path = tmp_path / ".loretools" / "config.json"
     assert config_path.exists()
     data = json.loads(config_path.read_text())
     assert "local" in data
@@ -27,7 +27,7 @@ def test_defaults_when_no_config_creates_file(tmp_path, monkeypatch):
 def test_loads_from_existing_config_file(tmp_path, monkeypatch):
     library_dir = str(tmp_path / "mylib")
     monkeypatch.chdir(tmp_path)
-    config_dir = tmp_path / ".scholartools"
+    config_dir = tmp_path / ".loretools"
     config_dir.mkdir()
     config_path = config_dir / "config.json"
     config = {
@@ -56,7 +56,7 @@ def test_settings_cached(tmp_path, monkeypatch):
 
 def test_partial_config_raises_with_message(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    config_dir = tmp_path / ".scholartools"
+    config_dir = tmp_path / ".loretools"
     config_dir.mkdir()
     (config_dir / "config.json").write_text(json.dumps({"backend": "local"}))
     with pytest.raises(ValueError, match="incomplete"):

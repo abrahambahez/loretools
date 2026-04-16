@@ -11,8 +11,8 @@ change — purely an internal adapter change.
 
 - WHEN `SyncConfig.bucket` contains no slash THEN the adapter uses it as-is and
   prepends no prefix to any key
-- WHEN `SyncConfig.bucket` is `"mybucket/scholartools"` THEN the adapter extracts
-  bucket `"mybucket"` and prepends `"scholartools/"` to all object keys
+- WHEN `SyncConfig.bucket` is `"mybucket/loretools"` THEN the adapter extracts
+  bucket `"mybucket"` and prepends `"loretools/"` to all object keys
 - WHEN `SyncConfig.bucket` is `"mybucket/a/b"` THEN the adapter extracts bucket
   `"mybucket"` and prepends `"a/b/"` to all object keys
 - WHEN `upload(config, path, "changes/peer/ts.json")` is called with prefix `"proj"` THEN

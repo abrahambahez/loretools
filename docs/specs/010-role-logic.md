@@ -19,10 +19,10 @@ References to `admin_peer_id` / `admin_device_id` across the codebase:
 
 | file | lines |
 |---|---|
-| `scholartools/models.py` | 134, 135 |
-| `scholartools/__init__.py` | 331, 334, 346, 347, 353, 378, 385, 386 |
-| `scholartools/services/peers.py` | 53, 61, 62, 64, 72, 109, 115, 116, 147, 182, 218 |
-| `scholartools/services/sync.py` | 46, 123, 175, 407, 412, 422, 432, 433, 462, 472, 473 |
+| `loretools/models.py` | 134, 135 |
+| `loretools/__init__.py` | 331, 334, 346, 347, 353, 378, 385, 386 |
+| `loretools/services/peers.py` | 53, 61, 62, 64, 72, 109, 115, 116, 147, 182, 218 |
+| `loretools/services/sync.py` | 46, 123, 175, 407, 412, 422, 432, 433, 462, 472, 473 |
 
 `resolve_conflict()` and `restore_reference()` in `__init__.py` build `ChangeLogEntry` and key paths directly from `ctx.admin_peer_id`/`ctx.admin_device_id` (lines 331-386).
 

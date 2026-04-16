@@ -5,7 +5,7 @@ status: current
 
 ## what this is
 
-The complete core of scholartools. Defines the data model, port contracts, local adapter, and all public functions an agent needs to manage a reference library: store references, extract metadata from PDFs, and manage associated files.
+The complete core of loretools. Defines the data model, port contracts, local adapter, and all public functions an agent needs to manage a reference library: store references, extract metadata from PDFs, and manage associated files.
 
 The core package has zero network or auth dependencies. Its only runtime dependencies are `pydantic>=2.0` and `pdfplumber>=0.11`. Anything requiring httpx, anthropic, minio, or cryptography belongs in a future plugin.
 
@@ -46,11 +46,11 @@ Out — proposed for future plugins:
 - **Pagination**: all list operations return 10 records per page, sorted by citekey ascending. Page size is not configurable.
 - **FileRecord placement**: embedded in the `Reference` object as `_file`. Single `library.json`, no separate index.
 - **Atomic writes**: write to `.library.tmp.json`, rename to `library.json`. No lock file — single-agent assumption.
-- **CWD-relative library**: config and library paths are resolved relative to the current working directory (`.scholartools/config.json`), not a fixed home-dir path. This allows per-project libraries.
+- **CWD-relative library**: config and library paths are resolved relative to the current working directory (`.loretools/config.json`), not a fixed home-dir path. This allows per-project libraries.
 
 ## data model
 
-### Reference (CSL-JSON + scholartools fields)
+### Reference (CSL-JSON + loretools fields)
 
 ```python
 class Reference(BaseModel):
@@ -67,7 +67,7 @@ class Reference(BaseModel):
     uid: str | None = None
     uid_confidence: Literal["authoritative", "semantic"] | None = None
 
-    # scholartools private fields (stored with underscore aliases)
+    # loretools private fields (stored with underscore aliases)
     file_record: FileRecord | None = Field(None, alias="_file")
     warnings: list[str] = Field(default_factory=list, alias="_warnings")
 ```
@@ -115,7 +115,7 @@ class FileRow(BaseModel):
 
 ## config
 
-Config file path: `.scholartools/config.json` (CWD-relative). Auto-created with defaults on first run.
+Config file path: `.loretools/config.json` (CWD-relative). Auto-created with defaults on first run.
 
 ```json
 {

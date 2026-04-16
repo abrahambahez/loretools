@@ -1,7 +1,7 @@
 from unittest.mock import AsyncMock
 
-from scholartools.models import LibraryCtx
-from scholartools.services.store import filter_references
+from loretools.models import LibraryCtx
+from loretools.services.store import filter_references
 
 _RECORDS = [
     {

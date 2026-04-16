@@ -2,7 +2,7 @@
 
 ## objective
 
-Add uid computation and uid-based deduplication to scholartools. This establishes the stable identity layer required by the distributed sync protocol (RFC-001 phase 1). Changes are confined to three modules: model layer (two new fields), services layer (uid generation and dedup), and a one-time backfill script. The feature is transparent to public API users — uids are assigned automatically at intake and never exposed in the function signatures.
+Add uid computation and uid-based deduplication to loretools. This establishes the stable identity layer required by the distributed sync protocol (RFC-001 phase 1). Changes are confined to three modules: model layer (two new fields), services layer (uid generation and dedup), and a one-time backfill script. The feature is transparent to public API users — uids are assigned automatically at intake and never exposed in the function signatures.
 
 ## acceptance criteria
 

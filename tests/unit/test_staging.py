@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
-from scholartools.adapters.local import make_staging_storage
-from scholartools.models import (
+from loretools.adapters.local import make_staging_storage
+from loretools.models import (
     DeleteStagedResult,
     ListStagedResult,
     MergeResult,
@@ -54,7 +54,7 @@ async def test_staging_isolated_from_library(tmp_path):
     lib_json = tmp_path / "library.json"
     staging_json = tmp_path / "staging.json"
 
-    from scholartools.adapters.local import make_storage
+    from loretools.adapters.local import make_storage
 
     lib_read, lib_write = make_storage(str(lib_json))
     stage_read, stage_write = make_staging_storage(
@@ -95,7 +95,7 @@ def test_stage_result_failure():
 
 
 def test_list_staged_result():
-    from scholartools.models import ReferenceRow
+    from loretools.models import ReferenceRow
 
     rows = [ReferenceRow(citekey="a"), ReferenceRow(citekey="b")]
     result = ListStagedResult(references=rows, total=2)

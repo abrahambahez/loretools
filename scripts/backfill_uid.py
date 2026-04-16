@@ -11,9 +11,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from scholartools.config import load_settings
-from scholartools.models import Reference
-from scholartools.services.uid import compute_uid
+from loretools.config import load_settings
+from loretools.models import Reference
+from loretools.services.uid import compute_uid
 
 
 def _backfill_file(path: Path, dry_run: bool, verbose: bool, force: bool) -> int:

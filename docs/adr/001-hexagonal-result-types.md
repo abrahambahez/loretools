@@ -4,7 +4,7 @@
 Accepted
 
 ## context
-scholartools is consumed by AI agents, not humans. Agents call functions, read structured outputs, and cannot gracefully handle Python exceptions. The library must also support multiple storage backends (local, S3+DynamoDB, MongoDB+GCS) without changing the agent-facing interface. Standard layered architecture couples business logic to I/O and propagates exceptions upward — both are problems for agent reliability and backend flexibility.
+loretools is consumed by AI agents, not humans. Agents call functions, read structured outputs, and cannot gracefully handle Python exceptions. The library must also support multiple storage backends (local, S3+DynamoDB, MongoDB+GCS) without changing the agent-facing interface. Standard layered architecture couples business logic to I/O and propagates exceptions upward — both are problems for agent reliability and backend flexibility.
 
 ## decision
 Use Hexagonal Architecture (Ports & Adapters):

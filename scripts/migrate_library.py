@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Migrate scholartools library to remote-enabled dir"
+        description="Migrate loretools library to remote-enabled dir"
     )
     parser.add_argument(
         "--from-dir", required=True, type=Path, help="Old library_dir path"
@@ -35,8 +35,8 @@ def main() -> None:
         print(f"error: --from-dir does not exist: {from_dir}")
         sys.exit(1)
 
-    import scholartools as st
-    from scholartools.config import load_settings
+    import loretools as st
+    from loretools.config import load_settings
 
     settings = load_settings()
     to_dir = settings.local.library_dir.resolve()

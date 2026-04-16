@@ -2,7 +2,7 @@
 
 ## context
 
-The S3 adapter (`adapters/s3_sync.py`) uses boto3 + botocore for 6 operations. This pulls in ~15MB for the full AWS SDK surface. scholartools only needs S3-compatible object storage. `SyncConfig.endpoint` already signals support for non-AWS backends (MinIO, Cloudflare R2, Backblaze B2). The current dev environment has 8 conditional test failures because boto3 is not installed.
+The S3 adapter (`adapters/s3_sync.py`) uses boto3 + botocore for 6 operations. This pulls in ~15MB for the full AWS SDK surface. loretools only needs S3-compatible object storage. `SyncConfig.endpoint` already signals support for non-AWS backends (MinIO, Cloudflare R2, Backblaze B2). The current dev environment has 8 conditional test failures because boto3 is not installed.
 
 ADR-005 accepted: replace boto3 with the MinIO Python SDK (~500KB). All 6 operations have direct equivalents. One breaking consequence: no AWS credential auto-discovery — `access_key`/`secret_key` must be explicit in `SyncConfig`.
 

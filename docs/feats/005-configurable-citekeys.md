@@ -5,7 +5,7 @@ status: current
 
 ## Problem
 
-Citekey format is hardcoded. Researchers have existing conventions — in Zotero, JabRef, or their own vaults — that differ from the scholartools default. There is no way to adapt generation without touching source code.
+Citekey format is hardcoded. Researchers have existing conventions — in Zotero, JabRef, or their own vaults — that differ from the loretools default. There is no way to adapt generation without touching source code.
 
 ## Goal
 

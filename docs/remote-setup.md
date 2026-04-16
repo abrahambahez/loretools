@@ -2,7 +2,7 @@
 
 ## overview
 
-scholartools sync uses an S3-compatible bucket as a shared backbone. The bucket holds
+loretools sync uses an S3-compatible bucket as a shared backbone. The bucket holds
 three namespaces: `changes/` (append-only change log), `snapshots/` (full library
 dumps), and `blobs/` (content-addressed file storage for PDFs and other linked files).
 
@@ -70,7 +70,7 @@ Save the **Access Key ID** and **Secret Access Key** — they appear only once.
 
 ## 2. config.json
 
-Location: `~/.config/scholartools/config.json`
+Location: `~/.config/loretools/config.json`
 
 Minimal working config:
 
@@ -100,15 +100,15 @@ Notes:
   `files/`, `staging.json`, `peers/`) are computed under it automatically.
 - The `sync` block activates the composite storage adapter that writes a change log
   entry on every library write.
-- `bucket` accepts an optional subdir prefix: `"MY-BUCKET/scholartools"` scopes all
-  objects under `scholartools/` inside the bucket. Useful when sharing a bucket across
+- `bucket` accepts an optional subdir prefix: `"MY-BUCKET/loretools"` scopes all
+  objects under `loretools/` inside the bucket. Useful when sharing a bucket across
   multiple projects or libraries.
 
 ---
 
 ## 3. identity bootstrap
 
-Each researcher has one keypair at `~/.config/scholartools/keys/PEER_ID/DEVICE_ID.key`.
+Each researcher has one keypair at `~/.config/loretools/keys/PEER_ID/DEVICE_ID.key`.
 The first researcher self-registers as admin; subsequent researchers generate a keypair
 and share their public key for the admin to register.
 
@@ -118,14 +118,14 @@ and share their public key for the admin to register.
 ### First researcher (admin)
 
 ```bash
-scht peers init sabhz laptop
-scht peers register-self
+lore peers init sabhz laptop
+lore peers register-self
 ```
 
 `peers init` generates the keypair and prints JSON with the `public_key`.
 `peers register-self` registers this peer as admin in the local peer directory.
 
-Add the `peer` block to `~/.config/scholartools/config.json`:
+Add the `peer` block to `~/.config/loretools/config.json`:
 
 ```json
 {
@@ -141,12 +141,12 @@ Add the `peer` block to `~/.config/scholartools/config.json`:
 After steps 1–3:
 
 ```bash
-scht sync push-changelog     # empty but no errors = S3 is reachable
-scht sync snapshot
+lore sync push-changelog     # empty but no errors = S3 is reachable
+lore sync snapshot
 ```
 
 The library is empty. Start adding references normally — every write generates a change
-log entry. Run `scht sync push-changelog` to upload them to S3.
+log entry. Run `lore sync push-changelog` to upload them to S3.
 
 ---
 
@@ -171,7 +171,7 @@ What the script does:
 After migration, run push-changelog to upload any change log entries generated during the copy:
 
 ```bash
-scht sync push-changelog
+lore sync push-changelog
 ```
 
 ### manual migration (step by step)
@@ -189,17 +189,17 @@ cp -r /old/library/dir/staging /new/library/dir/staging           # if exists
 uv run python scripts/backfill_uid.py
 
 # 3. snapshot the current state to S3
-scht sync snapshot
+lore sync snapshot
 
 # 4. upload blobs for all records that have a linked local file
-scht sync upload-blobs
+lore sync upload-blobs
 
 # upload-blobs sets blob_ref on each record but writes no change log entries.
 # follow with snapshot to publish the updated blob_ref state to S3.
-scht sync snapshot
+lore sync snapshot
 
 # 5. push change log
-scht sync push-changelog
+lore sync push-changelog
 ```
 
 ---
@@ -220,13 +220,13 @@ aws s3 ls s3://MY-BUCKET/blobs/     --recursive | grep -v '\.meta$' | wc -l
 
 On the **new researcher's machine**:
 
-1. Install scholartools and configure `config.json` with the same bucket credentials
+1. Install loretools and configure `config.json` with the same bucket credentials
    and their own `library_dir`. Do **not** add a `peer` block yet.
 
 2. Generate a keypair:
 
    ```bash
-   scht peers init alice laptop
+   lore peers init alice laptop
    ```
 
    The output JSON contains `public_key`. Share it with the admin.
@@ -234,8 +234,8 @@ On the **new researcher's machine**:
 3. **Admin-side**: register the new researcher:
 
    ```bash
-   echo '{"peer_id":"alice","device_id":"laptop","public_key":"<key from step 2>"}' | scht peers register
-   scht sync push-changelog
+   echo '{"peer_id":"alice","device_id":"laptop","public_key":"<key from step 2>"}' | lore peers register
+   lore sync push-changelog
    ```
 
 4. New researcher: add the `peer` block to their `config.json`:
@@ -258,14 +258,14 @@ On the **new researcher's machine**:
 
 On the **new device**:
 
-1. Install scholartools and configure `config.json` with the same bucket credentials
+1. Install loretools and configure `config.json` with the same bucket credentials
    and a **new** `library_dir`.
 
 2. Bootstrap identities (steps 3a and 3b above), using the same `peer_id` but a
    different `device_id`:
 
    ```bash
-   scht peers init sabhz desktop
+   lore peers init sabhz desktop
    ```
 
 3. Copy the peer directory from the first device so pull verification works:
@@ -278,20 +278,20 @@ On the **new device**:
 
    ```bash
    # on first device — after copying the new device's public key
-   echo '{"peer_id":"sabhz","device_id":"desktop","public_key":"<key>"}' | scht peers add-device sabhz
-   scht sync push-changelog
+   echo '{"peer_id":"sabhz","device_id":"desktop","public_key":"<key>"}' | lore peers add-device sabhz
+   lore sync push-changelog
    ```
 
 4. Restore from the latest snapshot on the new device:
 
    ```bash
-   scht sync pull-changelog
+   lore sync pull-changelog
    ```
 
-5. Download blobs on demand via `scht files get <citekey>` or prefetch all:
+5. Download blobs on demand via `lore files get <citekey>` or prefetch all:
 
    ```bash
-   scht files prefetch
+   lore files prefetch
    ```
 
 ---

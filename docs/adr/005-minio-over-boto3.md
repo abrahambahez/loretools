@@ -4,7 +4,7 @@
 Accepted
 
 ## context
-The S3 adapter (`adapters/s3_sync.py`) uses boto3 for 6 operations: upload_file, download_file, list_objects_v2, head_object, put_object, and client construction. boto3 + botocore is ~15MB of dependencies designed for the full AWS SDK surface area — IAM, CloudFormation, EC2, and hundreds of other services. scholartools only needs S3-compatible object storage.
+The S3 adapter (`adapters/s3_sync.py`) uses boto3 for 6 operations: upload_file, download_file, list_objects_v2, head_object, put_object, and client construction. boto3 + botocore is ~15MB of dependencies designed for the full AWS SDK surface area — IAM, CloudFormation, EC2, and hundreds of other services. loretools only needs S3-compatible object storage.
 
 `SyncConfig.endpoint` already signals the design intent: S3-compatible backends (self-hosted MinIO, Cloudflare R2, Backblaze B2) are the primary target, not AWS S3 specifically. boto3 was chosen for convenience in the initial implementation, not for any feature it uniquely provides.
 

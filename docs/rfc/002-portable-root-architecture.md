@@ -9,7 +9,7 @@
 
 ## summary
 
-Replace the global config and global install model with a **collection-scoped** architecture. A collection is a directory that contains all its reference data, config, and the binary. `scht` always operates relative to CWD — no global state, no PATH registration, no complex resolution chain. One session, one collection.
+Replace the global config and global install model with a **collection-scoped** architecture. A collection is a directory that contains all its reference data, config, and the binary. `lore` always operates relative to CWD — no global state, no PATH registration, no complex resolution chain. One session, one collection.
 
 This unblocks the primary user (non-technical researcher on Claude Co-Work) and enables a natural multi-collection workflow for all users.
 
@@ -17,7 +17,7 @@ This unblocks the primary user (non-technical researcher on Claude Co-Work) and 
 
 ## terminology
 
-**collection** — a self-contained working directory on which `scht` operates. All reference data, config, and the binary live inside it. `MyRefs/` is a collection.
+**collection** — a self-contained working directory on which `lore` operates. All reference data, config, and the binary live inside it. `MyRefs/` is a collection.
 
 ---
 
@@ -36,7 +36,7 @@ The current architecture assumes a persistent home directory. In Co-Work, `~/.co
 
 ### agents don't switch collections mid-session
 
-`scht` is designed for AI agents as primary consumers. An agent working in a given session has a clear, scoped task within one collection. Context-switching between collections mid-session is an anti-pattern from a context engineering perspective. One session = one collection. This justifies a CWD-first, no-global-state model.
+`lore` is designed for AI agents as primary consumers. An agent working in a given session has a clear, scoped task within one collection. Context-switching between collections mid-session is an anti-pattern from a context engineering perspective. One session = one collection. This justifies a CWD-first, no-global-state model.
 
 ### the multi-collection case
 
@@ -50,27 +50,27 @@ A researcher may maintain independent collections — a personal library, shared
 
 ```
 MyRefs/
-  scht              ← single-file binary (onefile PyInstaller)
+  lore              ← single-file binary (onefile PyInstaller)
   library.json
   staging.json
   staging/
   files/
-  .scholartools/
+  .loretools/
     config.json     ← collection config (auto-created on first run)
     peers/          ← peer registry and sync keys
 ```
 
-Reference data lives at the collection root. Tool config lives in `.scholartools/` — hidden, out of the way, clearly not a reference file. The collection directory is the library directory.
+Reference data lives at the collection root. Tool config lives in `.loretools/` — hidden, out of the way, clearly not a reference file. The collection directory is the library directory.
 
 ### config resolution
 
 One rule: **CWD is the collection root.**
 
-`scht` looks for `.scholartools/config.json` in CWD. If absent and CWD is writable, the directory and file are auto-created with defaults. No ENV var, no `--root` flag, no global fallback.
+`lore` looks for `.loretools/config.json` in CWD. If absent and CWD is writable, the directory and file are auto-created with defaults. No ENV var, no `--root` flag, no global fallback.
 
 ```bash
-cd ~/MyRefs && ./scht refs list          # works — CWD has config.json
-./scht refs list                          # fails if CWD has no config.json
+cd ~/MyRefs && ./lore refs list          # works — CWD has config.json
+./lore refs list                          # fails if CWD has no config.json
 ```
 
 `library_dir` remains in `config.json` as an optional override for testing and edge cases. Its default is CWD. It is not shown in the auto-generated config.
@@ -85,17 +85,17 @@ The binary lives in the collection directory. It is persistent across Co-Work se
 
 **first session (one-time setup, agent-guided):**
 
-1. User downloads the release zip in their browser (contains `scht` binary + `scholartools-manager` skill zip)
+1. User downloads the release zip in their browser (contains `lore` binary + `loretools-manager` skill zip)
 2. User opens Claude Co-Work, mounts their research folder, uploads both files
-3. User prompts: *"Help me set up scholartools for a reference collection"*
-4. Agent (guided by `scholartools-manager` skill) executes setup:
+3. User prompts: *"Help me set up loretools for a reference collection"*
+4. Agent (guided by `loretools-manager` skill) executes setup:
    ```bash
    # copy binary to collection directory and make executable
-   cp /path/to/uploaded/scht /path/to/MyRefs/scht
+   cp /path/to/uploaded/lore /path/to/MyRefs/scht
    chmod +x /path/to/MyRefs/scht
 
    # verify
-   cd /path/to/MyRefs && ./scht refs list
+   cd /path/to/MyRefs && ./lore refs list
    # config.json auto-created with defaults
    ```
 5. Agent asks user preferences (email for API polite pool, citekey pattern, etc.) and writes `config.json`
@@ -103,7 +103,7 @@ The binary lives in the collection directory. It is persistent across Co-Work se
 **subsequent sessions:**
 
 ```bash
-cd /path/to/MyRefs && ./scht refs list
+cd /path/to/MyRefs && ./lore refs list
 ```
 
 The binary is already in the collection directory. No copying, no setup. The agent cd's to the collection and runs commands.
@@ -111,16 +111,16 @@ The binary is already in the collection directory. No copying, no setup. The age
 ### installation delivery
 
 The release zip for the primary user contains:
-- `scht` — single-file Linux x86_64 binary
-- `scholartools-manager-en-vX.Y.Z.zip` — bundled skill
+- `lore` — single-file Linux x86_64 binary
+- `loretools-manager-en-vX.Y.Z.zip` — bundled skill
 
 The user uploads both to Claude Desktop. The skill guides the agent through setup. The user never touches a terminal.
 
 ---
 
-## new skill: scholartools-manager
+## new skill: loretools-manager
 
-Replaces the current `scholartools-config` skill. Scope: first-time setup, session start verification, and config reference. The agent reads this skill and knows how to:
+Replaces the current `loretools-config` skill. Scope: first-time setup, session start verification, and config reference. The agent reads this skill and knows how to:
 
 1. Install the binary into the collection directory
 2. Create or validate `config.json` based on user preferences
@@ -137,12 +137,12 @@ This skill is the primary onboarding surface for non-technical users.
 
 | file | change |
 |---|---|
-| `scholartools/config.py` | Remove `CONFIG_PATH` constant. Resolve to `Path.cwd() / ".scholartools" / "config.json"`. Auto-create dir + file with defaults if absent. |
-| `scholartools/models.py` | `LocalSettings.library_dir` default changes to `Path.cwd()` (resolved at load time, not model definition time). |
+| `loretools/config.py` | Remove `CONFIG_PATH` constant. Resolve to `Path.cwd() / ".loretools" / "config.json"`. Auto-create dir + file with defaults if absent. |
+| `loretools/models.py` | `LocalSettings.library_dir` default changes to `Path.cwd()` (resolved at load time, not model definition time). |
 | `.build/pyinstaller.spec` | Switch to `--onefile` mode. Remove `COLLECT` step. Single EXE output. |
 | `.github/workflows/build-release.yml` | Adjust zip step — zip single binary file, not a directory. |
-| `skills/en/scholartools-config/` | Replaced by `skills/en/scholartools-manager/`. |
-| `skills/es/scholartools-config/` | Replaced by `skills/es/scholartools-manager/`. |
+| `skills/en/loretools-config/` | Replaced by `skills/en/loretools-manager/`. |
+| `skills/es/loretools-config/` | Replaced by `skills/es/loretools-manager/`. |
 
 ### removed
 
@@ -169,11 +169,11 @@ This skill is the primary onboarding surface for non-technical users.
 
 **R1 — test isolation**: Unit tests calling `load_settings()` will resolve to the repo root as CWD. A `.scht/` or `config.json` could be auto-created there. Mitigation: `conftest.py` sets CWD to a tmp directory or patches `Path.cwd()` before any test that calls `load_settings()`.
 
-**R2 — existing beta users**: Any user with `~/.config/scholartools/config.json` will see it ignored. Mitigation: zero real users; document in CHANGELOG. No migration path needed.
+**R2 — existing beta users**: Any user with `~/.config/loretools/config.json` will see it ignored. Mitigation: zero real users; document in CHANGELOG. No migration path needed.
 
 **R3 — onefile startup time**: First run extracts to a temp dir (~2 s). Acceptable for agent use where startup cost is negligible relative to API call latency.
 
-**R4 — binary size in collection**: A 100 MB binary in every collection directory. For users with multiple collections this multiplies. Acceptable for now; a future `~/.scholartools/collections.json` index (noted as not-now) could introduce a shared binary location.
+**R4 — binary size in collection**: A 100 MB binary in every collection directory. For users with multiple collections this multiplies. Acceptable for now; a future `~/.loretools/collections.json` index (noted as not-now) could introduce a shared binary location.
 
 ---
 

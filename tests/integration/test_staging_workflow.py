@@ -1,13 +1,13 @@
 import pytest
 
-from scholartools.adapters.local import (
+from loretools.adapters.local import (
     make_filestore,
     make_staging_storage,
     make_storage,
 )
-from scholartools.models import LibraryCtx, Reference
-from scholartools.services.merge import merge
-from scholartools.services.staging import list_staged, stage_reference
+from loretools.models import LibraryCtx, Reference
+from loretools.services.merge import merge
+from loretools.services.staging import list_staged, stage_reference
 
 
 def make_ctx(tmp_path):

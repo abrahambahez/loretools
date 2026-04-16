@@ -4,37 +4,37 @@ status: approved
 
 ## objective
 
-Build an MCP server that exposes the scholartools library to Claude Desktop and MCP-compatible clients through 7 workflow-phase tools. The server is a thin wrapper over the existing public API — no new services, no new models, no new adapters. Success is an agent confidently selecting the correct tool first, executing a full research workflow end-to-end, with no exceptions leaking across the MCP boundary.
+Build an MCP server that exposes the loretools library to Claude Desktop and MCP-compatible clients through 7 workflow-phase tools. The server is a thin wrapper over the existing public API — no new services, no new models, no new adapters. Success is an agent confidently selecting the correct tool first, executing a full research workflow end-to-end, with no exceptions leaking across the MCP boundary.
 
 ## acceptance criteria
 
 - WHEN `scht-mcp` is invoked, the system MUST initialize stdio transport via FastMCP and register exactly 7 tools with trigger-condition descriptions — never raise on startup.
-- WHEN a `discover` call is received with `query`, optional `sources`, and optional `limit`, the system MUST call `scholartools.discover_references()`, return staged references in `SearchResult`, and NOT require a subsequent `staging` call to persist candidates.
-- WHEN a `fetch` call is received with `identifier`, the system MUST call `scholartools.fetch_reference()`, auto-stage the result, and return `FetchResult` with `reference`, `source`, and `error` — identifier type is auto-detected by the public API.
-- WHEN an `ingest_file` call is received with `file_path`, the system MUST call `scholartools.extract_from_file()`, auto-stage the result with its linked file, and return `ExtractResult` with `reference`, `method_used`, `confidence`, and `error`.
-- WHEN a `staging` call is received with `action="list"` and optional `page`, the system MUST call `scholartools.list_staged()` and return paginated `ListStagedResult`.
-- WHEN a `staging` call is received with `action="delete"` and `citekey`, the system MUST call `scholartools.delete_staged()` and return `DeleteStagedResult`.
-- WHEN a `staging` call is received with `action="merge"` and optional `omit` and `allow_semantic`, the system MUST call `scholartools.merge()` and return `MergeResult` with promoted and skipped citekeys.
-- WHEN a `library` call is received with `action="filter"` and any combination of `query`, `author`, `year`, `ref_type`, `has_file`, `page`, the system MUST call `scholartools.filter_references()` and return paginated `ListResult`.
-- WHEN a `library` call is received with `action="get"` and `citekey`, the system MUST call `scholartools.get_reference()` and return `GetResult` with the full Reference or error.
-- WHEN a `library` call is received with `action="list"` and optional `page`, the system MUST call `scholartools.list_references()` and return paginated `ListResult`.
-- WHEN a `manage_reference` call is received with `action="add"` and `ref` dict, the system MUST call `scholartools.add_reference()` and return `AddResult` with citekey or error.
-- WHEN a `manage_reference` call is received with `action="update"`, `citekey`, and `fields` dict, the system MUST call `scholartools.update_reference()` and return `UpdateResult`.
-- WHEN a `manage_reference` call is received with `action="delete"` and `citekey`, the system MUST call `scholartools.delete_reference()` and return `DeleteResult`.
-- WHEN a `manage_reference` call is received with `action="rename"`, `old_key`, and `new_key`, the system MUST call `scholartools.rename_reference()` and return `RenameResult`.
-- WHEN a `files` call is received with `action="link"`, `citekey`, and `file_path`, the system MUST call `scholartools.link_file()` and return `LinkResult`.
-- WHEN a `files` call is received with `action="unlink"` and `citekey`, the system MUST call `scholartools.unlink_file()` and return `UnlinkResult`.
-- WHEN a `files` call is received with `action="move"`, `citekey`, and `dest_name`, the system MUST call `scholartools.move_file()` and return `MoveResult`.
-- WHEN a `files` call is received with `action="list"` and optional `page`, the system MUST call `scholartools.list_files()` and return paginated `FilesListResult`.
+- WHEN a `discover` call is received with `query`, optional `sources`, and optional `limit`, the system MUST call `loretools.discover_references()`, return staged references in `SearchResult`, and NOT require a subsequent `staging` call to persist candidates.
+- WHEN a `fetch` call is received with `identifier`, the system MUST call `loretools.fetch_reference()`, auto-stage the result, and return `FetchResult` with `reference`, `source`, and `error` — identifier type is auto-detected by the public API.
+- WHEN an `ingest_file` call is received with `file_path`, the system MUST call `loretools.extract_from_file()`, auto-stage the result with its linked file, and return `ExtractResult` with `reference`, `method_used`, `confidence`, and `error`.
+- WHEN a `staging` call is received with `action="list"` and optional `page`, the system MUST call `loretools.list_staged()` and return paginated `ListStagedResult`.
+- WHEN a `staging` call is received with `action="delete"` and `citekey`, the system MUST call `loretools.delete_staged()` and return `DeleteStagedResult`.
+- WHEN a `staging` call is received with `action="merge"` and optional `omit` and `allow_semantic`, the system MUST call `loretools.merge()` and return `MergeResult` with promoted and skipped citekeys.
+- WHEN a `library` call is received with `action="filter"` and any combination of `query`, `author`, `year`, `ref_type`, `has_file`, `page`, the system MUST call `loretools.filter_references()` and return paginated `ListResult`.
+- WHEN a `library` call is received with `action="get"` and `citekey`, the system MUST call `loretools.get_reference()` and return `GetResult` with the full Reference or error.
+- WHEN a `library` call is received with `action="list"` and optional `page`, the system MUST call `loretools.list_references()` and return paginated `ListResult`.
+- WHEN a `manage_reference` call is received with `action="add"` and `ref` dict, the system MUST call `loretools.add_reference()` and return `AddResult` with citekey or error.
+- WHEN a `manage_reference` call is received with `action="update"`, `citekey`, and `fields` dict, the system MUST call `loretools.update_reference()` and return `UpdateResult`.
+- WHEN a `manage_reference` call is received with `action="delete"` and `citekey`, the system MUST call `loretools.delete_reference()` and return `DeleteResult`.
+- WHEN a `manage_reference` call is received with `action="rename"`, `old_key`, and `new_key`, the system MUST call `loretools.rename_reference()` and return `RenameResult`.
+- WHEN a `files` call is received with `action="link"`, `citekey`, and `file_path`, the system MUST call `loretools.link_file()` and return `LinkResult`.
+- WHEN a `files` call is received with `action="unlink"` and `citekey`, the system MUST call `loretools.unlink_file()` and return `UnlinkResult`.
+- WHEN a `files` call is received with `action="move"`, `citekey`, and `dest_name`, the system MUST call `loretools.move_file()` and return `MoveResult`.
+- WHEN a `files` call is received with `action="list"` and optional `page`, the system MUST call `loretools.list_files()` and return paginated `FilesListResult`.
 - WHEN any tool call fails (library error, missing param, unknown action), the system MUST return a result with `error` populated — never raise an exception across the MCP boundary.
 - WHEN `file_path` is provided to `ingest_file` or `files link`, the system MUST reject paths containing `..` before calling the public API.
 
 ## tasks
 
 - [x] task-01: scaffold mcp_server.py and entry point (blocks: none)
-  - Create `scholartools/mcp_server.py` with FastMCP instance and `main()` that calls `mcp.run()`
+  - Create `loretools/mcp_server.py` with FastMCP instance and `main()` that calls `mcp.run()`
   - Add `mcp>=1.0` to `pyproject.toml` optional dependencies: `[project.optional-dependencies] mcp = ["mcp>=1.0"]`
-  - Add entry point to `pyproject.toml`: `scht-mcp = "scholartools.mcp_server:main"`
+  - Add entry point to `pyproject.toml`: `scht-mcp = "loretools.mcp_server:main"`
   - Tests: module imports without error; `main` is callable; FastMCP instance is registered
 
 - [x] task-02: implement discover, fetch, ingest_file tools (blocks: task-01)

@@ -4,16 +4,16 @@
 
 From docs/feats/025-skills-zip-distribution.md:
 
-Skills (`scholartools-config`, `scholartools-references`, `scholartools-files`,
-`scholartools-sync-peers`) exist in `skills/en/` and `skills/es/`. Researchers must
+Skills (`loretools-config`, `loretools-references`, `loretools-files`,
+`loretools-sync-peers`) exist in `skills/en/` and `skills/es/`. Researchers must
 currently copy SKILL.md files manually into Claude Desktop. There is no versioned
 artifact and no install script for skills.
 
 **Distribution model:**
 - One zip per language published as a GitHub Release asset when any `skills/` file changed
   between the current and previous version tag
-- Asset names: `scholartools-skills-en-vX.Y.Z.zip`, `scholartools-skills-es-vX.Y.Z.zip`
-- Zip root contains flat skill directories: `scholartools-config/SKILL.md`, etc.
+- Asset names: `loretools-skills-en-vX.Y.Z.zip`, `loretools-skills-es-vX.Y.Z.zip`
+- Zip root contains flat skill directories: `loretools-config/SKILL.md`, etc.
 - Two install scripts (`install-skills.sh`, `install-skills.ps1`) published as additional
   release assets, conditional on the same change gate
 - Install scripts target `~/.claude/skills/` (macOS/Linux) or `%APPDATA%\Claude\skills\`
@@ -34,14 +34,14 @@ Add changelog discipline to CLAUDE.md.
 ## acceptance criteria (EARS format)
 
 - when a `v*` tag is pushed and any file under `skills/` changed since the previous tag,
-  the system must publish `scholartools-skills-en-<version>.zip` and
-  `scholartools-skills-es-<version>.zip` as GitHub Release assets
+  the system must publish `loretools-skills-en-<version>.zip` and
+  `loretools-skills-es-<version>.zip` as GitHub Release assets
 - when a `v*` tag is pushed and no file under `skills/` changed since the previous tag,
-  the system must NOT publish any `scholartools-skills-*` asset
+  the system must NOT publish any `loretools-skills-*` asset
 - when no previous tag exists (first release), the system must publish skill zips
   unconditionally
 - when each skills zip is extracted, it must contain exactly three directories at the root
-  (`scholartools-config/`, `scholartools-references/`, `scholartools-sync-peers/`),
+  (`loretools-config/`, `loretools-references/`, `loretools-sync-peers/`),
   each containing a `SKILL.md` file
 - when skill zips are published, the system must also publish `install-skills.sh` and
   `install-skills.ps1` as release assets in the same release
@@ -51,11 +51,11 @@ Add changelog discipline to CLAUDE.md.
 - when a researcher runs `install-skills.sh --lang es`, the system must install the
   Spanish skills zip without prompting for language
 - when a researcher runs `install-skills.sh --uninstall`, the system must remove all
-  directories matching `scholartools-*` from `~/.claude/skills/`
+  directories matching `loretools-*` from `~/.claude/skills/`
 - when a researcher runs `install-skills.ps1` on Windows, the system must extract into
   `$env:APPDATA\Claude\skills\`
 - when `install-skills.ps1 -Uninstall` is called, the system must remove all
-  `scholartools-*` directories from the Windows skills dir
+  `loretools-*` directories from the Windows skills dir
 - when a skills release asset is not found for the requested language, both scripts must
   exit non-zero with a clear error message
 - when a release touches `skills/`, the CHANGELOG.md entry must include a `### Skills`
@@ -72,16 +72,16 @@ Add changelog discipline to CLAUDE.md.
     subsequent steps, or a conditional job-level output)
   - For each language (`en`, `es`): zip `skills/<lang>/*/SKILL.md` preserving directory
     structure from `skills/<lang>/` as root, output
-    `scholartools-skills-<lang>-<version>.zip`
+    `loretools-skills-<lang>-<version>.zip`
   - Upload both zips and `install-skills.sh` / `install-skills.ps1` via
     `softprops/action-gh-release@v2`
 
 - [x] task-02: write `install-skills.sh` (blocks: task-01)
   - Place at `.build/install-skills.sh` (published as release asset, not bundled in zips)
   - Parse `--lang <en|es>` (default `en`) and `--uninstall` flags
-  - If `--uninstall`: remove `$HOME/.claude/skills/scholartools-*/` and exit
-  - Otherwise: fetch `https://api.github.com/repos/abrahambahez/scholartools/releases/latest`,
-    find asset matching `scholartools-skills-<lang>-*.zip`
+  - If `--uninstall`: remove `$HOME/.claude/skills/loretools-*/` and exit
+  - Otherwise: fetch `https://api.github.com/repos/abrahambahez/loretools/releases/latest`,
+    find asset matching `loretools-skills-<lang>-*.zip`
   - Download to temp dir, extract to `~/.claude/skills/`, print installed dirs, clean up
   - Exit non-zero with message if asset not found or download fails
   - No interactive prompts beyond the language choice when `--lang` is not supplied
@@ -89,7 +89,7 @@ Add changelog discipline to CLAUDE.md.
 - [x] task-03: write `install-skills.ps1` (blocks: task-01)
   - Place at `.build/install-skills.ps1`
   - Params: `-Lang <en|es>` (default `en`), `-Uninstall` switch
-  - If `-Uninstall`: remove `$env:APPDATA\Claude\skills\scholartools-*` and exit
+  - If `-Uninstall`: remove `$env:APPDATA\Claude\skills\loretools-*` and exit
   - Otherwise: `Invoke-RestMethod` latest release, find matching asset, download,
     `Expand-Archive` to `$env:APPDATA\Claude\skills\`, print installed dirs
   - Exit non-zero with `Write-Error` if asset not found

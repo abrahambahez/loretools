@@ -1,4 +1,4 @@
-# Primeros pasos con scholartools
+# Primeros pasos con loretools
 
 Esta guía es para investigadores que usan **Claude Co-Work** (Proyectos de Claude con acceso a archivos). No se requiere experiencia con la terminal — tu agente de IA gestiona todas las operaciones de shell.
 
@@ -6,10 +6,10 @@ Esta guía es para investigadores que usan **Claude Co-Work** (Proyectos de Clau
 
 ## ¿Qué es una colección?
 
-Una **colección** es una única carpeta que contiene todo lo que scholartools necesita:
+Una **colección** es una única carpeta que contiene todo lo que loretools necesita:
 
-- `scht` — el binario que ejecuta el agente
-- `.scholartools/config.json` — tus preferencias y configuración
+- `lore` — el binario que ejecuta el agente
+- `.loretools/config.json` — tus preferencias y configuración
 - `library.json` — tu biblioteca de referencias
 - `files/` — archivos PDF y documentos vinculados a referencias
 - `staging/` — referencias en espera de revisión y fusión
@@ -22,7 +22,7 @@ Puedes crear una colección por proyecto de investigación (o una colección com
 
 ### 1. Descarga el zip de la versión
 
-Ve a la [página de Releases](https://github.com/abrahambahez/scholartools/releases) y descarga el zip para tu plataforma:
+Ve a la [página de Releases](https://github.com/abrahambahez/loretools/releases) y descarga el zip para tu plataforma:
 
 - **macOS (Apple Silicon):** `scht-X.Y.Z-macos-arm64.zip`
 - **Linux:** `scht-X.Y.Z-linux-x86_64.zip`
@@ -40,21 +40,21 @@ Abre Claude Projects y conecta tu carpeta de colección para que el agente pueda
 
 Sube el archivo zip que descargaste en el paso 1 a tu sesión de Co-Work.
 
-### 5. Instala la skill `scholartools-manager`
+### 5. Instala la skill `loretools-manager`
 
-Descarga el zip de la skill desde la misma página de Releases (`scholartools-scholartools-manager-es-X.Y.Z.zip` para español o la variante `en` para inglés) e instálala. Dile al agente:
+Descarga el zip de la skill desde la misma página de Releases (`loretools-loretools-manager-es-X.Y.Z.zip` para español o la variante `en` para inglés) e instálala. Dile al agente:
 
-> "Por favor instala la skill scholartools-manager desde este zip."
+> "Por favor instala la skill loretools-manager desde este zip."
 
 ### 6. Pide al agente que complete la configuración
 
 Una vez instalada la skill, di:
 
-> "Configura scholartools en mi carpeta de colección."
+> "Configura loretools en mi carpeta de colección."
 
 El agente:
-1. Descomprimirá `scht` y lo hará ejecutable
-2. Lo ejecutará una vez para crear automáticamente `.scholartools/config.json`
+1. Descomprimirá `lore` y lo hará ejecutable
+2. Lo ejecutará una vez para crear automáticamente `.loretools/config.json`
 3. Verificará que la colección esté operativa
 
 ### 7. Verifica que todo funciona
@@ -74,9 +74,9 @@ Cada vez que abras una nueva sesión de Co-Work:
 1. Abre Claude Projects y monta tu carpeta de colección
 2. Pide al agente que verifique la colección:
 
-   > "Verifica que scholartools esté funcionando."
+   > "Verifica que loretools esté funcionando."
 
-   El agente comprueba que `scht` esté presente y que la configuración sea válida.
+   El agente comprueba que `lore` esté presente y que la configuración sea válida.
 
 3. Comienza a trabajar — añade referencias, obtén metadatos, fusiona elementos en staging, etc.
 
@@ -88,8 +88,8 @@ Tras la configuración, tu carpeta de colección tiene este aspecto:
 
 ```
 <tu-colección>/
-  scht                          # el binario de scholartools
-  .scholartools/
+  lore                          # el binario de loretools
+  .loretools/
     config.json                 # configuración (creada automáticamente en el primer uso)
     keys/                       # pares de claves Ed25519 (solo si usas sincronización)
   library.json                  # tu biblioteca de referencias
@@ -98,13 +98,13 @@ Tras la configuración, tu carpeta de colección tiene este aspecto:
   staging/                      # archivos en staging
 ```
 
-El agente siempre ejecuta `scht` desde esta carpeta, por lo que todas las rutas se resuelven correctamente sin ninguna configuración de PATH.
+El agente siempre ejecuta `lore` desde esta carpeta, por lo que todas las rutas se resuelven correctamente sin ninguna configuración de PATH.
 
 ---
 
 ## Referencia de configuración
 
-`.scholartools/config.json` se crea automáticamente con valores predeterminados sensatos. Solo necesitas editarlo si quieres cambiar algo.
+`.loretools/config.json` se crea automáticamente con valores predeterminados sensatos. Solo necesitas editarlo si quieres cambiar algo.
 
 | Campo | Predeterminado | Qué controla |
 |-------|----------------|--------------|
@@ -130,14 +130,14 @@ Sin estas claves, la herramienta degrada de forma elegante: la extracción con L
 
 ## Resolución de problemas
 
-**`scht` no se encuentra tras la carga**
-Asegúrate de que el zip fue descomprimido y que el archivo resultante se llama `scht` (no `scht-X.Y.Z-plataforma`). Dile al agente: "Lista los archivos en la carpeta de colección."
+**`lore` no se encuentra tras la carga**
+Asegúrate de que el zip fue descomprimido y que el archivo resultante se llama `lore` (no `scht-X.Y.Z-plataforma`). Dile al agente: "Lista los archivos en la carpeta de colección."
 
-**Permiso denegado al ejecutar `scht`**
-El binario necesita permiso de ejecución. Dile al agente: "Haz scht ejecutable con chmod +x."
+**Permiso denegado al ejecutar `lore`**
+El binario necesita permiso de ejecución. Dile al agente: "Haz lore ejecutable con chmod +x."
 
 **Configuración no encontrada o incompleta**
-Ejecuta `./scht refs list` una vez — esto crea automáticamente `.scholartools/config.json` si no existe.
+Ejecuta `./lore refs list` una vez — esto crea automáticamente `.loretools/config.json` si no existe.
 
 **Las operaciones de biblioteca fallan en el primer uso**
 `library.json` y `staging.json` se crean automáticamente en la primera escritura (primer `merge` o `add`). Es normal obtener resultados vacíos antes de eso.

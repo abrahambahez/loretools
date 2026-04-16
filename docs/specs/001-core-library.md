@@ -26,7 +26,7 @@ Build the complete core library foundation that enables agents to reliably manag
 ## tasks
 
 - [ ] task-01: project structure, pyproject.toml, config system
-  - create `src/scholartools/` directory layout per docs/structure.md
+  - create `src/loretools/` directory layout per docs/structure.md
   - define `config.json` schema, `Settings` Pydantic model, `config.py` loader with env var fallback
   - tests: loading from file, env var override, local defaults when config absent
 

@@ -3,14 +3,14 @@ import os
 from PyInstaller.utils.hooks import collect_all, collect_data_files
 
 datas, binaries, hiddenimports = [], [], []
-for _pkg in ["pydantic", "pydantic_core", "scholartools"]:
+for _pkg in ["pydantic", "pydantic_core", "loretools"]:
     _d, _b, _h = collect_all(_pkg)
     datas += _d; binaries += _b; hiddenimports += _h
 
-datas += collect_data_files("scholartools")
+datas += collect_data_files("loretools")
 
 a = Analysis(
-    [os.path.join(SPECPATH, "..", "scholartools", "cli", "__init__.py")],
+    [os.path.join(SPECPATH, "..", "loretools", "cli", "__init__.py")],
     pathex=[os.path.join(SPECPATH, "..")],
     binaries=binaries,
     datas=datas,
@@ -22,16 +22,6 @@ a = Analysis(
         "pdfminer.layout",
         "pdfminer.pdfpage",
         "pdfminer.converter",
-        "cryptography",
-        "Cryptodome",
-        "minio",
-        "urllib3",
-        "certifi",
-        "charset_normalizer",
-        "httpx",
-        "socksio",
-        "anyio",
-        "anyio._backends._asyncio",
         "annotated_types",
     ],
     hookspath=[],
@@ -49,7 +39,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     exclude_binaries=False,
-    name="scht",
+    name="lore",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

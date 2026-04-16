@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from scholartools.cli import _build_parser
-from scholartools.cli._fmt import read_arg
+from loretools.cli import _build_parser
+from loretools.cli._fmt import read_arg
 
 
 def test_parser_loads():

@@ -4,7 +4,7 @@
 
 From CHANGELOG analysis against docs/product.md and docs/tech.md:
 
-**Problem:** The core package (`scholartools/`) contains search adapters (httpx), LLM extraction (anthropic SDK), distributed sync infrastructure (HLC, change log, S3/MinIO via minio), and peer management (cryptography). All of these violate the portability invariant: *if a module imports httpx, anthropic, minio, or cryptography, it belongs in a plugin, not core.*
+**Problem:** The core package (`loretools/`) contains search adapters (httpx), LLM extraction (anthropic SDK), distributed sync infrastructure (HLC, change log, S3/MinIO via minio), and peer management (cryptography). All of these violate the portability invariant: *if a module imports httpx, anthropic, minio, or cryptography, it belongs in a plugin, not core.*
 
 **Concrete violations:**
 
@@ -34,24 +34,24 @@ Delete all non-core modules, salvage the three local file operations from `sync.
 
 ## acceptance criteria (EARS format)
 
-- when `grep -r "import httpx\|import anthropic\|import minio\|import cryptography\|from cryptography\|from minio"` is run on `scholartools/`, it must return zero matches
+- when `grep -r "import httpx\|import anthropic\|import minio\|import cryptography\|from cryptography\|from minio"` is run on `loretools/`, it must return zero matches
 - when `uv run pytest tests/unit/` is run with no environment variables set, all tests must pass
 - when `pyproject.toml` dependencies are inspected, the only runtime dependencies must be `pydantic>=2.0` and `pdfplumber>=0.11`
 - when `extract_from_file()` is called on a PDF where pdfplumber yields no usable metadata, the system must return `ExtractResult(agent_extraction_needed=True, file_path=<path>)` rather than calling any external API
 - when `attach_file(citekey, path)` is called, the system must copy the file to `files/` and register `FileRecord` — with no S3, no change log, and no HLC dependency
 - when `detach_file(citekey)` is called, the system must delete the local copy and clear `_file` — with no S3 or change log dependency
 - when `get_file(citekey)` is called, the system must return the local `files/` path — with no S3 or blob cache lookup
-- when `scht files attach`, `scht files detach`, and `scht files get` are called, the CLI must route to the local-only implementations
+- when `lore files attach`, `lore files detach`, and `lore files get` are called, the CLI must route to the local-only implementations
 - when `LibraryCtx` is inspected, it must contain no fields for `api_sources`, `llm_extract`, `peers_dir`, `data_dir`, `peer_id`, `device_id`, or `sync_config`
-- when `Settings` is loaded from `.scholartools/config.json`, it must parse only `local` and `citekey` blocks — `apis`, `llm`, `sync`, and `peer` blocks must not exist
+- when `Settings` is loaded from `.loretools/config.json`, it must parse only `local` and `citekey` blocks — `apis`, `llm`, `sync`, and `peer` blocks must not exist
 
 ## tasks
 
 - [ ] task-01: delete non-core source modules (blocks: none)
-  - Delete `scholartools/apis/` (entire directory)
-  - Delete `scholartools/adapters/conflicts_store.py`, `peer_directory.py`, `s3_sync.py`, `sync_composite.py`
-  - Delete `scholartools/services/search.py`, `fetch.py`, `blobs.py`, `hlc.py`, `peers.py`, `sync.py`
-  - Delete `scholartools/cli/discover.py`, `fetch.py`, `peers.py`, `sync.py`
+  - Delete `loretools/apis/` (entire directory)
+  - Delete `loretools/adapters/conflicts_store.py`, `peer_directory.py`, `s3_sync.py`, `sync_composite.py`
+  - Delete `loretools/services/search.py`, `fetch.py`, `blobs.py`, `hlc.py`, `peers.py`, `sync.py`
+  - Delete `loretools/cli/discover.py`, `fetch.py`, `peers.py`, `sync.py`
 
 - [ ] task-02: delete non-core tests (blocks: task-01)
   - Delete all unit and integration tests for the deleted modules (22 files total)
@@ -89,7 +89,7 @@ Delete all non-core modules, salvage the three local file operations from `sync.
   - Remove `httpx[socks]`, `anthropic`, `cryptography` from `dependencies`
   - Remove `sync` optional dependency group (`minio`)
   - Run `uv sync` to regenerate `uv.lock`
-  - Verify `uv run python -c "import scholartools"` works with no network or credential env vars
+  - Verify `uv run python -c "import loretools"` works with no network or credential env vars
 
 - [ ] task-08: update extract service for agent-nudge behavior (blocks: task-04, task-06)
   - In `services/extract.py`: when pdfplumber extraction yields confidence below threshold or raises, return `ExtractResult(agent_extraction_needed=True, file_path=file_path)` instead of calling LLM
@@ -98,7 +98,7 @@ Delete all non-core modules, salvage the three local file operations from `sync.
 - [ ] task-09: fix broken imports, run tests green (blocks: all previous)
   - Run `uv run ruff check .` and fix any import errors
   - Run `uv run pytest tests/unit/` — all tests must pass
-  - Run `grep -r "import httpx\|import anthropic\|import minio\|from cryptography" scholartools/` — must return zero results
+  - Run `grep -r "import httpx\|import anthropic\|import minio\|from cryptography" loretools/` — must return zero results
 
 ## ADR required?
 

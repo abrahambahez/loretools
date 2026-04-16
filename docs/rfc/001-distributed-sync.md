@@ -1,4 +1,4 @@
-# rfc: append-only distributed sync for scholartools
+# rfc: append-only distributed sync for loretools
 
 **status:** revised draft
 **date:** 2026-03-11
@@ -9,7 +9,7 @@
 
 ## summary
 
-Add a distributed sync layer to scholartools using an append-only change log and content-addressed blob storage. Local-first behavior is preserved — scholars work offline against their local library, and sync is an explicit operation. No central database, no coordination server.
+Add a distributed sync layer to loretools using an append-only change log and content-addressed blob storage. Local-first behavior is preserved — scholars work offline against their local library, and sync is an explicit operation. No central database, no coordination server.
 
 The sync backend is infrastructure-agnostic: the same protocol runs on managed cloud storage, a self-hosted Linux server, or a federated cluster. Stakeholders choose the deployment model that matches their ownership requirements.
 
@@ -240,11 +240,11 @@ A `conflicts/` directory is added to the local data layout — no configuration 
 The sync adapter is configured via `config.json`:
 
 ```json
-{ "sync": { "backend": "s3", "endpoint": "https://minio.example.org", "bucket": "scholartools" } }
+{ "sync": { "backend": "s3", "endpoint": "https://minio.example.org", "bucket": "loretools" } }
 ```
 
 ```json
-{ "sync": { "backend": "rsync", "host": "user@server.example.org", "path": "/srv/scholartools-shared" } }
+{ "sync": { "backend": "rsync", "host": "user@server.example.org", "path": "/srv/loretools-shared" } }
 ```
 
 ### deployment tiers
@@ -258,7 +258,7 @@ Phase 1 ships three adapters (rsync, MinIO/self-hosted S3, managed S3). Phase 2 
 | managed | AWS S3, Backblaze B2 | 1 | institutions, low ops burden |
 | federated | Garage cluster | 2 | activist networks, no single operator |
 
-**rsync over SSH** requires no special software. Push writes a single JSON file per session: `rsync -av ./changes/peer-id/timestamp.json user@server:/srv/scholartools-shared/changes/peer-id/`. Single-file writes via rsync are atomic at the filesystem level on Linux.
+**rsync over SSH** requires no special software. Push writes a single JSON file per session: `rsync -av ./changes/peer-id/timestamp.json user@server:/srv/loretools-shared/changes/peer-id/`. Single-file writes via rsync are atomic at the filesystem level on Linux.
 
 **MinIO** is a single binary, Apache 2.0 licensed. The S3 adapter covers AWS S3, Backblaze B2, and MinIO with no code changes — only the endpoint and credentials differ in config.
 

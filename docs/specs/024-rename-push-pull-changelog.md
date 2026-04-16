@@ -9,20 +9,20 @@ scope explicit at the call site, improving agent tool-selection accuracy.
 
 ## acceptance criteria
 
-- [ ] AC-01: `scholartools.push_changelog()` exists and behaves identically to the old `push()`
-- [ ] AC-02: `scholartools.pull_changelog()` exists and behaves identically to the old `pull()`
+- [ ] AC-01: `loretools.push_changelog()` exists and behaves identically to the old `push()`
+- [ ] AC-02: `loretools.pull_changelog()` exists and behaves identically to the old `pull()`
 - [ ] AC-03: `push()` and `pull()` no longer exist in the public API
-- [ ] AC-04: `scht sync push-changelog` and `scht sync pull-changelog` are the CLI subcommands
-- [ ] AC-05: `scht sync push` and `scht sync pull` no longer exist
+- [ ] AC-04: `lore sync push-changelog` and `lore sync pull-changelog` are the CLI subcommands
+- [ ] AC-05: `lore sync push` and `lore sync pull` no longer exist
 - [ ] AC-06: `sync_service.push_changelog()` and `sync_service.pull_changelog()` are the service functions
 - [ ] AC-07: All tests updated — no reference to old names remains
 - [ ] AC-08: All tests pass
 
 ## tasks
 
-- [ ] task-01: rename `push` → `push_changelog` and `pull` → `pull_changelog` in `scholartools/services/sync.py`
-- [ ] task-02: update `scholartools/__init__.py` — rename wrappers and update `sync_service.push/pull` call sites
-- [ ] task-03: update `scholartools/cli/sync.py` — rename handlers and subcommand strings
+- [ ] task-01: rename `push` → `push_changelog` and `pull` → `pull_changelog` in `loretools/services/sync.py`
+- [ ] task-02: update `loretools/__init__.py` — rename wrappers and update `sync_service.push/pull` call sites
+- [ ] task-03: update `loretools/cli/sync.py` — rename handlers and subcommand strings
 - [ ] task-04: update all tests (`tests/unit/cli/test_sync.py`, `tests/unit/test_sync_api.py`, `tests/integration/test_distributed_sync.py`, `tests/integration/test_blob_sync.py`)
 - [ ] task-05: update `README.md` — any push/pull command examples
 - [ ] task-06: update `docs/remote-setup.md` — any push/pull references
@@ -31,9 +31,9 @@ scope explicit at the call site, improving agent tool-selection accuracy.
 
 ## files in scope
 
-- `scholartools/services/sync.py`
-- `scholartools/__init__.py`
-- `scholartools/cli/sync.py`
+- `loretools/services/sync.py`
+- `loretools/__init__.py`
+- `loretools/cli/sync.py`
 - `tests/unit/cli/test_sync.py`
 - `tests/unit/test_sync_api.py`
 - `tests/integration/test_distributed_sync.py`
