@@ -20,20 +20,12 @@ async def extract_from_file(file_path: str, ctx: LibraryCtx) -> ExtractResult:
     fields, confidence = _extract_with_pdfplumber(file_path)
 
     if confidence >= 0.7 and _has_required(fields):
-        return _build_result(fields, "pdfplumber", confidence)
+        return _build_result(fields, confidence)
 
-    if ctx.llm_extract:
-        llm_fields = await ctx.llm_extract(file_path)
-        if llm_fields:
-            return _build_result(llm_fields, "llm", 1.0)
-        return ExtractResult(
-            error="llm extraction returned no fields", method_used="llm", confidence=0.0
-        )
+    if not fields or (fields.get("title") is None and fields.get("author") is None):
+        return ExtractResult(agent_extraction_needed=True, file_path=file_path)
 
-    if fields:
-        return _build_result(fields, "pdfplumber", confidence)
-
-    return ExtractResult(error="could not extract metadata (no llm_extract configured)")
+    return _build_result(fields, confidence)
 
 
 def _extract_with_pdfplumber(file_path: str) -> tuple[dict, float]:
@@ -71,12 +63,12 @@ def _confidence(fields: dict) -> float:
     return found / len(_REQUIRED)
 
 
-def _build_result(fields: dict, method: str, confidence: float) -> ExtractResult:
+def _build_result(fields: dict, confidence: float) -> ExtractResult:
     citekey = f"ref{uuid.uuid4().hex[:6]}"
     try:
         ref = Reference.model_validate(
             {"id": citekey, "type": "article-journal", **fields}
         )
     except ValidationError as e:
-        return ExtractResult(error=str(e), method_used=method, confidence=confidence)
-    return ExtractResult(reference=ref, method_used=method, confidence=confidence)
+        return ExtractResult(error=str(e), confidence=confidence)
+    return ExtractResult(reference=ref, confidence=confidence)

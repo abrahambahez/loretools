@@ -3,26 +3,18 @@ import importlib.metadata
 import os
 import sys
 
-from scholartools.cli import discover as _discover
 from scholartools.cli import extract as _extract
-from scholartools.cli import fetch as _fetch
 from scholartools.cli import files as _files
-from scholartools.cli import peers as _peers
 from scholartools.cli import refs as _refs
 from scholartools.cli import staging as _staging
-from scholartools.cli import sync as _sync
 
-_GROUPS = ["refs", "discover", "fetch", "extract", "files", "staging", "peers", "sync"]
+_GROUPS = ["refs", "extract", "files", "staging"]
 
 _DESCRIPTIONS = {
     "refs": "manage references in the library",
-    "discover": "search external sources for references",
-    "fetch": "fetch a reference by identifier",
     "extract": "extract metadata from a local file",
     "files": "manage files linked to references",
     "staging": "manage staged references before merging",
-    "peers": "manage peer identities and devices",
-    "sync": "push, pull, and resolve sync conflicts",
 }
 
 
@@ -53,13 +45,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
     _group_registers = {
         "refs": _refs.register,
-        "discover": _discover.register,
-        "fetch": _fetch.register,
         "extract": _extract.register,
         "files": _files.register,
-        "peers": _peers.register,
         "staging": _staging.register,
-        "sync": _sync.register,
     }
 
     for group in _GROUPS:

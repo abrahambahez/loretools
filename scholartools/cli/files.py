@@ -76,15 +76,6 @@ def _list(args: argparse.Namespace) -> None:
     exit_result(result, args.plain)
 
 
-def _prefetch(args: argparse.Namespace) -> None:
-    citekeys = [k.strip() for k in args.citekeys.split(",")] if args.citekeys else None
-    try:
-        result = scholartools.prefetch_blobs(citekeys=citekeys)
-    except Exception as e:
-        exit_result(Result(ok=False, error=str(e)), plain=False)
-    exit_result(result, args.plain)
-
-
 def register(sub: argparse.ArgumentParser) -> None:
     cmds = sub.add_subparsers(dest="files_cmd")
 
@@ -111,7 +102,3 @@ def register(sub: argparse.ArgumentParser) -> None:
     p_list = cmds.add_parser("list")
     p_list.add_argument("--page", type=int, default=1)
     p_list.set_defaults(func=_list)
-
-    p_prefetch = cmds.add_parser("prefetch")
-    p_prefetch.add_argument("--citekeys", default=None)
-    p_prefetch.set_defaults(func=_prefetch)

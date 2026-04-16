@@ -8,7 +8,6 @@ from scholartools.models import (
     ExtractResult,
     FileRecord,
     Reference,
-    SearchResult,
 )
 
 
@@ -66,18 +65,9 @@ def test_date_field_alias():
     assert data["date-parts"] == [[2020, 3]]
 
 
-def test_search_result_defaults():
-    result = SearchResult(
-        references=[], sources_queried=["crossref"], total_found=0, errors=[]
-    )
-    assert result.total_found == 0
-    assert result.errors == []
-
-
 def test_extract_result_no_raise_on_error():
     result = ExtractResult(error="file not found")
     assert result.reference is None
-    assert result.method_used is None
     assert result.confidence is None
     assert result.error == "file not found"
 

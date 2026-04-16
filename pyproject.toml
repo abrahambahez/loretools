@@ -9,17 +9,11 @@ description = "Agent-first academic reference management library — idearium fo
 requires-python = ">=3.12"
 dependencies = [
     "pydantic>=2.0",
-    "httpx[socks]>=0.27",
     "pdfplumber>=0.11",
-    "anthropic>=0.40",
-    "cryptography>=42.0",
 ]
 
 [project.scripts]
 scht = "scholartools.cli:main"
-
-[project.optional-dependencies]
-sync = ["minio>=7.0.0"]
 
 [dependency-groups]
 dev = [

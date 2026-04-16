@@ -2,10 +2,9 @@ import json
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
 
 from scholartools.config import load_settings, reset_settings
-from scholartools.models import LlmSettings, LocalSettings, SourceConfig
+from scholartools.models import LocalSettings
 
 
 @pytest.fixture(autouse=True)
@@ -17,7 +16,6 @@ def clear_settings():
 
 def test_defaults_when_no_config_creates_file(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     s = load_settings()
     assert s.backend == "local"
     config_path = tmp_path / ".scholartools" / "config.json"
@@ -35,16 +33,12 @@ def test_loads_from_existing_config_file(tmp_path, monkeypatch):
     config = {
         "backend": "local",
         "local": {"library_dir": library_dir},
-        "apis": {"sources": [{"name": "crossref", "enabled": True}]},
-        "llm": {"model": "claude-opus-4-6"},
     }
     config_path.write_text(json.dumps(config))
     s = load_settings()
     assert s.local.library_dir == Path(library_dir)
     assert s.local.library_file == Path(library_dir) / "library.json"
     assert s.local.files_dir == Path(library_dir) / "files"
-    assert s.apis.sources[0].name == "crossref"
-    assert s.llm.model == "claude-opus-4-6"
 
 
 def test_library_dir_derives_paths(tmp_path):
@@ -60,46 +54,6 @@ def test_settings_cached(tmp_path, monkeypatch):
     assert s1 is s2
 
 
-def test_source_config_forbids_api_key():
-    with pytest.raises(ValidationError):
-        SourceConfig(name="google_books", api_key="secret")
-
-
-def test_llm_settings_forbids_anthropic_api_key():
-    with pytest.raises(ValidationError):
-        LlmSettings(anthropic_api_key="sk-test")
-
-
-def test_config_file_with_api_key_raises(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    config_dir = tmp_path / ".scholartools"
-    config_dir.mkdir()
-    config_path = config_dir / "config.json"
-    config = {
-        "backend": "local",
-        "local": {},
-        "apis": {"sources": []},
-        "llm": {"anthropic_api_key": "sk-from-config"},
-    }
-    config_path.write_text(json.dumps(config))
-    with pytest.raises(ValidationError):
-        load_settings()
-
-
-def test_source_order_preserved(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    s = load_settings()
-    names = [src.name for src in s.apis.sources]
-    assert names == [
-        "crossref",
-        "semantic_scholar",
-        "arxiv",
-        "openalex",
-        "doaj",
-        "google_books",
-    ]
-
-
 def test_partial_config_raises_with_message(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     config_dir = tmp_path / ".scholartools"
@@ -107,66 +61,3 @@ def test_partial_config_raises_with_message(tmp_path, monkeypatch):
     (config_dir / "config.json").write_text(json.dumps({"backend": "local"}))
     with pytest.raises(ValueError, match="incomplete"):
         load_settings()
-
-
-def _base_config(library_dir: str) -> dict:
-    return {
-        "backend": "local",
-        "local": {"library_dir": library_dir},
-        "apis": {},
-        "llm": {},
-    }
-
-
-def test_sync_without_peer_raises(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    config_dir = tmp_path / ".scholartools"
-    config_dir.mkdir()
-    config = _base_config(str(tmp_path / "lib"))
-    config["sync"] = {"bucket": "b", "access_key": "a", "secret_key": "s"}
-    (config_dir / "config.json").write_text(json.dumps(config))
-    with pytest.raises(ValueError, match="peer"):
-        load_settings()
-
-
-def test_sync_with_peer_passes(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    config_dir = tmp_path / ".scholartools"
-    config_dir.mkdir()
-    config = _base_config(str(tmp_path / "lib"))
-    config["sync"] = {"bucket": "b", "access_key": "a", "secret_key": "s"}
-    config["peer"] = {"peer_id": "alice", "device_id": "laptop"}
-    (config_dir / "config.json").write_text(json.dumps(config))
-    s = load_settings()
-    assert s.peer is not None
-    assert s.peer.peer_id == "alice"
-
-
-def test_no_sync_no_peer_passes(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    config_dir = tmp_path / ".scholartools"
-    config_dir.mkdir()
-    config = _base_config(str(tmp_path / "lib"))
-    (config_dir / "config.json").write_text(json.dumps(config))
-    s = load_settings()
-    assert s.sync is None
-    assert s.peer is None
-
-
-def test_peer_settings_rejects_extra_keys(tmp_path, monkeypatch):
-    from pydantic import ValidationError
-
-    from scholartools.models import PeerSettings
-
-    with pytest.raises(ValidationError):
-        PeerSettings(peer_id="alice", device_id="laptop", extra_field="bad")
-
-
-def test_api_keys_not_in_settings(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
-    monkeypatch.setenv("GBOOKS_API_KEY", "gbooks-test")
-    s = load_settings()
-    assert not hasattr(s.llm, "anthropic_api_key")
-    for src in s.apis.sources:
-        assert not hasattr(src, "api_key")

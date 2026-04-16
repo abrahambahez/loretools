@@ -7,14 +7,13 @@ from scholartools.models import (
 
 _settings: Settings | None = None
 
-_REQUIRED_KEYS = {"backend", "local", "apis", "llm"}
+_REQUIRED_KEYS = {"backend", "local"}
 
 _LOCAL_COMPUTED = {
     "library_file",
     "files_dir",
     "staging_file",
     "staging_dir",
-    "peers_dir",
 }
 
 
@@ -47,12 +46,6 @@ def load_settings() -> Settings:
             "Please add them or delete the file to regenerate defaults."
         )
     _settings = Settings.model_validate(data)
-    if _settings.sync is not None and _settings.peer is None:
-        raise ValueError(
-            "config.json has a 'sync' block but no 'peer' block. "
-            "Add a 'peer' block with 'peer_id' and 'device_id' to identify"
-            " this researcher."
-        )
     return _settings
 
 

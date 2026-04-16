@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -6,7 +6,9 @@ from scholartools.models import LibraryCtx
 from scholartools.services.extract import _confidence, extract_from_file
 
 
-def make_ctx(llm_extract=None, files_dir="data/files"):
+def make_ctx(files_dir="data/files"):
+    from unittest.mock import AsyncMock
+
     async def noop(*_):
         pass
 
@@ -18,8 +20,6 @@ def make_ctx(llm_extract=None, files_dir="data/files"):
         rename_file=noop,
         list_file_paths=AsyncMock(return_value=[]),
         files_dir=files_dir,
-        api_sources=[],
-        llm_extract=llm_extract,
     )
 
 
@@ -72,38 +72,30 @@ async def test_extract_uses_pdfplumber_when_confident(tmp_path):
         ctx = make_ctx()
         result = await extract_from_file(str(fake), ctx)
 
-    assert result.method_used == "pdfplumber"
     assert result.confidence == 1.0
     assert result.reference.title == "Infrastructure in the Global South"
+    assert not result.agent_extraction_needed
 
 
-# --- LLM fallback ---
+# --- agent nudge on empty fields ---
 
 
-async def test_extract_falls_back_to_llm_on_low_confidence(tmp_path):
-    low_fields = {"DOI": "10.1234/x"}  # no title/author/issued → low confidence
-    llm_fields = {
-        "title": "LLM Title",
-        "author": [{"family": "Smith", "given": "J."}],
-        "issued": {"date-parts": [[2022]]},
-    }
-    llm_mock = AsyncMock(return_value=llm_fields)
+async def test_extract_no_fields_returns_agent_nudge(tmp_path):
     fake = tmp_path / "fake.pdf"
     fake.write_bytes(b"")
-
     with patch(
         "scholartools.services.extract._extract_with_pdfplumber",
-        return_value=(low_fields, 1 / 3),
+        return_value=({}, 0.0),
     ):
-        ctx = make_ctx(llm_extract=llm_mock)
+        ctx = make_ctx()
         result = await extract_from_file(str(fake), ctx)
 
-    assert result.method_used == "llm"
-    assert result.reference.title == "LLM Title"
-    llm_mock.assert_called_once()
+    assert result.agent_extraction_needed is True
+    assert result.file_path == str(fake)
+    assert result.reference is None
 
 
-async def test_extract_no_llm_returns_partial_result(tmp_path):
+async def test_extract_partial_fields_returns_result(tmp_path):
     partial_fields = {"title": "Some Title", "DOI": "10.1/x"}
     fake = tmp_path / "fake.pdf"
     fake.write_bytes(b"")
@@ -111,33 +103,11 @@ async def test_extract_no_llm_returns_partial_result(tmp_path):
         "scholartools.services.extract._extract_with_pdfplumber",
         return_value=(partial_fields, 1 / 3),
     ):
-        ctx = make_ctx(llm_extract=None)
+        ctx = make_ctx()
         result = await extract_from_file(str(fake), ctx)
 
-    assert result.method_used == "pdfplumber"
     assert result.reference.title == "Some Title"
-
-
-async def test_extract_llm_returns_none_gives_error(tmp_path):
-    with patch(
-        "scholartools.services.extract._extract_with_pdfplumber", return_value=({}, 0.0)
-    ):
-        ctx = make_ctx(llm_extract=AsyncMock(return_value=None))
-        result = await extract_from_file(str(tmp_path / "fake.pdf"), ctx)
-
-    assert result.reference is None
-    assert result.error is not None
-
-
-async def test_extract_no_llm_no_fields_gives_error(tmp_path):
-    with patch(
-        "scholartools.services.extract._extract_with_pdfplumber", return_value=({}, 0.0)
-    ):
-        ctx = make_ctx(llm_extract=None)
-        result = await extract_from_file(str(tmp_path / "fake.pdf"), ctx)
-
-    assert result.reference is None
-    assert result.error is not None
+    assert not result.agent_extraction_needed
 
 
 # --- result never raises ---
@@ -148,4 +118,4 @@ async def test_extract_never_raises_on_corrupt_file(tmp_path):
     corrupt.write_bytes(b"not a pdf")
     ctx = make_ctx()
     result = await extract_from_file(str(corrupt), ctx)
-    assert result is not None  # never raises
+    assert result is not None

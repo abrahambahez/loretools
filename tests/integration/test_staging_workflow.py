@@ -38,7 +38,6 @@ def make_ctx(tmp_path):
         staging_copy_file=staging_copy_file,
         staging_delete_file=staging_delete_file,
         staging_dir=str(staging_dir),
-        api_sources=[],
     )
 
 

@@ -1,18 +1,15 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Literal, TypedDict
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 from scholartools.ports import (
     CopyFile,
     DeleteFile,
-    FetchFn,
     ListFilePaths,
-    LlmExtractFn,
     ReadAll,
     RenameFile,
-    SearchFn,
     WriteAll,
 )
 
@@ -49,18 +46,8 @@ class Reference(BaseModel):
     uid: str | None = None
     uid_confidence: Literal["authoritative", "semantic"] | None = None
 
-    blob_ref: str | None = None
     file_record: FileRecord | None = Field(None, alias="_file")
     warnings: list[str] = Field(default_factory=list, alias="_warnings")
-    field_timestamps: dict[str, str] = Field(
-        default_factory=dict, alias="_field_timestamps"
-    )
-
-
-class ApiSource(TypedDict):
-    name: str
-    search: SearchFn
-    fetch: FetchFn
 
 
 class CitekeySettings(BaseModel):
@@ -126,14 +113,7 @@ class LibraryCtx(BaseModel):
     staging_copy_file: CopyFile | None = None
     staging_delete_file: DeleteFile | None = None
     staging_dir: str | None = None
-    api_sources: list[ApiSource]
-    llm_extract: LlmExtractFn | None = None
     citekey_settings: CitekeySettings = Field(default_factory=CitekeySettings)
-    peers_dir: str | None = None
-    data_dir: str | None = None
-    peer_id: str = ""
-    device_id: str = ""
-    sync_config: "SyncConfig | None" = None
 
 
 class AddResult(BaseModel):
@@ -187,34 +167,22 @@ class DeleteResult(BaseModel):
     error: str | None = None
 
 
-class SearchResult(BaseModel):
-    references: list[Reference]
-    sources_queried: list[str]
-    total_found: int
-    errors: list[str]
-
-
-class FetchResult(BaseModel):
-    reference: Reference | None = None
-    source: str | None = None
-    error: str | None = None
-
-
 class ExtractResult(BaseModel):
     reference: Reference | None = None
-    method_used: Literal["pdfplumber", "llm"] | None = None
     confidence: float | None = None
     error: str | None = None
+    agent_extraction_needed: bool = False
+    file_path: str | None = None
 
 
-class LinkResult(BaseModel):
+class AttachResult(BaseModel):
     citekey: str | None = None
     file_record: FileRecord | None = None
     error: str | None = None
 
 
-class UnlinkResult(BaseModel):
-    unlinked: bool
+class DetachResult(BaseModel):
+    detached: bool = False
     error: str | None = None
 
 
@@ -254,61 +222,11 @@ class LocalSettings(BaseModel):
     def staging_dir(self) -> Path:
         return self.library_dir / "staging"
 
-    @computed_field
-    @property
-    def peers_dir(self) -> Path:
-        return self.library_dir / "peers"
-
-
-class SourceConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    name: str
-    enabled: bool = True
-
-
-def _default_sources() -> list[SourceConfig]:
-    return [
-        SourceConfig(name="crossref"),
-        SourceConfig(name="semantic_scholar"),
-        SourceConfig(name="arxiv"),
-        SourceConfig(name="openalex"),
-        SourceConfig(name="doaj"),
-        SourceConfig(name="google_books"),
-    ]
-
-
-class ApiSettings(BaseModel):
-    email: str | None = None
-    sources: list[SourceConfig] = Field(default_factory=_default_sources)
-
-
-class LlmSettings(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    model: str = "claude-sonnet-4-6"
-
-
-class SyncConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    endpoint: str | None = None
-    bucket: str
-    access_key: str
-    secret_key: str
-
-
-class PeerSettings(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    peer_id: str
-    device_id: str
-
 
 class Settings(BaseModel):
     backend: str = "local"
     local: LocalSettings = Field(default_factory=LocalSettings)
-    apis: ApiSettings = Field(default_factory=ApiSettings)
-    llm: LlmSettings = Field(default_factory=LlmSettings)
     citekey: CitekeySettings = Field(default_factory=CitekeySettings)
-    sync: SyncConfig | None = None
-    peer: PeerSettings | None = None
 
 
 class StageResult(BaseModel):
@@ -334,110 +252,12 @@ class MergeResult(BaseModel):
     skipped: list[str]
 
 
-class DeviceIdentity(BaseModel):
-    device_id: str
-    public_key: str
-    registered_at: datetime
-    revoked_at: datetime | None = None
-    role: str = "contributor"
-
-
-class PeerRecord(BaseModel):
-    peer_id: str
-    devices: list[DeviceIdentity]
-    signature: str | None = None
-
-
-class PeerIdentity(BaseModel):
-    peer_id: str
-    device_id: str
-    public_key: str
-
-
-class PeerInitResult(BaseModel):
-    identity: PeerIdentity | None = None
-    error: str | None = None
-
-
-class PeerRegisterResult(BaseModel):
-    peer_id: str | None = None
-    error: str | None = None
-
-
-class PeerAddDeviceResult(BaseModel):
-    peer_id: str | None = None
-    error: str | None = None
-
-
-class PeerRevokeDeviceResult(BaseModel):
-    revoked: bool = False
-    error: str | None = None
-
-
-class PeerRevokeResult(BaseModel):
-    revoked: bool = False
-    error: str | None = None
-
-
-class VerifyEntryResult(BaseModel):
-    verified: bool = False
-    error: str | None = None
-
-
-class ChangeLogEntry(BaseModel):
-    op: str
-    uid: str
-    uid_confidence: str
-    citekey: str
-    data: dict = Field(default_factory=dict)
-    blob_ref: str | None = None
-    peer_id: str
-    device_id: str
-    timestamp_hlc: str
-    signature: str
-
-
-class ConflictRecord(BaseModel):
-    uid: str
-    field: str
-    local_value: Any
-    local_timestamp_hlc: str
-    remote_value: Any
-    remote_timestamp_hlc: str
-    remote_peer_id: str
-
-
-class PushResult(BaseModel):
-    entries_pushed: int = 0
-    errors: list[str] = Field(default_factory=list)
-
-
-class PullResult(BaseModel):
-    applied_count: int = 0
-    rejected_count: int = 0
-    conflicted_count: int = 0
-    errors: list[str] = Field(default_factory=list)
-
-
 class Result(BaseModel):
     ok: bool = True
     error: str | None = None
-
-
-class PrefetchResult(BaseModel):
-    fetched: int
-    already_cached: int
-    errors: list[str]
 
 
 class ReindexResult(BaseModel):
     repaired: int
     already_ok: int
     not_found: int
-
-
-class UploadBlobsResult(BaseModel):
-    uploaded: int
-    skipped: int
-    failed: int
-    errors: list[str] = Field(default_factory=list)

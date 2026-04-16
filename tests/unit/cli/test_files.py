@@ -8,7 +8,6 @@ from scholartools.models import (
     FileRow,
     FilesListResult,
     MoveResult,
-    PrefetchResult,
 )
 
 
@@ -93,21 +92,3 @@ def test_files_list_page_arg():
         with pytest.raises(SystemExit):
             _run(["files", "list", "--page", "2"])
         mock_fn.assert_called_once_with(page=2)
-
-
-def test_files_prefetch_no_citekeys():
-    result = PrefetchResult(fetched=0, already_cached=0, errors=[])
-    with patch("scholartools.prefetch_blobs", return_value=result) as mock_fn:
-        with pytest.raises(SystemExit) as exc_info:
-            _run(["files", "prefetch"])
-        assert exc_info.value.code == 0
-        mock_fn.assert_called_once_with(citekeys=None)
-
-
-def test_files_prefetch_with_citekeys():
-    result = PrefetchResult(fetched=2, already_cached=0, errors=[])
-    with patch("scholartools.prefetch_blobs", return_value=result) as mock_fn:
-        with pytest.raises(SystemExit) as exc_info:
-            _run(["files", "prefetch", "--citekeys", "smith2020,jones2021"])
-        assert exc_info.value.code == 0
-        mock_fn.assert_called_once_with(citekeys=["smith2020", "jones2021"])

@@ -10,6 +10,11 @@ def _extract(args: argparse.Namespace) -> None:
         result = scholartools.extract_from_file(args.file_path)
     except Exception as e:
         exit_result(Result(ok=False, error=str(e)), plain=False)
+    if result.agent_extraction_needed:
+        print(
+            f"pdfplumber could not extract metadata from {result.file_path}. "
+            "Pass the file to your AI assistant for vision-based extraction."
+        )
     exit_result(result, plain=False)
 
 
