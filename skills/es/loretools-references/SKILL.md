@@ -1,25 +1,21 @@
 ---
 name: loretools-references
-description: gestión de referencias en loretools — descubrir referencias en APIs externas, obtener metadatos por DOI/arXiv/ISBN, extraer metadatos de PDFs locales, poner referencias en staging, fusionarlas con la biblioteca, realizar CRUD completo sobre los registros y gestionar archivos vinculados a referencias (vincular, desvincular, mover, listar). Usa esto para cualquier tarea con loretools que implique encontrar referencias, agregarlas a la biblioteca, filtrar o buscar, actualizar o eliminar registros, el flujo staging→merge, o adjuntar/eliminar PDFs y EPUBs. Si el usuario hace algo con loretools relacionado con referencias que no sea exclusivamente sincronización, usa esta skill.
+description: gestión de referencias en loretools — extraer metadatos de PDFs locales, poner referencias en staging, fusionarlas con la biblioteca, realizar CRUD completo sobre los registros y gestionar archivos vinculados a referencias (adjuntar, desvincular, mover, listar). Usa esto para cualquier tarea con loretools que implique extraer referencias de PDFs, agregarlas a la biblioteca, filtrar o buscar, actualizar o eliminar registros, el flujo staging→merge, o adjuntar/eliminar PDFs y EPUBs. Si el usuario hace algo con loretools relacionado con referencias que no sea exclusivamente configuración, usa esta skill.
 ---
 
 ## Conceptos
 
 - **Staging**: área de exploración temporal. Las referencias viven aquí hasta que se promueven.
 - **Biblioteca**: almacén de producción. Cada registro recibe un citekey asignado al hacer merge.
-- **Flujo típico**: discover/fetch/extract → `lore staging stage` → revisar → `lore staging merge`
+- **Flujo típico**: `lore extract <pdf>` → `lore staging stage` → revisar → `lore staging merge`
 
-## Descubrimiento
+## Extracción
 
 ```sh
-lore discover "<consulta>" [--sources crossref,semantic_scholar,...] [--limit N]
-# sources: crossref, semantic_scholar, arxiv, openalex, doaj, google_books
-
-lore fetch <identificador>
-# identificador: DOI, ID de arXiv o ISBN
-
 lore extract <ruta_archivo>
-# Requiere ANTHROPIC_API_KEY para el fallback LLM en PDFs escaneados
+# Extrae metadatos de un PDF local usando pdfplumber.
+# Si la confianza de extracción es baja, devuelve agent_extraction_needed: true —
+# el agente debe entonces leer el PDF directamente y construir el JSON manualmente.
 ```
 
 ## Staging
@@ -61,22 +57,28 @@ lore refs filter [--query "<texto>"] [--author "<apellido>"] [--year AAAA] \
 
 ## Archivos
 
-Los archivos se vinculan a referencias de la **biblioteca** (no a las que están en staging). Cada referencia puede tener como máximo un archivo.
+Los archivos se adjuntan a referencias de la **biblioteca** (no a las que están en staging). Cada referencia puede tener como máximo un archivo.
 
 ```sh
-lore files link <citekey> <ruta>
-# Copia <ruta> al archivo y lo vincula a la referencia.
+lore files attach <citekey> <ruta>
+# Copia <ruta> a files/ y lo registra en la referencia.
 
-lore files unlink <citekey>
-# Elimina la copia del archivo y limpia el vínculo en la referencia.
+lore files detach <citekey>
+# Elimina la copia local y limpia el vínculo en la referencia.
 
 lore files move <citekey> <nombre_destino>
 # Renombra el archivo almacenado. nombre_destino es solo el nombre de archivo, sin ruta.
 
+lore files reindex
+# Repara rutas obsoletas si files/ fue reorganizado manualmente.
+
+lore files get <citekey>
+# Devuelve la ruta absoluta al archivo local.
+
 lore files list [--page N]
 ```
 
-Para adjuntar un archivo al ingresar una referencia: `lore staging stage '<json>' --file <ruta>` — `merge` lo mueve al archivo definitivo.
+Para adjuntar un archivo al ingresar una referencia: `lore staging stage '<json>' --file <ruta>` — `merge` lo mueve a files/.
 
 ## Campos clave de los modelos
 

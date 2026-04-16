@@ -1,25 +1,21 @@
 ---
 name: loretools-references
-description: loretools reference management — discover references from external APIs, fetch by DOI/arXiv/ISBN, extract metadata from local PDFs, stage candidates, merge into the library, perform full CRUD on library records, and manage files attached to references (link, unlink, move, list). Use this for any loretools task involving finding references, adding them to the library, filtering or searching the library, updating or deleting records, the full staging→merge workflow, or attaching/removing PDFs and EPUBs. If the user is doing anything research-related with loretools that isn't purely about sync, use this skill.
+description: loretools reference management — extract metadata from local PDFs, stage candidates, merge into the library, perform full CRUD on library records, and manage files attached to references (attach, detach, move, list). Use this for any loretools task involving extracting references from PDFs, adding them to the library, filtering or searching the library, updating or deleting records, the full staging→merge workflow, or attaching/removing PDFs and EPUBs. If the user is doing anything research-related with loretools that isn't purely about setup, use this skill.
 ---
 
 ## Concepts
 
 - **Staging**: exploration scratchpad. References live here until promoted.
 - **Library**: production store. Every record has a citekey assigned at merge.
-- **Typical flow**: discover/fetch/extract → `lore staging stage` → review → `lore staging merge`
+- **Typical flow**: `lore extract <pdf>` → `lore staging stage` → review → `lore staging merge`
 
-## Discovery
+## Extract
 
 ```sh
-lore discover "<query>" [--sources crossref,semantic_scholar,...] [--limit N]
-# sources: crossref, semantic_scholar, arxiv, openalex, doaj, google_books
-
-lore fetch <identifier>
-# identifier: DOI, arXiv ID, or ISBN
-
 lore extract <file_path>
-# Requires ANTHROPIC_API_KEY for LLM fallback on scanned PDFs
+# Extracts metadata from a local PDF using pdfplumber.
+# If extraction confidence is low, returns agent_extraction_needed: true —
+# the agent should then read the PDF directly and build the JSON manually.
 ```
 
 ## Staging
@@ -61,22 +57,28 @@ lore refs filter [--query "<text>"] [--author "<surname>"] [--year YYYY] \
 
 ## Files
 
-Files are linked to **library** references (not staged ones). Each reference holds at most one file.
+Files are attached to **library** references (not staged ones). Each reference holds at most one file.
 
 ```sh
-lore files link <citekey> <path>
-# Copies <path> into the archive and links it to the reference.
+lore files attach <citekey> <path>
+# Copies <path> to files/ and registers it on the reference.
 
-lore files unlink <citekey>
-# Removes the archive copy and clears the file link.
+lore files detach <citekey>
+# Deletes the local copy and clears the file link.
 
 lore files move <citekey> <dest_name>
 # Renames the archived file. dest_name is filename only, no path.
 
+lore files reindex
+# Repairs stale paths if files/ was manually reorganized.
+
+lore files get <citekey>
+# Returns the absolute path to the local file.
+
 lore files list [--page N]
 ```
 
-To attach a file at intake: `lore staging stage '<json>' --file <path>` — `merge` moves it to the archive.
+To attach a file at intake: `lore staging stage '<json>' --file <path>` — `merge` moves it to files/.
 
 ## Key model fields
 

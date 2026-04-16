@@ -12,8 +12,8 @@ A **collection** is a directory that contains `lore`, `.lore/config.json`, and t
 The researcher has uploaded a release zip. Unzip it and make it executable:
 
 ```bash
-unzip scht-*.zip
-chmod +x scht
+unzip lore-*.zip
+chmod +x lore
 ```
 
 Verify it works:
@@ -32,29 +32,21 @@ Run `lore` once from the collection directory to auto-create `.lore/config.json`
 
 This creates `.lore/config.json` with `library_dir` set to the collection directory (CWD). No further path configuration is needed unless the user wants a non-default layout.
 
-**Step 3 — Apply user preferences**
+**Step 3 — Apply user preferences (optional)**
 
-If the user provides API keys or wants to customize config, edit `.lore/config.json`. Common fields:
+If the user wants to customize citekey generation, edit `.lore/config.json`:
 
 ```json
 {
-  "apis": { "email": "you@example.com" },
-  "llm": { "model": "claude-sonnet-4-6" }
+  "citekey": { "pattern": "{author[1]}{year}" }
 }
 ```
-
-Set API keys as environment variables (never in config):
-
-| Variable | Purpose |
-|----------|---------|
-| `ANTHROPIC_API_KEY` | PDF extraction via Claude vision |
-| `GBOOKS_API_KEY` | Google Books source |
 
 **Step 4 — Verify collection**
 
 ```bash
 ./lore refs list
-./lore staging list
+./lore staging list-staged
 ```
 
 Both should return `{"ok": true, ...}`. The collection is ready.
@@ -66,7 +58,6 @@ Both should return `{"ok": true, ...}`. The collection is ready.
   lore                          # binary
   .lore/
     config.json                 # config (CWD-relative, auto-created)
-    keys/                       # Ed25519 keypairs (sync only)
   library.json                  # production library (created on first add/merge)
   files/                        # archived PDF/document files
   staging.json                  # staged references
@@ -86,22 +77,18 @@ If `lore` is not found, the binary was not uploaded or the working directory is 
 
 ## Config reference
 
-All fields except `backend` and `local` are optional.
-
 | Field | Default | Description |
 |-------|---------|-------------|
-| `backend` | `"local"` | Storage backend. Always `"local"` unless using S3 sync. |
 | `local.library_dir` | CWD | Root for all data files. Defaults to the collection directory. |
-| `apis.email` | (none) | Identifies requests to Crossref/OpenAlex for polite-pool rate limits. |
-| `llm.model` | `"claude-sonnet-4-6"` | Claude model for PDF vision extraction. |
 | `citekey.pattern` | `"{author[2]}{year}"` | Citekey generation pattern. |
+| `citekey.separator` | `"_"` | Separator between author tokens. |
+| `citekey.etal` | `"_etal"` | Suffix appended when authors exceed the pattern limit. |
+| `citekey.disambiguation_suffix` | `"letters"` | `"letters"` (a/b/c) or `"title[1-9]"` (first N title words). |
 
 ## Citekey pattern tokens
 
 - `{author[N]}` — first N author surnames joined by `separator`
 - `{year}` — 4-digit year
-- `etal` — appended when authors exceed N
-- `disambiguation_suffix`: `"letters"` (a/b/c) or `"title[1-9]"` (first N title words)
 
 ## Global flag
 
@@ -117,4 +104,3 @@ All fields except `backend` and `local` are optional.
 | `files/` | Archived files |
 | `staging.json` | Staged references |
 | `staging/` | Staged files |
-| `peers/` | Peer registry (sync only) |
