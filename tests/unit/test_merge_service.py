@@ -196,6 +196,25 @@ async def test_merge_missing_required_field_goes_to_errors():
     assert "author" in result.errors["notype2020"]
 
 
+async def test_merge_accepts_edited_volume_without_author():
+    staged = [
+        {
+            "id": "jones2020",
+            "type": "book",
+            "title": "Edited Volume",
+            "editor": [{"family": "Jones"}],
+            "issued": {"date-parts": [[2020]]},
+            "added_at": "2025-01-01T00:00:00+00:00",
+        }
+    ]
+    ctx, _, lib_store, _, _, _, _ = make_ctx(staged=staged)
+
+    result = await merge(None, ctx)
+
+    assert result.promoted == ["jones2020"]
+    assert result.errors == {}
+
+
 # --- skip list ---
 
 

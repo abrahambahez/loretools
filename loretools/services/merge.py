@@ -4,7 +4,7 @@ from loretools.models import DateField, LibraryCtx, MergeResult, Reference
 from loretools.services.duplicates import is_duplicate
 from loretools.services.uid import compute_uid
 
-_REQUIRED = ("id", "type", "title", "author", "issued")
+_REQUIRED = ("id", "type", "title", "issued")
 _CONTAINER_TYPES = {
     "chapter",
     "entry-encyclopedia",
@@ -50,6 +50,8 @@ def _validate_schema(record: dict) -> str | None:
     for field in _REQUIRED:
         if not record.get(field):
             return f"missing required field: {field}"
+    if not record.get("author") and not record.get("editor"):
+        return "missing required field: author (or editor for edited volumes)"
     return None
 
 
