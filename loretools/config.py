@@ -7,7 +7,7 @@ from loretools.models import (
 
 _settings: Settings | None = None
 
-_REQUIRED_KEYS = {"backend", "local"}
+_REQUIRED_KEYS = {"local"}
 
 _LOCAL_COMPUTED = {
     "library_file",

@@ -17,7 +17,7 @@ def clear_settings():
 def test_defaults_when_no_config_creates_file(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     s = load_settings()
-    assert s.backend == "local"
+    assert s.local is not None
     config_path = tmp_path / ".loretools" / "config.json"
     assert config_path.exists()
     data = json.loads(config_path.read_text())
@@ -31,7 +31,6 @@ def test_loads_from_existing_config_file(tmp_path, monkeypatch):
     config_dir.mkdir()
     config_path = config_dir / "config.json"
     config = {
-        "backend": "local",
         "local": {"library_dir": library_dir},
     }
     config_path.write_text(json.dumps(config))
@@ -58,6 +57,6 @@ def test_partial_config_raises_with_message(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     config_dir = tmp_path / ".loretools"
     config_dir.mkdir()
-    (config_dir / "config.json").write_text(json.dumps({"backend": "local"}))
+    (config_dir / "config.json").write_text(json.dumps({}))
     with pytest.raises(ValueError, match="incomplete"):
         load_settings()

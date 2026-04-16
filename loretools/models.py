@@ -224,7 +224,6 @@ class LocalSettings(BaseModel):
 
 
 class Settings(BaseModel):
-    backend: str = "local"
     local: LocalSettings = Field(default_factory=LocalSettings)
     citekey: CitekeySettings = Field(default_factory=CitekeySettings)
 
