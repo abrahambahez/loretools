@@ -107,7 +107,8 @@ class LibraryCtx(BaseModel):
     delete_file: DeleteFile
     rename_file: RenameFile
     list_file_paths: ListFilePaths
-    files_dir: str
+    sources_raw_dir: str
+    sources_read_dir: str
     staging_read_all: ReadAll | None = None
     staging_write_all: WriteAll | None = None
     staging_copy_file: CopyFile | None = None
@@ -214,8 +215,18 @@ class LocalSettings(BaseModel):
 
     @computed_field
     @property
-    def files_dir(self) -> Path:
-        return self.library_dir / "files"
+    def sources_dir(self) -> Path:
+        return self.library_dir / "sources"
+
+    @computed_field
+    @property
+    def sources_raw_dir(self) -> Path:
+        return self.sources_dir / "raw"
+
+    @computed_field
+    @property
+    def sources_read_dir(self) -> Path:
+        return self.sources_dir / "read"
 
     @computed_field
     @property
@@ -265,3 +276,21 @@ class ReindexResult(BaseModel):
     repaired: int
     already_ok: int
     not_found: int
+
+
+class ReadResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    citekey: str
+    output_path: str | None = None
+    format: Literal["md", "txt"] | None = None
+    method: Literal["pymupdf4llm", "pymupdf"] | None = None
+    quality_score: float | None = None
+    page_count: int | None = None
+    error: str | None = None
+
+
+class ReadBatchResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    results: list[ReadResult]
+    total_read: int
+    total_failed: int

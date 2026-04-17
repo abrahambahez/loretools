@@ -42,7 +42,8 @@ def make_ctx(staged: list[dict] | None = None, library: list[dict] | None = None
         delete_file=noop,
         rename_file=noop,
         list_file_paths=lambda _: [],
-        files_dir="/data/files",
+        sources_raw_dir="/data/sources/raw",
+        sources_read_dir="/data/sources/read",
         staging_read_all=staging_read_all,
         staging_write_all=staging_write_all,
         staging_copy_file=noop,
@@ -306,7 +307,7 @@ async def test_merge_archives_file_for_valid_record():
     assert "smith2020" in result.promoted
     assert len(copied_files) == 1
     assert copied_files[0][0] == "/tmp/staging/smith2020.pdf"
-    assert copied_files[0][1] == "/data/files/smith2020.pdf"
+    assert copied_files[0][1] == "/data/sources/raw/smith2020.pdf"
 
 
 async def test_merge_renames_file_to_citekey():
@@ -323,9 +324,9 @@ async def test_merge_renames_file_to_citekey():
     result = await merge(None, ctx)
 
     assert "smith2020" in result.promoted
-    assert copied_files[0][1] == "/data/files/smith2020.pdf"
+    assert copied_files[0][1] == "/data/sources/raw/smith2020.pdf"
     promoted = next(r for r in lib_store if r["id"] == "smith2020")
-    assert promoted["_file"]["path"] == "/data/files/smith2020.pdf"
+    assert promoted["_file"]["path"] == "/data/sources/raw/smith2020.pdf"
 
 
 # --- staging cleanup after promotion ---

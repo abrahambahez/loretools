@@ -120,7 +120,7 @@ async def merge(
 
         if file_path:
             src = file_path
-            dest = str(Path(ctx.files_dir) / f"{citekey}{Path(file_path).suffix}")
+            dest = str(Path(ctx.sources_raw_dir) / f"{citekey}{Path(file_path).suffix}")
             try:
                 await ctx.copy_file(src, dest)
                 normalized["_file"] = {**normalized["_file"], "path": dest}

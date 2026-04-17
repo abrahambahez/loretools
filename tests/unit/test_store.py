@@ -29,7 +29,8 @@ def make_ctx(initial: list[dict] | None = None):
         delete_file=noop,
         rename_file=noop,
         list_file_paths=lambda _: [],
-        files_dir="data/files",
+        sources_raw_dir="data/sources/raw",
+        sources_read_dir="data/sources/read",
         api_sources=[],
     ), store
 

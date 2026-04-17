@@ -45,7 +45,9 @@ Si no se encuentra `lore`, la carpeta de colección no está montada. Pide al in
   lore                    # binario — ejecutar como ./lore
   .lore/config.json       # configuración (creada automáticamente en el primer uso)
   library.json            # biblioteca de referencias en producción
-  files/                  # PDFs y documentos archivados
+  sources/
+    raw/                  # PDFs y documentos archivados
+    read/                 # contenido extraído para lectura del agente
   staging.json            # referencias en staging
   staging/                # archivos en staging
 

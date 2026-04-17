@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `read_reference(citekey)` and `read_references(citekeys)` — knowledge layer entry point: extracts full text from archived reference files using pymupdf4llm (structured Markdown) with automatic fallback to pymupdf (flat text) when quality checks fail
+- `ReadResult` and `ReadBatchResult` models with `format`, `method`, and `quality_score` fields
+
+### Changed
+- **BREAKING:** `sources/raw/` replaces `files/` as the raw file archive directory. Existing libraries must move their `files/` directory to `sources/raw/` before upgrading.
+- `LocalSettings.files_dir` replaced by `sources_dir`, `sources_raw_dir`, and `sources_read_dir`
+- PDF extraction in `extract.py` now uses `pymupdf` directly instead of `pdfplumber`
+
+### Removed
+- `pdfplumber` dependency — replaced by `pymupdf` (via `pymupdf4llm`)
+
 ## [0.14.1] - 2026-04-16
 
 ### Fixed

@@ -1,7 +1,7 @@
 # ADR-002: Two-Stage PDF Extraction (pdfplumber → LLM Vision Fallback)
 
 ## status
-Accepted
+Superseded by spec-029 (2026-04-17). The two-stage pdfplumber → LLM vision pipeline was replaced by pymupdf (direct) for metadata extraction and pymupdf4llm → pymupdf (with quality gate) for knowledge layer read operations. The LLM fallback concept was dropped: the agent runtime is Claude and reads files natively.
 
 ## context
 loretools must extract bibliographic metadata from PDFs and ebooks provided by the human. PDFs come in two fundamentally different forms: text-based (selectable text embedded in the file) and image-based (scanned pages, no embedded text). A single extraction strategy cannot handle both reliably. The tool must also avoid heavyweight dependencies like Tesseract for OCR.

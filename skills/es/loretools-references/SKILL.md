@@ -61,7 +61,7 @@ Los archivos se adjuntan a referencias de la **biblioteca** (no a las que están
 
 ```sh
 lore files attach <citekey> <ruta>
-# Copia <ruta> a files/ y lo registra en la referencia.
+# Copia <ruta> a sources/raw/ y lo registra en la referencia.
 
 lore files detach <citekey>
 # Elimina la copia local y limpia el vínculo en la referencia.
@@ -70,7 +70,7 @@ lore files move <citekey> <nombre_destino>
 # Renombra el archivo almacenado. nombre_destino es solo el nombre de archivo, sin ruta.
 
 lore files reindex
-# Repara rutas obsoletas si files/ fue reorganizado manualmente.
+# Repara rutas obsoletas si sources/raw/ fue reorganizado manualmente.
 
 lore files get <citekey>
 # Devuelve la ruta absoluta al archivo local.
@@ -78,7 +78,7 @@ lore files get <citekey>
 lore files list [--page N]
 ```
 
-Para adjuntar un archivo al ingresar una referencia: `lore staging stage '<json>' --file <ruta>` — `merge` lo mueve a files/.
+Para adjuntar un archivo al ingresar una referencia: `lore staging stage '<json>' --file <ruta>` — `merge` lo mueve a `sources/raw/`.
 
 ## Campos clave de los modelos
 

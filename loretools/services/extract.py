@@ -2,13 +2,13 @@ import re
 import uuid
 from pathlib import Path
 
-import pdfplumber
-from pdfplumber.utils.exceptions import PdfminerException
+import pymupdf
+import pymupdf4llm
 from pydantic import ValidationError
 
 from loretools.models import ExtractResult, LibraryCtx, Reference
 
-_DOI_RE = re.compile(r"\b(10\.\d{4,}/[^\s,;]+)")
+_DOI_RE = re.compile(r"\b(10\.\d{4,}/[^\s,;)\]]+)")
 _YEAR_RE = re.compile(r"\b(19|20)\d{2}\b")
 _REQUIRED = ("title", "author", "issued")
 
@@ -17,7 +17,7 @@ async def extract_from_file(file_path: str, ctx: LibraryCtx) -> ExtractResult:
     if not Path(file_path).exists():
         return ExtractResult(error=f"file not found: {file_path}")
 
-    fields, confidence = _extract_with_pdfplumber(file_path)
+    fields, confidence = _extract_with_pymupdf(file_path)
 
     if confidence >= 0.7 and _has_required(fields):
         return _build_result(fields, confidence)
@@ -28,11 +28,17 @@ async def extract_from_file(file_path: str, ctx: LibraryCtx) -> ExtractResult:
     return _build_result(fields, confidence)
 
 
-def _extract_with_pdfplumber(file_path: str) -> tuple[dict, float]:
+async def convert_to_markdown(file_path: str, output_path: str) -> str:
+    md = pymupdf4llm.to_markdown(file_path)
+    Path(output_path).write_text(md, encoding="utf-8")
+    return output_path
+
+
+def _extract_with_pymupdf(file_path: str) -> tuple[dict, float]:
     try:
-        with pdfplumber.open(file_path) as pdf:
-            text = "\n".join(page.extract_text() or "" for page in pdf.pages[:3])
-    except (OSError, PdfminerException):
+        with pymupdf.open(file_path) as doc:
+            text = "\n".join(doc[i].get_text() for i in range(min(3, doc.page_count)))
+    except Exception:
         return {}, 0.0
 
     fields: dict = {}
