@@ -65,7 +65,7 @@ async def read_reference(
 
     if not force:
         for ext in ("md", "txt"):
-            cached = sources_read_dir / f"{citekey}.{ext}"
+            cached = sources_read_dir / f"{citekey}.source.{ext}"
             if cached.exists():
                 return ReadResult(
                     citekey=citekey,
@@ -100,7 +100,7 @@ async def read_reference(
 
     if md:
         sources_read_dir.mkdir(parents=True, exist_ok=True)
-        out = sources_read_dir / f"{citekey}.md"
+        out = sources_read_dir / f"{citekey}.source.md"
         out.write_text(md, encoding="utf-8")
         return ReadResult(
             citekey=citekey,
@@ -117,7 +117,7 @@ async def read_reference(
 
     txt_score = _check_quality(text, page_count)
     sources_read_dir.mkdir(parents=True, exist_ok=True)
-    out = sources_read_dir / f"{citekey}.txt"
+    out = sources_read_dir / f"{citekey}.source.txt"
     out.write_text(text, encoding="utf-8")
     return ReadResult(
         citekey=citekey,
