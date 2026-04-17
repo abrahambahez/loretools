@@ -6,7 +6,7 @@ from loretools.models import LibraryCtx
 from loretools.services.extract import _confidence, extract_from_file
 
 
-def make_ctx(files_dir="data/files"):
+def make_ctx():
     from unittest.mock import AsyncMock
 
     async def noop(*_):
@@ -19,7 +19,8 @@ def make_ctx(files_dir="data/files"):
         delete_file=noop,
         rename_file=noop,
         list_file_paths=AsyncMock(return_value=[]),
-        files_dir=files_dir,
+        sources_raw_dir="data/sources/raw",
+        sources_read_dir="data/sources/read",
     )
 
 
@@ -66,7 +67,7 @@ async def test_extract_uses_pdfplumber_when_confident(tmp_path):
     fake = tmp_path / "fake.pdf"
     fake.write_bytes(b"")
     with patch(
-        "loretools.services.extract._extract_with_pdfplumber",
+        "loretools.services.extract._extract_with_pymupdf",
         return_value=(good_fields, 1.0),
     ):
         ctx = make_ctx()
@@ -84,7 +85,7 @@ async def test_extract_no_fields_returns_agent_nudge(tmp_path):
     fake = tmp_path / "fake.pdf"
     fake.write_bytes(b"")
     with patch(
-        "loretools.services.extract._extract_with_pdfplumber",
+        "loretools.services.extract._extract_with_pymupdf",
         return_value=({}, 0.0),
     ):
         ctx = make_ctx()
@@ -100,7 +101,7 @@ async def test_extract_partial_fields_returns_result(tmp_path):
     fake = tmp_path / "fake.pdf"
     fake.write_bytes(b"")
     with patch(
-        "loretools.services.extract._extract_with_pdfplumber",
+        "loretools.services.extract._extract_with_pymupdf",
         return_value=(partial_fields, 1 / 3),
     ):
         ctx = make_ctx()

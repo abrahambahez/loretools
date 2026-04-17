@@ -21,6 +21,8 @@ from loretools.models import (
     ListStagedResult,
     MergeResult,
     MoveResult,
+    ReadBatchResult,
+    ReadResult,
     Reference,
     ReindexResult,
     RenameResult,
@@ -35,6 +37,7 @@ from loretools.models import (
 )
 from loretools.services import extract, files, store
 from loretools.services import merge as merge_service
+from loretools.services import read as read_service
 from loretools.services import staging as staging_service
 
 _ctx: LibraryCtx | None = None
@@ -44,7 +47,7 @@ def _build_ctx() -> LibraryCtx:
     s = load_settings()
     read_all, write_all = make_storage(str(s.local.library_file))
     copy_file, delete_file, rename_file, list_file_paths = make_filestore(
-        str(s.local.files_dir)
+        str(s.local.sources_raw_dir)
     )
     staging_read_all, staging_write_all = make_staging_storage(
         str(s.local.staging_file), str(s.local.staging_dir)
@@ -60,7 +63,8 @@ def _build_ctx() -> LibraryCtx:
         delete_file=delete_file,
         rename_file=rename_file,
         list_file_paths=list_file_paths,
-        files_dir=str(s.local.files_dir),
+        sources_raw_dir=str(s.local.sources_raw_dir),
+        sources_read_dir=str(s.local.sources_read_dir),
         staging_read_all=staging_read_all,
         staging_write_all=staging_write_all,
         staging_copy_file=staging_copy_file,
@@ -186,3 +190,11 @@ def delete_staged(citekey: str) -> DeleteStagedResult:
 
 def merge(omit: list[str] | None = None, allow_semantic: bool = False) -> MergeResult:
     return _run(merge_service.merge(omit, _get_ctx(), allow_semantic=allow_semantic))
+
+
+def read_reference(citekey: str, force: bool = False) -> ReadResult:
+    return _run(read_service.read_reference(citekey, _get_ctx(), force=force))
+
+
+def read_references(citekeys: list[str], force: bool = False) -> ReadBatchResult:
+    return _run(read_service.read_references(citekeys, _get_ctx(), force=force))

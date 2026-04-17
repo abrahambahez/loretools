@@ -45,7 +45,9 @@ If `lore` is not found, the collection folder is not mounted. Ask the researcher
   lore                    # binary — run as ./lore
   .lore/config.json       # settings (auto-created on first run)
   library.json            # production reference library
-  files/                  # archived PDFs and documents
+  sources/
+    raw/                  # archived PDFs and documents
+    read/                 # extracted text content
   staging.json            # staged references
   staging/                # staged files
 

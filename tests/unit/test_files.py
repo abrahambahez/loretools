@@ -12,8 +12,10 @@ from loretools.services.files import (
 
 def make_ctx(tmp_path, initial=None):
     store = list(initial or [])
-    files_dir = tmp_path / "files"
-    files_dir.mkdir(exist_ok=True)
+    sources_raw_dir = tmp_path / "sources" / "raw"
+    sources_raw_dir.mkdir(parents=True, exist_ok=True)
+    sources_read_dir = tmp_path / "sources" / "read"
+    sources_read_dir.mkdir(parents=True, exist_ok=True)
 
     async def read_all():
         return list(store)
@@ -43,16 +45,16 @@ def make_ctx(tmp_path, initial=None):
             delete_file=delete_file,
             rename_file=rename_file,
             list_file_paths=list_file_paths,
-            files_dir=str(files_dir),
-            api_sources=[],
+            sources_raw_dir=str(sources_raw_dir),
+            sources_read_dir=str(sources_read_dir),
         ),
         store,
-        files_dir,
+        sources_raw_dir,
     )
 
 
 async def test_move_file(tmp_path):
-    ctx, store, files_dir = make_ctx(
+    ctx, store, sources_raw_dir = make_ctx(
         tmp_path,
         [
             {
@@ -67,7 +69,7 @@ async def test_move_file(tmp_path):
             }
         ],
     )
-    (files_dir / "x.pdf").write_bytes(b"hello")
+    (sources_raw_dir / "x.pdf").write_bytes(b"hello")
 
     result = await move_file("x", "x_renamed.pdf", ctx)
 
@@ -117,13 +119,13 @@ async def test_list_files(tmp_path):
 
 
 def test_resolve_file_path_relative(tmp_path):
-    ctx, _, files_dir = make_ctx(tmp_path)
+    ctx, _, sources_raw_dir = make_ctx(tmp_path)
     resolved = _resolve_file_path(ctx, "paper.pdf")
-    assert resolved == files_dir / "paper.pdf"
+    assert resolved == sources_raw_dir / "paper.pdf"
 
 
 def test_resolve_file_path_absolute_exists(tmp_path):
-    ctx, _, files_dir = make_ctx(tmp_path)
+    ctx, _, sources_raw_dir = make_ctx(tmp_path)
     existing = tmp_path / "other" / "paper.pdf"
     existing.parent.mkdir(parents=True)
     existing.write_bytes(b"data")
@@ -132,14 +134,14 @@ def test_resolve_file_path_absolute_exists(tmp_path):
 
 
 def test_resolve_file_path_absolute_missing_falls_back(tmp_path):
-    ctx, _, files_dir = make_ctx(tmp_path)
+    ctx, _, sources_raw_dir = make_ctx(tmp_path)
     legacy = Path("/old/library/files/paper.pdf")
     resolved = _resolve_file_path(ctx, str(legacy))
-    assert resolved == files_dir / "paper.pdf"
+    assert resolved == sources_raw_dir / "paper.pdf"
 
 
 def test_reindex_files_repairs_stale_path(tmp_path):
-    ctx, store, files_dir = make_ctx(
+    ctx, store, sources_raw_dir = make_ctx(
         tmp_path,
         [
             {
@@ -154,7 +156,7 @@ def test_reindex_files_repairs_stale_path(tmp_path):
             }
         ],
     )
-    (files_dir / "x.pdf").write_bytes(b"hello")
+    (sources_raw_dir / "x.pdf").write_bytes(b"hello")
     result = asyncio.run(reindex_files(ctx))
     assert result.repaired == 1
     assert result.already_ok == 0
@@ -163,7 +165,7 @@ def test_reindex_files_repairs_stale_path(tmp_path):
 
 
 def test_reindex_files_already_ok(tmp_path):
-    ctx, _, files_dir = make_ctx(
+    ctx, _, sources_raw_dir = make_ctx(
         tmp_path,
         [
             {
@@ -178,7 +180,7 @@ def test_reindex_files_already_ok(tmp_path):
             }
         ],
     )
-    (files_dir / "x.pdf").write_bytes(b"hello")
+    (sources_raw_dir / "x.pdf").write_bytes(b"hello")
     result = asyncio.run(reindex_files(ctx))
     assert result.repaired == 0
     assert result.already_ok == 1

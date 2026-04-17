@@ -19,10 +19,10 @@ from loretools.services.list_helpers import paginate
 def _resolve_file_path(ctx: LibraryCtx, raw_path: str) -> Path:
     p = Path(raw_path)
     if not p.is_absolute():
-        return Path(ctx.files_dir) / raw_path
+        return Path(ctx.sources_raw_dir) / raw_path
     if p.exists():
         return p
-    return Path(ctx.files_dir) / p.name
+    return Path(ctx.sources_raw_dir) / p.name
 
 
 async def move_file(citekey: str, dest_name: str, ctx: LibraryCtx) -> MoveResult:
@@ -33,7 +33,7 @@ async def move_file(citekey: str, dest_name: str, ctx: LibraryCtx) -> MoveResult
                 return MoveResult(error="no file linked")
             r["_file"]["path"] = dest_name
             await ctx.write_all(records)
-            return MoveResult(new_path=str(Path(ctx.files_dir) / dest_name))
+            return MoveResult(new_path=str(Path(ctx.sources_raw_dir) / dest_name))
 
     return MoveResult(error=f"not found: {citekey}")
 
@@ -72,7 +72,7 @@ async def attach_file(ctx: LibraryCtx, citekey: str, path: str) -> AttachResult:
     if record is None:
         return AttachResult(error=f"not found: {citekey}")
 
-    files_dir = Path(ctx.files_dir)
+    files_dir = Path(ctx.sources_raw_dir)
     if src.is_relative_to(files_dir):
         dest = src
     else:
@@ -103,7 +103,7 @@ async def detach_file(ctx: LibraryCtx, citekey: str) -> DetachResult:
     if not record.get("_file"):
         return DetachResult(error="no file attached")
 
-    file_path = Path(ctx.files_dir) / record["_file"]["path"]
+    file_path = Path(ctx.sources_raw_dir) / record["_file"]["path"]
     try:
         file_path.unlink()
     except FileNotFoundError:
@@ -126,14 +126,14 @@ async def get_file(ctx: LibraryCtx, citekey: str) -> Path | None:
     raw = file_rec["path"]
     p = Path(raw)
     if not p.is_absolute():
-        p = Path(ctx.files_dir) / raw
+        p = Path(ctx.sources_raw_dir) / raw
     elif not p.exists():
-        p = Path(ctx.files_dir) / p.name
+        p = Path(ctx.sources_raw_dir) / p.name
     return p if p.exists() else None
 
 
 async def reindex_files(ctx: LibraryCtx) -> ReindexResult:
-    files_dir = Path(ctx.files_dir)
+    files_dir = Path(ctx.sources_raw_dir)
     if not files_dir.exists():
         return ReindexResult(repaired=0, already_ok=0, not_found=0)
 

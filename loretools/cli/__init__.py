@@ -19,8 +19,7 @@ _DESCRIPTIONS = {
     "extract": (
         "Parse a local file (PDF, ebook) and extract CSL-JSON metadata "
         "ready for `staging stage` or `refs add`. "
-        "Falls back to agent_extraction_needed=true if automatic parsing fails "
-        "(vision-based fallback requires the loretools-llm plugin)."
+        "Returns partial metadata with a confidence score if automatic parsing yields incomplete results."
     ),
     "files": (
         "Attach, retrieve, move, or detach a file linked to a library reference by its citekey. "

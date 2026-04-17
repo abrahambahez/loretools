@@ -61,7 +61,7 @@ Files are attached to **library** references (not staged ones). Each reference h
 
 ```sh
 lore files attach <citekey> <path>
-# Copies <path> to files/ and registers it on the reference.
+# Copies <path> to sources/raw/ and registers it on the reference.
 
 lore files detach <citekey>
 # Deletes the local copy and clears the file link.
@@ -70,7 +70,7 @@ lore files move <citekey> <dest_name>
 # Renames the archived file. dest_name is filename only, no path.
 
 lore files reindex
-# Repairs stale paths if files/ was manually reorganized.
+# Repairs stale paths if sources/raw/ was manually reorganized.
 
 lore files get <citekey>
 # Returns the absolute path to the local file.
@@ -78,7 +78,7 @@ lore files get <citekey>
 lore files list [--page N]
 ```
 
-To attach a file at intake: `lore staging stage '<json>' --file <path>` — `merge` moves it to files/.
+To attach a file at intake: `lore staging stage '<json>' --file <path>` — `merge` moves it to `sources/raw/`.
 
 ## Key model fields
 

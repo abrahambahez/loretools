@@ -37,13 +37,14 @@ def test_loads_from_existing_config_file(tmp_path, monkeypatch):
     s = load_settings()
     assert s.local.library_dir == Path(library_dir)
     assert s.local.library_file == Path(library_dir) / "library.json"
-    assert s.local.files_dir == Path(library_dir) / "files"
+    assert s.local.sources_raw_dir == Path(library_dir) / "sources" / "raw"
 
 
 def test_library_dir_derives_paths(tmp_path):
     ls = LocalSettings(library_dir=tmp_path / "mylib")
     assert ls.library_file == tmp_path / "mylib" / "library.json"
-    assert ls.files_dir == tmp_path / "mylib" / "files"
+    assert ls.sources_raw_dir == tmp_path / "mylib" / "sources" / "raw"
+    assert ls.sources_read_dir == tmp_path / "mylib" / "sources" / "read"
 
 
 def test_settings_cached(tmp_path, monkeypatch):

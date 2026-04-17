@@ -11,7 +11,9 @@ _REQUIRED_KEYS = {"local"}
 
 _LOCAL_COMPUTED = {
     "library_file",
-    "files_dir",
+    "sources_dir",
+    "sources_raw_dir",
+    "sources_read_dir",
     "staging_file",
     "staging_dir",
 }

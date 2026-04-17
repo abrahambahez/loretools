@@ -26,7 +26,7 @@ Config is loaded from `.lore/config.json` inside the **collection directory** (t
 
 ```jsonc
 {
-  // Where library.json, files/, and staging/ are stored.
+  // Where library.json, sources/, and staging/ are stored.
   // Defaults to the collection directory (CWD). Change only if you want data
   // stored somewhere other than the collection folder itself.
   "local": {

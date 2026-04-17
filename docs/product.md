@@ -53,7 +53,7 @@ Existing reference managers — Zotero, Mendeley, JabRef — are designed for hu
 2. stage — add references to the staging area from any source: local file, manual entry, or data passed from a plugin; all records share a common internal model from intake
 3. merge — promote staged records to the library after QA: schema validation, duplicate detection, file archival, citekey assignment
 4. store — CRUD operations on the production library (`~/.loretools/library.json`)
-5. files — manage associated files (`~/.loretools/files/`): link, move, rename, audit
+5. files — manage associated files (`~/.loretools/sources/raw/`): link, move, rename, audit
 6. citekeys — generate, assign, and manage human-readable citekeys consistently
 7. deduplicate — detect and resolve duplicate records
 8. audit — validate library integrity (schema issues, missing fields, orphaned files) and report to the agent
@@ -77,7 +77,7 @@ All capabilities exposed as direct Python functions. Calling a plugin-provided o
 
 ## storage
 
-The local backend is built into core: `~/.loretools/library.json` for metadata, `~/.loretools/files/` for PDFs and EPUBs. It requires nothing beyond the filesystem.
+The local backend is built into core: `~/.loretools/library.json` for metadata, `~/.loretools/sources/raw/` for original PDFs and EPUBs, and `~/.loretools/sources/read/` for extracted text content. It requires nothing beyond the filesystem.
 
 Cloud backends are provided by the `loretools-cloud` plugin. Installing the plugin and setting the backend in `config.json` is the only change required — the function interface is identical. Core code never references cloud backends.
 

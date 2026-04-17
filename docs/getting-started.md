@@ -11,7 +11,8 @@ A **collection** is a single folder that contains everything loretools needs:
 - `lore` — the binary the agent runs
 - `.lore/config.json` — your preferences and settings
 - `library.json` — your reference library
-- `files/` — PDF and document files linked to references
+- `sources/raw/` — PDF and document files linked to references
+- `sources/read/` — extracted text content for agent reading
 - `staging/` — references waiting to be reviewed and merged
 
 Create one collection per research project (or one shared collection across projects).
@@ -80,7 +81,9 @@ After setup your collection folder looks like this:
   .lore/
     config.json                 # settings (auto-created on first run)
   library.json                  # your reference library
-  files/                        # archived PDFs and documents
+  sources/
+    raw/                        # archived PDFs and documents
+    read/                       # extracted text content
   staging.json                  # staged references
   staging/                      # staged files
 ```
@@ -93,7 +96,7 @@ After setup your collection folder looks like this:
 
 | Field | Default | What it controls |
 |-------|---------|-----------------|
-| `local.library_dir` | Collection folder (CWD) | Where `library.json`, `files/`, and `staging/` are stored. |
+| `local.library_dir` | Collection folder (CWD) | Where `library.json`, `sources/`, and `staging/` are stored. |
 | `citekey.pattern` | `"{author[2]}{year}"` | Pattern for generated citekeys. Tokens: `{author[N]}` (first N surnames), `{year}`. |
 | `citekey.separator` | `"_"` | Separator between author tokens. |
 | `citekey.etal` | `"_etal"` | Suffix when authors exceed the pattern limit. |

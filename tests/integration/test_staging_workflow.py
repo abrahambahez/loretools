@@ -12,13 +12,14 @@ from loretools.services.staging import list_staged, stage_reference
 
 def make_ctx(tmp_path):
     library_file = tmp_path / "library.json"
-    files_dir = tmp_path / "files"
+    sources_raw_dir = tmp_path / "sources" / "raw"
+    sources_read_dir = tmp_path / "sources" / "read"
     staging_file = tmp_path / "staging.json"
     staging_dir = tmp_path / "staging"
 
     read_all, write_all = make_storage(str(library_file))
     copy_file, delete_file, rename_file, list_file_paths = make_filestore(
-        str(files_dir)
+        str(sources_raw_dir)
     )
     staging_read_all, staging_write_all = make_staging_storage(
         str(staging_file), str(staging_dir)
@@ -32,7 +33,8 @@ def make_ctx(tmp_path):
         delete_file=delete_file,
         rename_file=rename_file,
         list_file_paths=list_file_paths,
-        files_dir=str(files_dir),
+        sources_raw_dir=str(sources_raw_dir),
+        sources_read_dir=str(sources_read_dir),
         staging_read_all=staging_read_all,
         staging_write_all=staging_write_all,
         staging_copy_file=staging_copy_file,
@@ -144,8 +146,7 @@ async def test_file_archival_on_merge(tmp_path):
     merge_result = await merge(None, ctx, allow_semantic=True)
     assert citekey in merge_result.promoted
 
-    files_dir = tmp_path / "files"
-    archived_file = files_dir / f"{citekey}.pdf"
+    archived_file = tmp_path / "sources" / "raw" / f"{citekey}.pdf"
     assert archived_file.exists()
 
     assert not staged_file.exists()
