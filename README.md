@@ -4,43 +4,21 @@ Reference management library built for AI agents. Local-first, no GUI, no human 
 
 ## install
 
-**Primary: Claude Co-Work (recommended for researchers)**
+**Claude Co-Work (recommended for researchers)**
 
-See **[docs/getting-started.md](docs/getting-started.md)** for the full Co-Work setup guide. The short version: download a release zip from the [Releases page](https://github.com/abrahambahez/loretools/releases), upload it to your Co-Work session with the `loretools-manager` skill, and the agent handles the rest.
+1. Download the binary for your platform from the [Releases page](https://github.com/abrahambahez/loretools/releases)
+2. Place it in your collection folder and upload it to your Co-Work session
+3. Copy the setup prompt from [templates/en/init-prompt.md](templates/en/init-prompt.md) and paste it — your agent handles the rest
 
-**Secondary: direct binary download (technical users)**
+Full guide: **[docs/getting-started.md](docs/getting-started.md)**
 
-Download the binary for your platform from the [Releases page](https://github.com/abrahambahez/loretools/releases), unzip it, and place `lore` in your collection directory. Run it from that directory — no PATH installation required.
+**Skills (optional)**
 
-### install skills
+Download `loretools-skills-en-vX.Y.Z.zip` (or `es`) from the [Releases page](https://github.com/abrahambahez/loretools/releases) and ask your agent to install it. Skills extend the agent with specialized workflows for complex reference operations.
 
-macOS / Linux (default: English):
+**Direct binary (technical users)**
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/abrahambahez/loretools/main/install-skills.sh | bash
-```
-
-Spanish skills:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/abrahambahez/loretools/main/install-skills.sh) --lang es
-```
-
-Windows (elevated PowerShell):
-
-```powershell
-irm https://raw.githubusercontent.com/abrahambahez/loretools/main/install-skills.ps1 | iex
-```
-
-To uninstall skills:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/abrahambahez/loretools/main/install-skills.sh) --uninstall
-```
-
-```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/abrahambahez/loretools/main/install-skills.ps1))) -Uninstall
-```
+Download the binary, run `chmod +x lore`, and run it from your collection directory — no PATH installation required.
 
 ## config
 

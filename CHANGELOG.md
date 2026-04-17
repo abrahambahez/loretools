@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-04-16
+
+### Added
+- `templates/en/init-prompt.md` and `templates/es/init-prompt.md` — self-contained Co-Work setup prompts; copy, paste, done — no skill required for first-time setup
+
+### Changed
+- Binary ships as a direct download (no zip wrapper); setup is a one-paste prompt that installs the binary, initializes config, and writes `CLAUDE.md` to the collection folder
+- Skill zips consolidated from one per skill to one per language (`loretools-skills-{lang}-vX.Y.Z.zip`)
+- `docs/getting-started.md` and `docs/getting-started.es.md` rewritten: binary download, prompt-based setup, config reference updated to current `Settings` model (removed `backend`, `apis.email`, `llm.model` — not in core)
+- `docs/product.md` and `docs/tech.md`: removed incorrect LLM extraction plugin references — vision fallback is handled natively by the agent runtime, not a plugin
+- Site (EN + ES): hero updated with knowledge layer vision; get-started collapsed to single path with copyable init prompt; workflow section replaced with 5 core-only cards (Extract, Stage, Merge, Search & Filter, Files); envisioned section updated with 6 next features (Synthesize, Plugin ecosystem, Wiki, Citation graph, Sync & collaborative collections, Reading paths)
+
+### Removed
+- `skills/en/loretools-manager/` and `skills/es/loretools-manager/` — replaced by `templates/{en|es}/init-prompt.md`
+- `install-skills.sh` and `install-skills.ps1` — download skill zip from the Releases page directly
+- `docs/remote-setup.md` — sync is not in core; removed to avoid confusion
+
+### Skills
+- `loretools-manager` removed: first-time setup is now handled by the init prompt template; copy from `templates/en/init-prompt.md` (or `es`) and paste into Co-Work
+
 ## [0.13.0] - 2026-03-24
 
 ### Changed

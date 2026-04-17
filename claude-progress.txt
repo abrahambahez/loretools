@@ -450,3 +450,28 @@ pending: none
 decisions: none
 broken: none
 next: awaiting user instruction
+
+--- [2026-04-16] session onboarding-site-overhaul ---
+completed:
+  - Redesigned onboarding flow: loretools-manager skill replaced by templates/en|es/init-prompt.md
+    (self-contained Co-Work setup prompt; one paste, agent does the rest)
+  - Removed loretools-manager skill (en + es); setup is now prompt-based, not skill-based
+  - Skill zips consolidated: one per language (loretools-skills-{lang}-vX.Y.Z.zip) instead of one per skill
+  - docs/getting-started.md and docs/getting-started.es.md fully rewritten:
+      binary download (not zip), init prompt flow, CLAUDE.md auto-written by agent,
+      config reference corrected to current Settings model (local + citekey only)
+  - Removed install-skills.sh, install-skills.ps1, docs/remote-setup.md (sync not in core)
+  - docs/product.md and docs/tech.md: removed incorrect LLM extraction plugin references
+  - Site EN: hero (knowledge layer tagline, differentiators), get-started (single path + copyable prompt),
+      workflow (5 core-only cards), envisioned (6 next features), impact (original copy restored)
+  - Site ES: full translation matching English version
+  - README, CHANGELOG [0.14.0], pyproject.toml bumped to 0.14.0
+pending: none
+decisions:
+  - LLM extraction is NOT a plugin — Claude agents have native vision; core returns
+    agent_extraction_needed: True and the agent reads the PDF directly
+  - Annotations removed from envisioned roadmap — absorbed naturally by knowledge layer
+  - Epistemological pluralism removed from envisioned section — replaced by sync & collaborative collections
+    as a more concrete near-term deliverable
+broken: none
+next: tag v0.14.0 and push to main
